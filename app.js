@@ -1,5 +1,12 @@
 // Pool Builder - Sealed Pool Generator & Deckbuilder
-import { fetchAllSetCards, generateSealedPool, getDailySeed, getBoosterEra } from 'https://bensonperry.com/shared/mtg.js';
+import {
+  fetchSets,
+  createSetAutocomplete,
+  fetchAllSetCards,
+  generateSealedPool,
+  getDailySeed,
+  getBoosterEra
+} from 'https://bensonperry.com/shared/mtg.js';
 
 // State
 let sets = [];
@@ -9,6 +16,7 @@ let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
 let currentSort = 'color';
 let currentMode = 'generator';
 let selectedSet = null;
+let autocomplete = null;
 
 // DOM elements
 const setInput = document.getElementById('set-input');
@@ -29,39 +37,45 @@ const dailySeed = document.getElementById('daily-seed');
 
 // Initialize
 async function init() {
-  await loadSets();
-  setupEventListeners();
-  updateDailyInfo();
-}
-
-// Load sets from shared module
-async function loadSets() {
   try {
-    const response = await fetch('https://bensonperry.com/shared/sets.json');
-    sets = await response.json();
-    // Sets are already filtered in sets.json
+    sets = await fetchSets();
+
+    // Set up autocomplete using shared module
+    autocomplete = createSetAutocomplete({
+      inputEl: setInput,
+      dropdownEl: setDropdown,
+      hiddenEl: setSelect,
+      sets: sets,
+      onSelect: handleSetSelect
+    });
+
+    // Pre-select first set
+    if (sets.length > 0) {
+      autocomplete.setInitialSet(sets[0]);
+      selectedSet = sets[0];
+      generateBtn.disabled = false;
+    }
+
+    setInput.disabled = false;
+    setInput.placeholder = 'type to search sets...';
+
+    setupEventListeners();
+    updateDailyInfo();
   } catch (error) {
-    console.error('Failed to load sets:', error);
+    console.error('Failed to initialize:', error);
   }
 }
 
-// Setup event listeners
+function handleSetSelect(set) {
+  selectedSet = set;
+  generateBtn.disabled = false;
+}
+
+// Setup event listeners (non-autocomplete)
 function setupEventListeners() {
   // Mode toggle
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => handleModeToggle(btn.dataset.mode));
-  });
-
-  // Set autocomplete
-  setInput.addEventListener('input', handleSetInput);
-  setInput.addEventListener('focus', () => {
-    if (setInput.value.length > 0) showDropdown();
-  });
-  setInput.addEventListener('keydown', handleSetKeydown);
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.autocomplete-wrapper')) {
-      hideDropdown();
-    }
   });
 
   // Generate buttons
@@ -94,91 +108,6 @@ function handleModeToggle(mode) {
   });
   generatorControls.classList.toggle('hidden', mode !== 'generator');
   dailyControls.classList.toggle('hidden', mode !== 'daily');
-}
-
-// Set autocomplete
-function handleSetInput() {
-  const query = setInput.value.toLowerCase().trim();
-  if (query.length === 0) {
-    hideDropdown();
-    generateBtn.disabled = true;
-    selectedSet = null;
-    return;
-  }
-
-  const matches = sets.filter(s =>
-    s.name.toLowerCase().includes(query) ||
-    s.code.toLowerCase() === query
-  ).slice(0, 10);
-
-  if (matches.length > 0) {
-    renderDropdown(matches);
-    showDropdown();
-  } else {
-    hideDropdown();
-  }
-}
-
-function handleSetKeydown(e) {
-  const options = setDropdown.querySelectorAll('.option');
-  const highlighted = setDropdown.querySelector('.option.highlighted');
-
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (!highlighted && options.length > 0) {
-      options[0].classList.add('highlighted');
-    } else if (highlighted && highlighted.nextElementSibling) {
-      highlighted.classList.remove('highlighted');
-      highlighted.nextElementSibling.classList.add('highlighted');
-    }
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (highlighted && highlighted.previousElementSibling) {
-      highlighted.classList.remove('highlighted');
-      highlighted.previousElementSibling.classList.add('highlighted');
-    }
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    if (highlighted) {
-      selectSet(highlighted.dataset.code);
-    }
-  } else if (e.key === 'Escape') {
-    hideDropdown();
-  }
-}
-
-function renderDropdown(matches) {
-  setDropdown.innerHTML = matches.map(s => {
-    const year = s.released ? s.released.split('-')[0] : '';
-    return `<div class="option" data-code="${s.code}">${s.name}<span class="year">${year}</span></div>`;
-  }).join('');
-
-  setDropdown.querySelectorAll('.option').forEach(opt => {
-    opt.addEventListener('click', () => selectSet(opt.dataset.code));
-    opt.addEventListener('mouseenter', () => {
-      setDropdown.querySelector('.option.highlighted')?.classList.remove('highlighted');
-      opt.classList.add('highlighted');
-    });
-  });
-}
-
-function selectSet(code) {
-  const set = sets.find(s => s.code === code);
-  if (set) {
-    selectedSet = set;
-    setInput.value = set.name;
-    setSelect.value = code;
-    generateBtn.disabled = false;
-    hideDropdown();
-  }
-}
-
-function showDropdown() {
-  setDropdown.classList.remove('hidden');
-}
-
-function hideDropdown() {
-  setDropdown.classList.add('hidden');
 }
 
 // Daily challenge
@@ -300,7 +229,7 @@ function getColorCategory(card) {
 // Render pool
 function renderPool() {
   const sorted = sortCards(currentPool);
-  poolCount.textContent = `(${currentPool.length} cards)`;
+  poolCount.textContent = '(' + currentPool.length + ' cards)';
 
   if (currentSort === 'color') {
     renderPoolByColor(sorted);
@@ -334,7 +263,7 @@ function renderPoolByColor(cards) {
 
     const groupEl = document.createElement('div');
     groupEl.className = 'color-group';
-    groupEl.innerHTML = `<div class="color-group-header">${groupNames[key]} (${groupCards.length})</div>`;
+    groupEl.innerHTML = '<div class="color-group-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
 
     const gridEl = document.createElement('div');
     gridEl.className = 'card-grid';
@@ -363,7 +292,7 @@ function createCardElement(card, context) {
   el.dataset.id = card.id;
 
   const imgUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-  el.innerHTML = `<img src="${imgUrl}" alt="${card.name}" loading="lazy">`;
+  el.innerHTML = '<img src="' + imgUrl + '" alt="' + card.name + '" loading="lazy">';
 
   if (context === 'pool') {
     const inDeckCount = deck.filter(c => c.id === card.id).length;
@@ -427,7 +356,7 @@ function renderDeck() {
     const { count } = cardCounts.get(card.id);
     const el = createCardElement(card, 'deck');
     if (count > 1) {
-      el.innerHTML += `<span class="card-count">${count}</span>`;
+      el.innerHTML += '<span class="card-count">' + count + '</span>';
     }
     deckGrid.appendChild(el);
   });
