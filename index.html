@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pool builder</title>
+  <meta name="description" content="sealed pool generator and deckbuilder for magic: the gathering">
+  <meta property="og:title" content="pool builder">
+  <meta property="og:description" content="sealed pool generator and deckbuilder for mtg">
+  <meta property="og:url" content="https://bensonperry.com/poolbuilder">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>pool builder</h1>
+      <p class="subtitle">sealed pool generator</p>
+    </header>
+
+    <!-- Mode Selection -->
+    <div class="mode-toggle">
+      <button type="button" class="toggle-btn active" data-mode="generator">sealed generator</button>
+      <button type="button" class="toggle-btn" data-mode="daily">daily challenge</button>
+    </div>
+
+    <!-- Generator Controls -->
+    <div id="generator-controls" class="controls">
+      <div class="control-group">
+        <label>set</label>
+        <div class="autocomplete-wrapper">
+          <input type="text" id="set-input" placeholder="search sets..." autocomplete="off">
+          <input type="hidden" id="set-select" value="">
+          <div id="set-dropdown" class="autocomplete-dropdown hidden"></div>
+        </div>
+      </div>
+      <button type="button" id="generate-btn" class="primary-btn" disabled>generate pool</button>
+    </div>
+
+    <!-- Daily Challenge Info -->
+    <div id="daily-controls" class="controls hidden">
+      <div class="daily-info">
+        <div class="daily-set">
+          <span class="label">today's set:</span>
+          <span id="daily-set-name">loading...</span>
+        </div>
+        <div class="daily-seed">
+          <span class="label">seed:</span>
+          <span id="daily-seed"></span>
+        </div>
+      </div>
+      <button type="button" id="daily-generate-btn" class="primary-btn">open today's pool</button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading hidden">
+      <p>fetching cards from scryfall...</p>
+    </div>
+
+    <!-- Pool View -->
+    <div id="pool-section" class="hidden">
+      <div class="pool-header">
+        <h2>your pool <span id="pool-count"></span></h2>
+        <div class="pool-actions">
+          <button type="button" id="sort-color" class="sort-btn active">by color</button>
+          <button type="button" id="sort-rarity" class="sort-btn">by rarity</button>
+          <button type="button" id="sort-cmc" class="sort-btn">by cost</button>
+        </div>
+      </div>
+      
+      <div class="builder-layout">
+        <!-- Card Pool -->
+        <div class="pool-area">
+          <div id="pool-grid" class="card-grid"></div>
+        </div>
+
+        <!-- Deck Area -->
+        <div class="deck-area">
+          <div class="deck-header">
+            <h3>deck <span id="deck-count">0</span>/40</h3>
+            <button type="button" id="clear-deck" class="text-btn">clear</button>
+          </div>
+          <div id="deck-grid" class="card-grid deck-grid"></div>
+          
+          <div class="basics-section">
+            <h4>basic lands</h4>
+            <div class="basics-controls">
+              <div class="basic-control">
+                <span class="mana mana-w"></span>
+                <button type="button" class="basic-btn minus" data-color="W">-</button>
+                <span id="basic-W" class="basic-count">0</span>
+                <button type="button" class="basic-btn plus" data-color="W">+</button>
+              </div>
+              <div class="basic-control">
+                <span class="mana mana-u"></span>
+                <button type="button" class="basic-btn minus" data-color="U">-</button>
+                <span id="basic-U" class="basic-count">0</span>
+                <button type="button" class="basic-btn plus" data-color="U">+</button>
+              </div>
+              <div class="basic-control">
+                <span class="mana mana-b"></span>
+                <button type="button" class="basic-btn minus" data-color="B">-</button>
+                <span id="basic-B" class="basic-count">0</span>
+                <button type="button" class="basic-btn plus" data-color="B">+</button>
+              </div>
+              <div class="basic-control">
+                <span class="mana mana-r"></span>
+                <button type="button" class="basic-btn minus" data-color="R">-</button>
+                <span id="basic-R" class="basic-count">0</span>
+                <button type="button" class="basic-btn plus" data-color="R">+</button>
+              </div>
+              <div class="basic-control">
+                <span class="mana mana-g"></span>
+                <button type="button" class="basic-btn minus" data-color="G">-</button>
+                <span id="basic-G" class="basic-count">0</span>
+                <button type="button" class="basic-btn plus" data-color="G">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>made by <a href="https://bensonperry.com">benson</a></footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
