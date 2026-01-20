@@ -39,8 +39,7 @@ async function loadSets() {
   try {
     const response = await fetch('https://bensonperry.com/shared/sets.json');
     sets = await response.json();
-    // Filter to sets that have booster products
-    sets = sets.filter(s => s.set_type === 'expansion' || s.set_type === 'core' || s.set_type === 'draft_innovation');
+    // Sets are already filtered in sets.json
   } catch (error) {
     console.error('Failed to load sets:', error);
   }
@@ -150,7 +149,7 @@ function handleSetKeydown(e) {
 
 function renderDropdown(matches) {
   setDropdown.innerHTML = matches.map(s => {
-    const year = s.released_at ? s.released_at.split('-')[0] : '';
+    const year = s.released ? s.released.split('-')[0] : '';
     return `<div class="option" data-code="${s.code}">${s.name}<span class="year">${year}</span></div>`;
   }).join('');
 
@@ -188,7 +187,7 @@ function updateDailyInfo() {
   const dateStr = seed.replace('daily-', '');
 
   // Pick a set based on the date (rotate through recent sets)
-  const recentSets = sets.filter(s => s.released_at && s.released_at >= '2020-01-01');
+  const recentSets = sets.filter(s => s.released && s.released >= '2020-01-01');
   if (recentSets.length > 0) {
     const dayIndex = hashDate(dateStr) % recentSets.length;
     const dailySet = recentSets[dayIndex];
@@ -227,7 +226,7 @@ async function generatePool(setCode, seed = null) {
 
   try {
     const set = sets.find(s => s.code === setCode);
-    const era = set ? getBoosterEra(set.released_at) : 'play';
+    const era = set ? getBoosterEra(set.released) : 'play';
     const boosterType = era === 'play' ? 'play' : 'draft';
 
     const cards = await fetchAllSetCards(setCode, boosterType);
