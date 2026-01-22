@@ -14,19 +14,59 @@ body {
 }
 
 .container {
-  max-width: 1400px;
+  width: 1400px;
   margin: 0 auto;
 }
 
 header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
   margin-bottom: 30px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mode-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-link {
+  color: #999;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.mode-link:hover {
+  color: #666;
+}
+
+.mode-link.active {
+  color: #000;
+}
+
+.mode-links .sep {
+  color: #ccc;
+  font-size: 0.8rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 h1 {
   font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: -0.02em;
-  margin-bottom: 4px;
 }
 
 .subtitle {
@@ -34,47 +74,6 @@ h1 {
   font-size: 0.9rem;
 }
 
-/* Mode Toggle */
-.mode-toggle {
-  display: inline-flex;
-  border-bottom: 1px solid #000;
-  margin-bottom: 24px;
-}
-
-.toggle-btn {
-  appearance: none;
-  background: transparent;
-  border: none;
-  padding: 8px 16px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  color: #999;
-  cursor: pointer;
-  text-transform: lowercase;
-  position: relative;
-}
-
-.toggle-btn:first-child {
-  padding-left: 0;
-}
-
-.toggle-btn:hover {
-  color: #666;
-}
-
-.toggle-btn.active {
-  color: #000;
-}
-
-.toggle-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #000;
-}
 
 /* Controls */
 .controls {
@@ -218,14 +217,12 @@ h1 {
 
 /* Daily Challenge */
 .daily-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  font-size: 0.9rem;
 }
 
-.daily-info .label {
+.daily-seed {
   color: #999;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 #daily-set-name {
@@ -271,8 +268,8 @@ h1 {
 
 /* Builder Layout */
 .builder-layout {
-  display: grid;
-  grid-template-columns: 1fr 350px;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
 }
 
@@ -319,17 +316,69 @@ h1 {
   border-radius: 2px;
 }
 
-/* Color Groups */
-.color-group {
-  margin-bottom: 20px;
+/* Pool Columns Layout */
+.pool-columns {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
-.color-group-header {
-  font-size: 0.8rem;
+.card-column {
+  width: 170px;
+  flex-shrink: 0;
+}
+
+.column-header {
+  font-size: 0.75rem;
   color: #999;
   margin-bottom: 8px;
   padding-bottom: 4px;
   border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+/* Stacked Cards */
+.card-stack {
+  position: relative;
+}
+
+.card-stack .card {
+  position: relative;
+  margin-bottom: -200px;
+  transition: transform 0.15s ease, z-index 0s;
+  z-index: var(--stack-index, 0);
+}
+
+.card-stack .card:last-child {
+  margin-bottom: 0;
+}
+
+.card-stack .card:hover {
+  filter: brightness(1.1);
+}
+
+.card-stack .card.in-deck {
+  opacity: 0.3;
+}
+
+/* Card Preview */
+#card-preview {
+  position: fixed;
+  width: 300px;
+  pointer-events: none;
+  z-index: 1000;
+  display: none;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+#card-preview img {
+  width: 100%;
+  border-radius: 4%;
+  display: block;
+}
+
+#card-preview.visible {
+  display: block;
 }
 
 /* Deck Area */
@@ -337,10 +386,6 @@ h1 {
   background: #f3f2ef;
   padding: 16px;
   border-radius: 4px;
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
 }
 
 .deck-header {
@@ -348,6 +393,8 @@ h1 {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .deck-header h3 {
@@ -359,67 +406,21 @@ h1 {
   font-weight: 600;
 }
 
-/* Basic Lands */
-.basics-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #ddd;
-}
-
-.basics-section h4 {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: #999;
-  margin-bottom: 12px;
-}
-
-.basics-controls {
+.deck-columns {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
+  align-items: flex-start;
 }
 
-.basic-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.mana {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.mana-w { background: #f9faf4; border: 1px solid #ccc; }
-.mana-u { background: #0e68ab; }
-.mana-b { background: #150b00; }
-.mana-r { background: #d3202a; }
-.mana-g { background: #00733e; }
-
-.basic-btn {
-  appearance: none;
-  background: #fff;
-  border: 1px solid #ccc;
-  width: 24px;
-  height: 24px;
-  font-family: inherit;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.basic-btn:hover {
-  background: #eee;
-}
-
-.basic-count {
-  width: 20px;
-  text-align: center;
-  font-size: 0.9rem;
+.card-count-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #000;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 5px;
+  border-radius: 2px;
 }
 
 /* Utilities */
@@ -427,33 +428,3 @@ h1 {
   display: none !important;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .builder-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .deck-area {
-    position: static;
-    max-height: none;
-  }
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 20px 15px 80px;
-  }
-
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .autocomplete-wrapper input {
-    width: 100%;
-  }
-
-  .card-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}

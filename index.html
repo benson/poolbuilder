@@ -15,43 +15,27 @@
 <body>
   <div class="container">
     <header>
-      <h1>pool builder</h1>
-      <p class="subtitle">sealed pool generator</p>
-    </header>
-
-    <!-- Mode Selection -->
-    <div class="mode-toggle">
-      <button type="button" class="toggle-btn active" data-mode="generator">sealed generator</button>
-      <button type="button" class="toggle-btn" data-mode="daily">daily challenge</button>
-    </div>
-
-    <!-- Generator Controls -->
-    <div id="generator-controls" class="controls">
-      <div class="control-group">
-        <label>set</label>
+      <div class="header-left">
+        <h1>pool builder</h1>
+        <nav class="mode-links">
+          <a href="#" class="mode-link active" data-mode="generator">sealed generator</a>
+          <span class="sep">·</span>
+          <a href="#" class="mode-link" data-mode="daily">daily challenge</a>
+        </nav>
+      </div>
+      <div id="generator-controls" class="header-controls">
         <div class="autocomplete-wrapper">
           <input type="text" id="set-input" placeholder="search sets..." autocomplete="off">
           <input type="hidden" id="set-select" value="">
           <div id="set-dropdown" class="autocomplete-dropdown hidden"></div>
         </div>
+        <button type="button" id="generate-btn" class="primary-btn" disabled>generate pool</button>
       </div>
-      <button type="button" id="generate-btn" class="primary-btn" disabled>generate pool</button>
-    </div>
-
-    <!-- Daily Challenge Info -->
-    <div id="daily-controls" class="controls hidden">
-      <div class="daily-info">
-        <div class="daily-set">
-          <span class="label">today's set:</span>
-          <span id="daily-set-name">loading...</span>
-        </div>
-        <div class="daily-seed">
-          <span class="label">seed:</span>
-          <span id="daily-seed"></span>
-        </div>
+      <div id="daily-controls" class="header-controls hidden">
+        <span class="daily-info"><span id="daily-set-name">loading...</span> <span class="daily-seed">(seed: <span id="daily-seed"></span>)</span></span>
+        <button type="button" id="daily-generate-btn" class="primary-btn">open today's pool</button>
       </div>
-      <button type="button" id="daily-generate-btn" class="primary-btn">open today's pool</button>
-    </div>
+    </header>
 
     <!-- Loading State -->
     <div id="loading" class="loading hidden">
@@ -70,58 +54,24 @@
       </div>
       
       <div class="builder-layout">
-        <!-- Card Pool -->
-        <div class="pool-area">
-          <div id="pool-grid" class="card-grid"></div>
-        </div>
-
         <!-- Deck Area -->
         <div class="deck-area">
           <div class="deck-header">
             <h3>deck <span id="deck-count">0</span>/40</h3>
-            <button type="button" id="clear-deck" class="text-btn">clear</button>
+<button type="button" id="clear-deck" class="text-btn">clear</button>
           </div>
-          <div id="deck-grid" class="card-grid deck-grid"></div>
-          
-          <div class="basics-section">
-            <h4>basic lands</h4>
-            <div class="basics-controls">
-              <div class="basic-control">
-                <span class="mana mana-w"></span>
-                <button type="button" class="basic-btn minus" data-color="W">-</button>
-                <span id="basic-W" class="basic-count">0</span>
-                <button type="button" class="basic-btn plus" data-color="W">+</button>
-              </div>
-              <div class="basic-control">
-                <span class="mana mana-u"></span>
-                <button type="button" class="basic-btn minus" data-color="U">-</button>
-                <span id="basic-U" class="basic-count">0</span>
-                <button type="button" class="basic-btn plus" data-color="U">+</button>
-              </div>
-              <div class="basic-control">
-                <span class="mana mana-b"></span>
-                <button type="button" class="basic-btn minus" data-color="B">-</button>
-                <span id="basic-B" class="basic-count">0</span>
-                <button type="button" class="basic-btn plus" data-color="B">+</button>
-              </div>
-              <div class="basic-control">
-                <span class="mana mana-r"></span>
-                <button type="button" class="basic-btn minus" data-color="R">-</button>
-                <span id="basic-R" class="basic-count">0</span>
-                <button type="button" class="basic-btn plus" data-color="R">+</button>
-              </div>
-              <div class="basic-control">
-                <span class="mana mana-g"></span>
-                <button type="button" class="basic-btn minus" data-color="G">-</button>
-                <span id="basic-G" class="basic-count">0</span>
-                <button type="button" class="basic-btn plus" data-color="G">+</button>
-              </div>
-            </div>
-          </div>
+          <div id="deck-grid" class="deck-columns"></div>
+        </div>
+
+        <!-- Card Pool -->
+        <div class="pool-area">
+          <div id="pool-grid" class="pool-columns"></div>
         </div>
       </div>
     </div>
   </div>
+
+  <div id="card-preview"><img src="" alt=""></div>
 
   <footer>made by <a href="https://bensonperry.com">benson</a></footer>
 

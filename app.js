@@ -13,10 +13,20 @@ let sets = [];
 let currentPool = [];
 let deck = [];
 let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+let basicLandCards = {}; // { W: cardObj, U: cardObj, ... }
 let currentSort = 'color';
 let currentMode = 'generator';
 let selectedSet = null;
 let autocomplete = null;
+
+// Basic land names
+const BASIC_LAND_NAMES = {
+  W: 'Plains',
+  U: 'Island',
+  B: 'Swamp',
+  R: 'Mountain',
+  G: 'Forest'
+};
 
 // DOM elements
 const setInput = document.getElementById('set-input');
@@ -73,9 +83,12 @@ function handleSetSelect(set) {
 
 // Setup event listeners (non-autocomplete)
 function setupEventListeners() {
-  // Mode toggle
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => handleModeToggle(btn.dataset.mode));
+  // Mode links
+  document.querySelectorAll('.mode-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleModeToggle(link.dataset.mode);
+    });
   });
 
   // Generate buttons
@@ -89,22 +102,13 @@ function setupEventListeners() {
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
-
-  // Basic land buttons
-  document.querySelectorAll('.basic-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const color = btn.dataset.color;
-      const delta = btn.classList.contains('plus') ? 1 : -1;
-      updateBasics(color, delta);
-    });
-  });
 }
 
 // Mode toggle
 function handleModeToggle(mode) {
   currentMode = mode;
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === mode);
+  document.querySelectorAll('.mode-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.mode === mode);
   });
   generatorControls.classList.toggle('hidden', mode !== 'generator');
   dailyControls.classList.toggle('hidden', mode !== 'daily');
@@ -161,10 +165,12 @@ async function generatePool(setCode, seed = null) {
     const cards = await fetchAllSetCards(setCode, boosterType);
     currentPool = generateSealedPool(cards, seed);
 
+    // Fetch basic lands for this set
+    await fetchBasicLands(setCode);
+
     // Reset deck
     deck = [];
     basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-    updateBasicsDisplay();
 
     renderPool();
     renderDeck();
@@ -175,6 +181,61 @@ async function generatePool(setCode, seed = null) {
     alert('Failed to fetch cards. Please try again.');
   } finally {
     loadingEl.classList.add('hidden');
+  }
+}
+
+async function fetchBasicLands(setCode) {
+  // Fetch one of each basic land from the set
+  const basicNames = ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest'];
+  const query = `set:${setCode} (${basicNames.map(n => `!"${n}"`).join(' or ')}) type:basic`;
+
+  try {
+    const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
+    if (!response.ok) {
+      // Fallback to default basics if set doesn't have them
+      await fetchDefaultBasics();
+      return;
+    }
+    const data = await response.json();
+
+    // Group by color and pick one of each
+    basicLandCards = {};
+    const colorMap = { Plains: 'W', Island: 'U', Swamp: 'B', Mountain: 'R', Forest: 'G' };
+
+    data.data.forEach(card => {
+      const color = colorMap[card.name];
+      if (color && !basicLandCards[color]) {
+        basicLandCards[color] = card;
+      }
+    });
+
+    // Fill in any missing basics with defaults
+    for (const color of ['W', 'U', 'B', 'R', 'G']) {
+      if (!basicLandCards[color]) {
+        await fetchDefaultBasic(color);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch basic lands:', error);
+    await fetchDefaultBasics();
+  }
+}
+
+async function fetchDefaultBasics() {
+  for (const color of ['W', 'U', 'B', 'R', 'G']) {
+    await fetchDefaultBasic(color);
+  }
+}
+
+async function fetchDefaultBasic(color) {
+  const name = BASIC_LAND_NAMES[color];
+  try {
+    const response = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
+    if (response.ok) {
+      basicLandCards[color] = await response.json();
+    }
+  } catch (error) {
+    console.error(`Failed to fetch ${name}:`, error);
   }
 }
 
@@ -233,8 +294,10 @@ function renderPool() {
 
   if (currentSort === 'color') {
     renderPoolByColor(sorted);
-  } else {
-    renderPoolFlat(sorted);
+  } else if (currentSort === 'rarity') {
+    renderPoolByRarity(sorted);
+  } else if (currentSort === 'cmc') {
+    renderPoolByCmc(sorted);
   }
 }
 
@@ -244,7 +307,12 @@ function renderPoolByColor(cards) {
     multi: [], colorless: [], land: []
   };
 
+  // Filter out basic lands from pool (they'll be shown separately)
+  const basicLandNames = Object.values(BASIC_LAND_NAMES);
   cards.forEach(card => {
+    if (basicLandNames.includes(card.name) && card.type_line?.includes('Basic')) {
+      return; // Skip basic lands from packs
+    }
     const cat = getColorCategory(card);
     if (groups[cat]) {
       groups[cat].push(card);
@@ -253,37 +321,188 @@ function renderPoolByColor(cards) {
 
   const groupNames = {
     W: 'white', U: 'blue', B: 'black', R: 'red', G: 'green',
-    multi: 'multicolor', colorless: 'colorless', land: 'land'
+    multi: 'multi', colorless: 'colorless', land: 'land'
   };
 
   poolGrid.innerHTML = '';
+  poolGrid.className = 'pool-columns';
 
   Object.entries(groups).forEach(([key, groupCards]) => {
+    if (key === 'land') {
+      // Add basic lands to land column
+      renderLandColumn(groupCards);
+      return;
+    }
+
     if (groupCards.length === 0) return;
 
     const groupEl = document.createElement('div');
-    groupEl.className = 'color-group';
-    groupEl.innerHTML = '<div class="color-group-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
+    groupEl.className = 'card-column';
+    groupEl.innerHTML = '<div class="column-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
 
-    const gridEl = document.createElement('div');
-    gridEl.className = 'card-grid';
-    groupCards.forEach(card => {
-      gridEl.appendChild(createCardElement(card, 'pool'));
+    const stackEl = document.createElement('div');
+    stackEl.className = 'card-stack';
+    groupCards.forEach((card, idx) => {
+      const cardEl = createCardElement(card, 'pool');
+      cardEl.style.setProperty('--stack-index', idx);
+      stackEl.appendChild(cardEl);
     });
 
-    groupEl.appendChild(gridEl);
+    groupEl.appendChild(stackEl);
     poolGrid.appendChild(groupEl);
   });
 }
 
-function renderPoolFlat(cards) {
-  poolGrid.innerHTML = '';
-  const gridEl = document.createElement('div');
-  gridEl.className = 'card-grid';
-  cards.forEach(card => {
-    gridEl.appendChild(createCardElement(card, 'pool'));
+function renderLandColumn(nonBasicLands) {
+  const groupEl = document.createElement('div');
+  groupEl.className = 'card-column';
+
+  // Count: non-basics + 5 basics
+  const totalCount = nonBasicLands.length + 5;
+  groupEl.innerHTML = '<div class="column-header">land (' + totalCount + ')</div>';
+
+  const stackEl = document.createElement('div');
+  stackEl.className = 'card-stack';
+
+  // Add non-basic lands first
+  let idx = 0;
+  nonBasicLands.forEach(card => {
+    const cardEl = createCardElement(card, 'pool');
+    cardEl.style.setProperty('--stack-index', idx++);
+    stackEl.appendChild(cardEl);
   });
-  poolGrid.appendChild(gridEl);
+
+  // Add basic lands
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    const basicCard = basicLandCards[color];
+    if (basicCard) {
+      const cardEl = createBasicLandElement(basicCard, color);
+      cardEl.style.setProperty('--stack-index', idx++);
+      stackEl.appendChild(cardEl);
+    }
+  });
+
+  groupEl.appendChild(stackEl);
+  poolGrid.appendChild(groupEl);
+}
+
+function renderPoolByRarity(cards) {
+  const groups = {
+    'mythic+rare': [],
+    uncommon: [],
+    common: [],
+    land: []
+  };
+
+  const basicLandNames = Object.values(BASIC_LAND_NAMES);
+  cards.forEach(card => {
+    // Handle basic lands separately
+    if (basicLandNames.includes(card.name) && card.type_line?.includes('Basic')) {
+      return; // Skip basic lands
+    }
+    if (card.type_line?.includes('Land')) {
+      groups.land.push(card);
+    } else if (card.rarity === 'mythic' || card.rarity === 'rare') {
+      groups['mythic+rare'].push(card);
+    } else if (card.rarity === 'uncommon') {
+      groups.uncommon.push(card);
+    } else {
+      groups.common.push(card);
+    }
+  });
+
+  const groupNames = {
+    'mythic+rare': 'rare/mythic',
+    uncommon: 'uncommon',
+    common: 'common'
+  };
+
+  poolGrid.innerHTML = '';
+  poolGrid.className = 'pool-columns';
+
+  const rarityOrder = ['mythic+rare', 'uncommon', 'common'];
+  rarityOrder.forEach(key => {
+    const groupCards = groups[key];
+    if (groupCards.length === 0) return;
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'card-column';
+    groupEl.innerHTML = '<div class="column-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
+
+    const stackEl = document.createElement('div');
+    stackEl.className = 'card-stack';
+    groupCards.forEach((card, idx) => {
+      const cardEl = createCardElement(card, 'pool');
+      cardEl.style.setProperty('--stack-index', idx);
+      stackEl.appendChild(cardEl);
+    });
+
+    groupEl.appendChild(stackEl);
+    poolGrid.appendChild(groupEl);
+  });
+
+  // Add land column with basics
+  renderLandColumn(groups.land);
+}
+
+function renderPoolByCmc(cards) {
+  const groups = {
+    '0-1': [],
+    '2': [],
+    '3': [],
+    '4': [],
+    '5': [],
+    '6': [],
+    '7+': [],
+    land: []
+  };
+
+  const basicLandNames = Object.values(BASIC_LAND_NAMES);
+  cards.forEach(card => {
+    // Handle basic lands separately
+    if (basicLandNames.includes(card.name) && card.type_line?.includes('Basic')) {
+      return; // Skip basic lands
+    }
+    if (card.type_line?.includes('Land')) {
+      groups.land.push(card);
+      return;
+    }
+    const cmc = card.cmc || 0;
+    if (cmc <= 1) groups['0-1'].push(card);
+    else if (cmc === 2) groups['2'].push(card);
+    else if (cmc === 3) groups['3'].push(card);
+    else if (cmc === 4) groups['4'].push(card);
+    else if (cmc === 5) groups['5'].push(card);
+    else if (cmc === 6) groups['6'].push(card);
+    else groups['7+'].push(card);
+  });
+
+  poolGrid.innerHTML = '';
+  poolGrid.className = 'pool-columns';
+
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  cmcOrder.forEach(key => {
+    const groupCards = groups[key];
+    if (groupCards.length === 0) return;
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'card-column';
+    groupEl.innerHTML = '<div class="column-header">' + key + ' (' + groupCards.length + ')</div>';
+
+    const stackEl = document.createElement('div');
+    stackEl.className = 'card-stack';
+    groupCards.forEach((card, idx) => {
+      const cardEl = createCardElement(card, 'pool');
+      cardEl.style.setProperty('--stack-index', idx);
+      stackEl.appendChild(cardEl);
+    });
+
+    groupEl.appendChild(stackEl);
+    poolGrid.appendChild(groupEl);
+  });
+
+  // Add land column with basics
+  renderLandColumn(groups.land);
 }
 
 function createCardElement(card, context) {
@@ -291,8 +510,14 @@ function createCardElement(card, context) {
   el.className = 'card';
   el.dataset.id = card.id;
 
-  const imgUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-  el.innerHTML = '<img src="' + imgUrl + '" alt="' + card.name + '" loading="lazy">';
+  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  el.dataset.normalUrl = normalUrl;
+
+  // Hover preview
+  el.addEventListener('mouseenter', showCardPreview);
+  el.addEventListener('mouseleave', hideCardPreview);
 
   if (context === 'pool') {
     const inDeckCount = deck.filter(c => c.id === card.id).length;
@@ -306,6 +531,46 @@ function createCardElement(card, context) {
   }
 
   return el;
+}
+
+function createBasicLandElement(card, color) {
+  const el = document.createElement('div');
+  el.className = 'card basic-land';
+  el.dataset.id = card.id;
+  el.dataset.color = color;
+
+  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  el.dataset.normalUrl = normalUrl;
+
+  // Show count if in deck
+  if (basics[color] > 0) {
+    el.innerHTML += '<span class="card-count-badge">' + basics[color] + '</span>';
+  }
+
+  // Hover preview
+  el.addEventListener('mouseenter', showCardPreview);
+  el.addEventListener('mouseleave', hideCardPreview);
+
+  // Click to add to deck (unlimited)
+  el.addEventListener('click', () => addBasicToDeck(color));
+
+  return el;
+}
+
+function addBasicToDeck(color) {
+  basics[color]++;
+  renderDeck();
+  renderPool();
+}
+
+function removeBasicFromDeck(color) {
+  if (basics[color] > 0) {
+    basics[color]--;
+    renderDeck();
+    renderPool();
+  }
 }
 
 // Deck management
@@ -332,7 +597,6 @@ function removeFromDeck(card) {
 function clearDeck() {
   deck = [];
   basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-  updateBasicsDisplay();
   renderDeck();
   renderPool();
 }
@@ -349,30 +613,146 @@ function renderDeck() {
     cardCounts.set(card.id, count);
   });
 
+  // Group into CMC columns
+  const cmcGroups = {
+    '0-1': [],
+    '2': [],
+    '3': [],
+    '4': [],
+    '5': [],
+    '6': [],
+    '7+': []
+  };
+
+  [...cardCounts.values()].forEach(({ card, count }) => {
+    const cmc = card.cmc || 0;
+    const entry = { card, count };
+    if (cmc <= 1) cmcGroups['0-1'].push(entry);
+    else if (cmc === 2) cmcGroups['2'].push(entry);
+    else if (cmc === 3) cmcGroups['3'].push(entry);
+    else if (cmc === 4) cmcGroups['4'].push(entry);
+    else if (cmc === 5) cmcGroups['5'].push(entry);
+    else if (cmc === 6) cmcGroups['6'].push(entry);
+    else cmcGroups['7+'].push(entry);
+  });
+
   deckGrid.innerHTML = '';
-  const sorted = sortCards([...cardCounts.values()].map(c => c.card));
 
-  sorted.forEach(card => {
-    const { count } = cardCounts.get(card.id);
-    const el = createCardElement(card, 'deck');
-    if (count > 1) {
-      el.innerHTML += '<span class="card-count">' + count + '</span>';
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  cmcOrder.forEach(key => {
+    const entries = cmcGroups[key];
+    const groupEl = document.createElement('div');
+    groupEl.className = 'card-column';
+
+    const count = entries.reduce((sum, e) => sum + e.count, 0);
+    groupEl.innerHTML = '<div class="column-header">' + key + (count > 0 ? ' (' + count + ')' : '') + '</div>';
+
+    const stackEl = document.createElement('div');
+    stackEl.className = 'card-stack';
+    entries.forEach(({ card, count }, idx) => {
+      const cardEl = createCardElement(card, 'deck');
+      cardEl.style.setProperty('--stack-index', idx);
+      if (count > 1) {
+        cardEl.innerHTML += '<span class="card-count-badge">' + count + '</span>';
+      }
+      stackEl.appendChild(cardEl);
+    });
+
+    groupEl.appendChild(stackEl);
+    deckGrid.appendChild(groupEl);
+  });
+
+  // Add lands column for basics
+  const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
+  const landsEl = document.createElement('div');
+  landsEl.className = 'card-column';
+  landsEl.innerHTML = '<div class="column-header">lands' + (basicsTotal > 0 ? ' (' + basicsTotal + ')' : '') + '</div>';
+
+  const landsStack = document.createElement('div');
+  landsStack.className = 'card-stack';
+
+  let idx = 0;
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    if (basics[color] > 0 && basicLandCards[color]) {
+      const cardEl = createDeckBasicElement(basicLandCards[color], color);
+      cardEl.style.setProperty('--stack-index', idx++);
+      landsStack.appendChild(cardEl);
     }
-    deckGrid.appendChild(el);
   });
+
+  landsEl.appendChild(landsStack);
+  deckGrid.appendChild(landsEl);
 }
 
-// Basic lands
-function updateBasics(color, delta) {
-  basics[color] = Math.max(0, basics[color] + delta);
-  updateBasicsDisplay();
-  renderDeck();
+function createDeckBasicElement(card, color) {
+  const el = document.createElement('div');
+  el.className = 'card basic-land';
+  el.dataset.color = color;
+
+  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  el.dataset.normalUrl = normalUrl;
+
+  // Show count
+  if (basics[color] > 1) {
+    el.innerHTML += '<span class="card-count-badge">' + basics[color] + '</span>';
+  }
+
+  // Hover preview
+  el.addEventListener('mouseenter', showCardPreview);
+  el.addEventListener('mouseleave', hideCardPreview);
+
+  // Click to remove from deck
+  el.addEventListener('click', () => removeBasicFromDeck(color));
+
+  return el;
 }
 
-function updateBasicsDisplay() {
-  Object.keys(basics).forEach(color => {
-    document.getElementById('basic-' + color).textContent = basics[color];
-  });
+// Card Preview
+const cardPreview = document.getElementById('card-preview');
+const previewImg = cardPreview.querySelector('img');
+
+function showCardPreview(e) {
+  const card = e.currentTarget;
+  const rect = card.getBoundingClientRect();
+  const normalUrl = card.dataset.normalUrl;
+
+  if (!normalUrl) return;
+
+  previewImg.src = normalUrl;
+  cardPreview.classList.add('visible');
+
+  const previewWidth = 300;
+  const previewHeight = 418; // MTG card aspect ratio
+  const padding = 20;
+
+  // Determine left or right based on card position
+  const cardCenterX = rect.left + rect.width / 2;
+  const windowCenterX = window.innerWidth / 2;
+
+  let left;
+  if (cardCenterX < windowCenterX) {
+    // Card is on left side, show preview to the right
+    left = rect.right + padding;
+  } else {
+    // Card is on right side, show preview to the left
+    left = rect.left - previewWidth - padding;
+  }
+
+  // Vertical position - center on the row but offset above
+  let top = rect.top - previewHeight / 2 + rect.height / 2;
+
+  // Keep within viewport
+  top = Math.max(padding, Math.min(top, window.innerHeight - previewHeight - padding));
+  left = Math.max(padding, Math.min(left, window.innerWidth - previewWidth - padding));
+
+  cardPreview.style.left = left + 'px';
+  cardPreview.style.top = top + 'px';
+}
+
+function hideCardPreview() {
+  cardPreview.classList.remove('visible');
 }
 
 // Start
