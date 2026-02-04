@@ -623,7 +623,12 @@ function renderWithScrollLock() {
   const scrollY = window.scrollY;
   renderDeck();
   renderPool();
-  requestAnimationFrame(() => window.scrollTo(0, scrollY));
+  // Double rAF to ensure DOM has fully settled before restoring scroll
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollY);
+    });
+  });
 }
 
 function clearDeck() {
