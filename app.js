@@ -514,7 +514,9 @@ function createCardElement(card, context) {
 
   const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
   const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  // Only use lazy loading for pool cards (deck cards are always visible)
+  const lazy = context === 'pool' ? ' loading="lazy"' : '';
+  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '"' + lazy + '>';
   el.dataset.normalUrl = normalUrl;
 
   // Hover preview

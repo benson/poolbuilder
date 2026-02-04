@@ -292,7 +292,7 @@ h1 {
 .card {
   position: relative;
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition: transform 0.1s ease, opacity 0.15s ease;
 }
 
 .card:hover {
@@ -349,7 +349,7 @@ h1 {
 .card-stack .card {
   position: relative;
   margin-bottom: -200px;
-  transition: transform 0.15s ease, z-index 0s;
+  transition: transform 0.15s ease, opacity 0.15s ease, z-index 0s;
   z-index: var(--stack-index, 0);
 }
 
