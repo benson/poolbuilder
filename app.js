@@ -563,13 +563,15 @@ function createBasicLandElement(card, color) {
 
 function addBasicToDeck(color) {
   basics[color]++;
-  renderWithScrollLock();
+  renderDeck();
+  updatePoolBasicBadge(color);
 }
 
 function removeBasicFromDeck(color) {
   if (basics[color] > 0) {
     basics[color]--;
-    renderWithScrollLock();
+    renderDeck();
+    updatePoolBasicBadge(color);
   }
 }
 
@@ -580,7 +582,8 @@ function addToDeck(card) {
 
   if (inDeckCount < inPoolCount) {
     deck.push(card);
-    renderWithScrollLock();
+    renderDeck();
+    updatePoolCardClasses(card.id);
   }
 }
 
@@ -588,27 +591,38 @@ function removeFromDeck(card) {
   const idx = deck.findIndex(c => c.id === card.id);
   if (idx !== -1) {
     deck.splice(idx, 1);
-    renderWithScrollLock();
+    renderDeck();
+    updatePoolCardClasses(card.id);
   }
 }
 
-function renderWithScrollLock() {
-  const scrollY = window.scrollY;
+// Update 'in-deck' class on pool cards without re-rendering
+function updatePoolCardClasses(cardId) {
+  const inDeckCount = deck.filter(c => c.id === cardId).length;
+  const inPoolCount = currentPool.filter(c => c.id === cardId).length;
+  const shouldBeInDeck = inDeckCount >= inPoolCount;
 
-  // Hide content during re-render to prevent flash
-  poolSection.style.opacity = '0';
+  // Find all pool cards with this ID and update their class
+  poolGrid.querySelectorAll(`.card[data-id="${cardId}"]`).forEach(el => {
+    el.classList.toggle('in-deck', shouldBeInDeck);
+  });
+}
 
-  renderDeck();
-  renderPool();
-
-  // Try immediate scroll restore
-  window.scrollTo({ top: scrollY, behavior: 'instant' });
-
-  // Firefox needs setTimeout for scroll to stick - show section after
-  setTimeout(() => {
-    window.scrollTo({ top: scrollY, behavior: 'instant' });
-    poolSection.style.opacity = '';
-  }, 0);
+// Update basic land badge in pool
+function updatePoolBasicBadge(color) {
+  const basicEl = poolGrid.querySelector(`.card.basic-land[data-color="${color}"]`);
+  if (basicEl) {
+    const badge = basicEl.querySelector('.card-count-badge');
+    if (basics[color] > 0) {
+      if (badge) {
+        badge.textContent = basics[color];
+      } else {
+        basicEl.innerHTML += '<span class="card-count-badge">' + basics[color] + '</span>';
+      }
+    } else if (badge) {
+      badge.remove();
+    }
+  }
 }
 
 function clearDeck() {
