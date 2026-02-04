@@ -595,8 +595,8 @@ function removeFromDeck(card) {
 function renderWithScrollLock() {
   const scrollY = window.scrollY;
 
-  // Hide entire section during re-render to prevent flash
-  poolSection.style.visibility = 'hidden';
+  // Hide content during re-render to prevent flash
+  poolSection.style.opacity = '0';
 
   renderDeck();
   renderPool();
@@ -607,7 +607,7 @@ function renderWithScrollLock() {
   // Firefox needs setTimeout for scroll to stick - show section after
   setTimeout(() => {
     window.scrollTo({ top: scrollY, behavior: 'instant' });
-    poolSection.style.visibility = '';
+    poolSection.style.opacity = '';
   }, 0);
 }
 
