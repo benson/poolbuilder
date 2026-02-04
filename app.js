@@ -563,14 +563,16 @@ function createBasicLandElement(card, color) {
 
 function addBasicToDeck(color) {
   basics[color]++;
-  renderDeck();
+  updateDeckBasicsColumn();
+  updateDeckCount();
   updatePoolBasicBadge(color);
 }
 
 function removeBasicFromDeck(color) {
   if (basics[color] > 0) {
     basics[color]--;
-    renderDeck();
+    updateDeckBasicsColumn();
+    updateDeckCount();
     updatePoolBasicBadge(color);
   }
 }
@@ -582,7 +584,8 @@ function addToDeck(card) {
 
   if (inDeckCount < inPoolCount) {
     deck.push(card);
-    renderDeck();
+    addCardToDeckColumn(card);
+    updateDeckCount();
     updatePoolCardClasses(card.id);
   }
 }
@@ -591,9 +594,101 @@ function removeFromDeck(card) {
   const idx = deck.findIndex(c => c.id === card.id);
   if (idx !== -1) {
     deck.splice(idx, 1);
-    renderDeck();
+    removeCardFromDeckColumn(card);
+    updateDeckCount();
     updatePoolCardClasses(card.id);
   }
+}
+
+// Get CMC key for a card
+function getCmcKey(card) {
+  const cmc = card.cmc || 0;
+  if (cmc <= 1) return '0-1';
+  if (cmc >= 7) return '7+';
+  return String(cmc);
+}
+
+// Get column index for CMC key
+function getCmcColumnIndex(cmcKey) {
+  const order = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  return order.indexOf(cmcKey);
+}
+
+// Add a single card to the appropriate deck column
+function addCardToDeckColumn(card) {
+  const cmcKey = getCmcKey(card);
+  const colIndex = getCmcColumnIndex(cmcKey);
+  const column = deckGrid.children[colIndex];
+  if (!column) return;
+
+  const stack = column.querySelector('.card-stack');
+  const header = column.querySelector('.column-header');
+
+  // Create and add the card
+  const cardEl = createCardElement(card, 'deck');
+  const newIndex = stack.children.length;
+  cardEl.style.setProperty('--stack-index', newIndex);
+  stack.appendChild(cardEl);
+
+  // Update header count
+  const count = stack.children.length;
+  header.textContent = cmcKey + (count > 0 ? ' (' + count + ')' : '');
+}
+
+// Remove a single card from the deck column
+function removeCardFromDeckColumn(card) {
+  const cmcKey = getCmcKey(card);
+  const colIndex = getCmcColumnIndex(cmcKey);
+  const column = deckGrid.children[colIndex];
+  if (!column) return;
+
+  const stack = column.querySelector('.card-stack');
+  const header = column.querySelector('.column-header');
+
+  // Find and remove one instance of this card
+  const cardEl = stack.querySelector(`.card[data-id="${card.id}"]`);
+  if (cardEl) {
+    cardEl.remove();
+
+    // Re-index remaining cards
+    Array.from(stack.children).forEach((el, idx) => {
+      el.style.setProperty('--stack-index', idx);
+    });
+
+    // Update header count
+    const count = stack.children.length;
+    header.textContent = cmcKey + (count > 0 ? ' (' + count + ')' : '');
+  }
+}
+
+// Update just the basics column in deck
+function updateDeckBasicsColumn() {
+  const landsColumn = deckGrid.querySelector('.card-column:last-child');
+  if (!landsColumn) return;
+
+  const stack = landsColumn.querySelector('.card-stack');
+  const header = landsColumn.querySelector('.column-header');
+
+  // Rebuild just the lands stack
+  stack.innerHTML = '';
+  let idx = 0;
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    if (basics[color] > 0 && basicLandCards[color]) {
+      const cardEl = createDeckBasicElement(basicLandCards[color], color);
+      cardEl.style.setProperty('--stack-index', idx++);
+      stack.appendChild(cardEl);
+    }
+  });
+
+  // Update header
+  const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
+  header.textContent = 'lands' + (basicsTotal > 0 ? ' (' + basicsTotal + ')' : '');
+}
+
+// Update deck count display
+function updateDeckCount() {
+  const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
+  deckCount.textContent = totalCards;
 }
 
 // Update 'in-deck' class on pool cards without re-rendering
