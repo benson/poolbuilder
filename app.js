@@ -102,33 +102,6 @@ function setupEventListeners() {
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
-
-  // View toggle
-  document.getElementById('view-toggle').addEventListener('click', toggleView);
-}
-
-let currentView = 'pool'; // 'pool' or 'deck'
-
-function toggleView() {
-  const deckArea = document.getElementById('deck-area');
-  const poolArea = document.getElementById('pool-area');
-  const toggleBtn = document.getElementById('view-toggle');
-
-  if (currentView === 'pool') {
-    currentView = 'deck';
-    deckArea.classList.remove('collapsed');
-    deckArea.classList.add('expanded');
-    poolArea.classList.remove('expanded');
-    poolArea.classList.add('collapsed');
-    toggleBtn.textContent = '[show pool]';
-  } else {
-    currentView = 'pool';
-    poolArea.classList.remove('collapsed');
-    poolArea.classList.add('expanded');
-    deckArea.classList.remove('expanded');
-    deckArea.classList.add('collapsed');
-    toggleBtn.textContent = '[show deck]';
-  }
 }
 
 // Mode toggle
