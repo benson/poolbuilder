@@ -3,7 +3,7 @@ import {
   fetchSets,
   createSetAutocomplete,
   fetchAllSetCards,
-  generateSealedPool,
+  generateSealedPoolFromBoosterData,
   getDailySeed,
   getBoosterEra
 } from 'https://bensonperry.com/shared/mtg.js';
@@ -102,6 +102,33 @@ function setupEventListeners() {
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
+
+  // View toggle
+  document.getElementById('view-toggle').addEventListener('click', toggleView);
+}
+
+let currentView = 'pool'; // 'pool' or 'deck'
+
+function toggleView() {
+  const deckArea = document.getElementById('deck-area');
+  const poolArea = document.getElementById('pool-area');
+  const toggleBtn = document.getElementById('view-toggle');
+
+  if (currentView === 'pool') {
+    currentView = 'deck';
+    deckArea.classList.remove('collapsed');
+    deckArea.classList.add('expanded');
+    poolArea.classList.remove('expanded');
+    poolArea.classList.add('collapsed');
+    toggleBtn.textContent = '[show pool]';
+  } else {
+    currentView = 'pool';
+    poolArea.classList.remove('collapsed');
+    poolArea.classList.add('expanded');
+    deckArea.classList.remove('expanded');
+    deckArea.classList.add('collapsed');
+    toggleBtn.textContent = '[show deck]';
+  }
 }
 
 // Mode toggle
@@ -163,7 +190,9 @@ async function generatePool(setCode, seed = null) {
     const boosterType = era === 'play' ? 'play' : 'draft';
 
     const cards = await fetchAllSetCards(setCode, boosterType);
-    currentPool = generateSealedPool(cards, seed);
+
+    // Use booster-data aware pool generation (respects slot definitions and mythic rates)
+    currentPool = await generateSealedPoolFromBoosterData(setCode, cards, 6, seed);
 
     // Fetch basic lands for this set
     await fetchBasicLands(setCode);
@@ -561,15 +590,13 @@ function createBasicLandElement(card, color) {
 
 function addBasicToDeck(color) {
   basics[color]++;
-  renderDeck();
-  renderPool();
+  renderWithScrollLock();
 }
 
 function removeBasicFromDeck(color) {
   if (basics[color] > 0) {
     basics[color]--;
-    renderDeck();
-    renderPool();
+    renderWithScrollLock();
   }
 }
 
@@ -580,8 +607,7 @@ function addToDeck(card) {
 
   if (inDeckCount < inPoolCount) {
     deck.push(card);
-    renderDeck();
-    renderPool();
+    renderWithScrollLock();
   }
 }
 
@@ -589,9 +615,15 @@ function removeFromDeck(card) {
   const idx = deck.findIndex(c => c.id === card.id);
   if (idx !== -1) {
     deck.splice(idx, 1);
-    renderDeck();
-    renderPool();
+    renderWithScrollLock();
   }
+}
+
+function renderWithScrollLock() {
+  const scrollY = window.scrollY;
+  renderDeck();
+  renderPool();
+  requestAnimationFrame(() => window.scrollTo(0, scrollY));
 }
 
 function clearDeck() {

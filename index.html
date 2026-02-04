@@ -44,27 +44,33 @@
 
     <!-- Pool View -->
     <div id="pool-section" class="hidden">
-      <div class="pool-header">
-        <h2>your pool <span id="pool-count"></span></h2>
-        <div class="pool-actions">
-          <button type="button" id="sort-color" class="sort-btn active">by color</button>
-          <button type="button" id="sort-rarity" class="sort-btn">by rarity</button>
-          <button type="button" id="sort-cmc" class="sort-btn">by cost</button>
-        </div>
-      </div>
-      
       <div class="builder-layout">
         <!-- Deck Area -->
-        <div class="deck-area">
+        <div class="deck-area collapsed" id="deck-area">
           <div class="deck-header">
-            <h3>deck <span id="deck-count">0</span>/40</h3>
-<button type="button" id="clear-deck" class="text-btn">clear</button>
+            <h3>your deck <span id="deck-count">0</span>/40</h3>
+            <button type="button" id="clear-deck" class="text-btn">[clear]</button>
           </div>
           <div id="deck-grid" class="deck-columns"></div>
         </div>
 
+        <!-- Section Divider -->
+        <div class="section-divider">
+          <hr>
+          <button type="button" id="view-toggle" class="view-toggle">[show deck]</button>
+          <hr>
+        </div>
+
         <!-- Card Pool -->
-        <div class="pool-area">
+        <div class="pool-area expanded" id="pool-area">
+          <div class="pool-header">
+            <h3>your pool <span id="pool-count"></span></h3>
+            <div class="pool-actions">
+              <button type="button" id="sort-color" class="sort-btn active">[by color]</button>
+              <button type="button" id="sort-rarity" class="sort-btn">[by rarity]</button>
+              <button type="button" id="sort-cmc" class="sort-btn">[by cost]</button>
+            </div>
+          </div>
           <div id="pool-grid" class="pool-columns"></div>
         </div>
       </div>

@@ -14,8 +14,7 @@ body {
 }
 
 .container {
-  width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 header {
@@ -40,7 +39,7 @@ header {
 
 .mode-link {
   color: #999;
-  text-decoration: none;
+  text-decoration: underline;
   font-size: 0.85rem;
 }
 
@@ -187,6 +186,7 @@ h1 {
   font-size: 0.8rem;
   cursor: pointer;
   text-transform: lowercase;
+  text-decoration: underline;
   padding: 4px 8px;
 }
 
@@ -203,6 +203,7 @@ h1 {
   font-size: 0.8rem;
   cursor: pointer;
   text-transform: lowercase;
+  text-decoration: underline;
   padding: 4px 8px;
 }
 
@@ -212,7 +213,6 @@ h1 {
 
 .sort-btn.active {
   color: #000;
-  text-decoration: underline;
 }
 
 /* Daily Challenge */
@@ -246,13 +246,11 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 12px;
 }
 
-.pool-header h2 {
-  font-size: 1.1rem;
+.pool-header h3 {
+  font-size: 1rem;
   font-weight: 400;
 }
 
@@ -264,6 +262,12 @@ h1 {
 .pool-actions {
   display: flex;
   gap: 4px;
+}
+
+/* Expanded/collapsed states */
+.deck-area.expanded .deck-columns,
+.pool-area.expanded .pool-columns {
+  min-height: 300px;
 }
 
 /* Builder Layout */
@@ -383,9 +387,38 @@ h1 {
 
 /* Deck Area */
 .deck-area {
-  background: #f3f2ef;
-  padding: 16px;
-  border-radius: 4px;
+  padding-bottom: 16px;
+}
+
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+.section-divider hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.view-toggle {
+  appearance: none;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #666;
+  cursor: pointer;
+  text-transform: lowercase;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.view-toggle:hover {
+  color: #000;
 }
 
 .deck-header {
