@@ -658,7 +658,8 @@ function renderDeck() {
     else cmcGroups['7+'].push(card);
   });
 
-  deckGrid.innerHTML = '';
+  // Build all content in a fragment first (off-DOM)
+  const fragment = document.createDocumentFragment();
 
   const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
   cmcOrder.forEach(key => {
@@ -677,7 +678,7 @@ function renderDeck() {
     });
 
     groupEl.appendChild(stackEl);
-    deckGrid.appendChild(groupEl);
+    fragment.appendChild(groupEl);
   });
 
   // Add lands column for basics
@@ -699,7 +700,10 @@ function renderDeck() {
   });
 
   landsEl.appendChild(landsStack);
-  deckGrid.appendChild(landsEl);
+  fragment.appendChild(landsEl);
+
+  // Atomic swap - replaces all children in one operation
+  deckGrid.replaceChildren(fragment);
 }
 
 function createDeckBasicElement(card, color) {
