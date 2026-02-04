@@ -594,11 +594,20 @@ function removeFromDeck(card) {
 
 function renderWithScrollLock() {
   const scrollY = window.scrollY;
+
+  // Hide entire section during re-render to prevent flash
+  poolSection.style.visibility = 'hidden';
+
   renderDeck();
   renderPool();
-  // Use setTimeout to restore scroll after browser has finished layout
+
+  // Try immediate scroll restore
+  window.scrollTo({ top: scrollY, behavior: 'instant' });
+
+  // Firefox needs setTimeout for scroll to stick - show section after
   setTimeout(() => {
     window.scrollTo({ top: scrollY, behavior: 'instant' });
+    poolSection.style.visibility = '';
   }, 0);
 }
 
@@ -613,15 +622,7 @@ function renderDeck() {
   const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
   deckCount.textContent = totalCards;
 
-  // Group by card and show counts
-  const cardCounts = new Map();
-  deck.forEach(card => {
-    const count = cardCounts.get(card.id) || { card, count: 0 };
-    count.count++;
-    cardCounts.set(card.id, count);
-  });
-
-  // Group into CMC columns
+  // Group into CMC columns (no deduplication - show each card individually)
   const cmcGroups = {
     '0-1': [],
     '2': [],
@@ -632,37 +633,32 @@ function renderDeck() {
     '7+': []
   };
 
-  [...cardCounts.values()].forEach(({ card, count }) => {
+  deck.forEach(card => {
     const cmc = card.cmc || 0;
-    const entry = { card, count };
-    if (cmc <= 1) cmcGroups['0-1'].push(entry);
-    else if (cmc === 2) cmcGroups['2'].push(entry);
-    else if (cmc === 3) cmcGroups['3'].push(entry);
-    else if (cmc === 4) cmcGroups['4'].push(entry);
-    else if (cmc === 5) cmcGroups['5'].push(entry);
-    else if (cmc === 6) cmcGroups['6'].push(entry);
-    else cmcGroups['7+'].push(entry);
+    if (cmc <= 1) cmcGroups['0-1'].push(card);
+    else if (cmc === 2) cmcGroups['2'].push(card);
+    else if (cmc === 3) cmcGroups['3'].push(card);
+    else if (cmc === 4) cmcGroups['4'].push(card);
+    else if (cmc === 5) cmcGroups['5'].push(card);
+    else if (cmc === 6) cmcGroups['6'].push(card);
+    else cmcGroups['7+'].push(card);
   });
 
   deckGrid.innerHTML = '';
 
   const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
   cmcOrder.forEach(key => {
-    const entries = cmcGroups[key];
+    const cards = cmcGroups[key];
     const groupEl = document.createElement('div');
     groupEl.className = 'card-column';
 
-    const count = entries.reduce((sum, e) => sum + e.count, 0);
-    groupEl.innerHTML = '<div class="column-header">' + key + (count > 0 ? ' (' + count + ')' : '') + '</div>';
+    groupEl.innerHTML = '<div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div>';
 
     const stackEl = document.createElement('div');
     stackEl.className = 'card-stack';
-    entries.forEach(({ card, count }, idx) => {
+    cards.forEach((card, idx) => {
       const cardEl = createCardElement(card, 'deck');
       cardEl.style.setProperty('--stack-index', idx);
-      if (count > 1) {
-        cardEl.innerHTML += '<span class="card-count-badge">' + count + '</span>';
-      }
       stackEl.appendChild(cardEl);
     });
 
@@ -702,10 +698,8 @@ function createDeckBasicElement(card, color) {
   el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
   el.dataset.normalUrl = normalUrl;
 
-  // Show count
-  if (basics[color] > 1) {
-    el.innerHTML += '<span class="card-count-badge">' + basics[color] + '</span>';
-  }
+  // Show count badge
+  el.innerHTML += '<span class="card-count-badge">' + basics[color] + '</span>';
 
   // Hover preview
   el.addEventListener('mouseenter', showCardPreview);
