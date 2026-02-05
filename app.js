@@ -15,7 +15,7 @@ let deck = [];
 let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
 let basicLandCards = {}; // { W: cardObj, U: cardObj, ... }
 let currentSort = 'color';
-let currentMode = 'generator';
+let currentMode = 'daily';
 let selectedSet = null;
 let autocomplete = null;
 
@@ -70,6 +70,9 @@ async function init() {
 
     setupEventListeners();
     updateDailyInfo();
+
+    // Auto-load daily challenge on startup
+    handleDailyGenerate();
   } catch (error) {
     console.error('Failed to initialize:', error);
   }

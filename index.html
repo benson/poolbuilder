@@ -18,21 +18,21 @@
       <div class="header-left">
         <h1>pool builder</h1>
         <nav class="mode-links">
-          <a href="#" class="mode-link active" data-mode="generator">sealed generator</a>
+          <a href="#" class="mode-link active" data-mode="daily">daily challenge</a>
           <span class="sep">·</span>
-          <a href="#" class="mode-link" data-mode="daily">daily challenge</a>
+          <a href="#" class="mode-link" data-mode="generator">sealed generator</a>
         </nav>
       </div>
-      <div id="generator-controls" class="header-controls">
+      <div id="daily-controls" class="header-controls">
+        <span class="daily-info"><span id="daily-set-name">loading...</span> <span class="daily-seed">(seed: <span id="daily-seed"></span>)</span></span>
+      </div>
+      <div id="generator-controls" class="header-controls hidden">
         <div class="autocomplete-wrapper">
           <input type="text" id="set-input" placeholder="search sets..." autocomplete="off">
           <input type="hidden" id="set-select" value="">
           <div id="set-dropdown" class="autocomplete-dropdown hidden"></div>
         </div>
         <button type="button" id="generate-btn" class="primary-btn" disabled>generate pool</button>
-      </div>
-      <div id="daily-controls" class="header-controls hidden">
-        <span class="daily-info"><span id="daily-set-name">loading...</span> <span class="daily-seed">(seed: <span id="daily-seed"></span>)</span></span>
       </div>
     </header>
 
