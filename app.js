@@ -149,8 +149,39 @@ async function handleGenerate() {
 }
 
 async function handleDailyGenerate() {
+  loadingEl.classList.remove('hidden');
+  poolSection.classList.add('hidden');
+
+  try {
+    // Try to load pre-generated daily pool
+    const today = new Date().toISOString().split('T')[0];
+    const res = await fetch('daily.json?v=' + today);
+    if (res.ok) {
+      const daily = await res.json();
+      if (daily.date === today) {
+        currentPool = daily.pool;
+        basicLandCards = daily.basicLands || {};
+
+        // Update header info from cached data
+        dailySetName.textContent = daily.set.name;
+        dailySeed.textContent = daily.seed;
+
+        deck = [];
+        basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+        renderPool();
+        renderDeck();
+        poolSection.classList.remove('hidden');
+        loadingEl.classList.add('hidden');
+        return;
+      }
+    }
+  } catch (e) {
+    // Fall through to live generation
+  }
+
+  // Fallback: generate live from Scryfall
   const setCode = dailyControls.dataset.setCode;
-  if (!setCode) return;
+  if (!setCode) { loadingEl.classList.add('hidden'); return; }
   const seed = getDailySeed();
   await generatePool(setCode, seed);
 }
