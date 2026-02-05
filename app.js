@@ -248,6 +248,7 @@ function setSort(sort) {
     btn.classList.toggle('active', btn.id === 'sort-' + sort);
   });
   renderPool();
+  updateAllPoolCardClasses();
 }
 
 function sortCards(cards) {
@@ -524,11 +525,6 @@ function createCardElement(card, context) {
   el.addEventListener('mouseleave', hideCardPreview);
 
   if (context === 'pool') {
-    const inDeckCount = deck.filter(c => c.id === card.id).length;
-    const inPoolCount = currentPool.filter(c => c.id === card.id).length;
-    if (inDeckCount >= inPoolCount) {
-      el.classList.add('in-deck');
-    }
     el.addEventListener('click', () => addToDeck(card));
   } else {
     el.addEventListener('click', () => removeFromDeck(card));
@@ -694,14 +690,27 @@ function updateDeckCount() {
 }
 
 // Update 'in-deck' class on pool cards without re-rendering
+// Dims individual copies: if 2 in pool and 1 in deck, dim 1 card
 function updatePoolCardClasses(cardId) {
   const inDeckCount = deck.filter(c => c.id === cardId).length;
-  const inPoolCount = currentPool.filter(c => c.id === cardId).length;
-  const shouldBeInDeck = inDeckCount >= inPoolCount;
 
-  // Find all pool cards with this ID and update their class
-  poolGrid.querySelectorAll(`.card[data-id="${cardId}"]`).forEach(el => {
-    el.classList.toggle('in-deck', shouldBeInDeck);
+  poolGrid.querySelectorAll(`.card[data-id="${cardId}"]`).forEach((el, idx) => {
+    el.classList.toggle('in-deck', idx < inDeckCount);
+  });
+}
+
+// Update all pool card classes (used after full pool re-render)
+function updateAllPoolCardClasses() {
+  const deckCounts = new Map();
+  deck.forEach(c => deckCounts.set(c.id, (deckCounts.get(c.id) || 0) + 1));
+
+  const seen = new Map();
+  poolGrid.querySelectorAll('.card[data-id]').forEach(el => {
+    const id = el.dataset.id;
+    const idx = seen.get(id) || 0;
+    seen.set(id, idx + 1);
+    const inDeckCount = deckCounts.get(id) || 0;
+    el.classList.toggle('in-deck', idx < inDeckCount);
   });
 }
 
@@ -727,6 +736,7 @@ function clearDeck() {
   basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
   renderDeck();
   renderPool();
+  updateAllPoolCardClasses();
 }
 
 function renderDeck() {
