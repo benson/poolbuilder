@@ -33,7 +33,6 @@ const setInput = document.getElementById('set-input');
 const setSelect = document.getElementById('set-select');
 const setDropdown = document.getElementById('set-dropdown');
 const generateBtn = document.getElementById('generate-btn');
-const dailyGenerateBtn = document.getElementById('daily-generate-btn');
 const generatorControls = document.getElementById('generator-controls');
 const dailyControls = document.getElementById('daily-controls');
 const loadingEl = document.getElementById('loading');
@@ -93,7 +92,6 @@ function setupEventListeners() {
 
   // Generate buttons
   generateBtn.addEventListener('click', handleGenerate);
-  dailyGenerateBtn.addEventListener('click', handleDailyGenerate);
 
   // Sort buttons
   document.getElementById('sort-color').addEventListener('click', () => setSort('color'));
@@ -112,6 +110,10 @@ function handleModeToggle(mode) {
   });
   generatorControls.classList.toggle('hidden', mode !== 'generator');
   dailyControls.classList.toggle('hidden', mode !== 'daily');
+
+  if (mode === 'daily') {
+    handleDailyGenerate();
+  }
 }
 
 // Daily challenge
