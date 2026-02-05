@@ -633,6 +633,7 @@ function removeFromDeck(card) {
 
 // Get CMC key for a card
 function getCmcKey(card) {
+  if (card.type_line?.includes('Land')) return 'lands';
   const cmc = card.cmc || 0;
   if (cmc <= 1) return '0-1';
   if (cmc >= 7) return '7+';
@@ -641,7 +642,7 @@ function getCmcKey(card) {
 
 // Get column index for CMC key
 function getCmcColumnIndex(cmcKey) {
-  const order = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  const order = ['0-1', '2', '3', '4', '5', '6', '7+', 'lands'];
   return order.indexOf(cmcKey);
 }
 
@@ -692,7 +693,7 @@ function removeCardFromDeckColumn(card) {
   }
 }
 
-// Update just the basics column in deck
+// Update just the basics in the lands column (preserves non-basic lands)
 function updateDeckBasicsColumn() {
   const landsColumn = deckGrid.querySelector('.card-column:last-child');
   if (!landsColumn) return;
@@ -700,9 +701,11 @@ function updateDeckBasicsColumn() {
   const stack = landsColumn.querySelector('.card-stack');
   const header = landsColumn.querySelector('.column-header');
 
-  // Rebuild just the lands stack
-  stack.innerHTML = '';
-  let idx = 0;
+  // Remove existing basic land elements (keep non-basics)
+  stack.querySelectorAll('.basic-land').forEach(el => el.remove());
+
+  // Append basic lands after non-basics
+  let idx = stack.children.length;
   ['W', 'U', 'B', 'R', 'G'].forEach(color => {
     if (basics[color] > 0 && basicLandCards[color]) {
       const cardEl = createDeckBasicElement(basicLandCards[color], color);
@@ -711,9 +714,16 @@ function updateDeckBasicsColumn() {
     }
   });
 
-  // Update header
+  // Re-index all children
+  Array.from(stack.children).forEach((el, i) => {
+    el.style.setProperty('--stack-index', i);
+  });
+
+  // Update header with total lands count
   const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
-  header.textContent = 'lands' + (basicsTotal > 0 ? ' (' + basicsTotal + ')' : '');
+  const nonBasicCount = stack.querySelectorAll('.card:not(.basic-land)').length;
+  const total = nonBasicCount + basicsTotal;
+  header.textContent = 'lands' + (total > 0 ? ' (' + total + ')' : '');
 }
 
 // Update deck count display
@@ -784,18 +794,12 @@ function renderDeck() {
     '4': [],
     '5': [],
     '6': [],
-    '7+': []
+    '7+': [],
+    'lands': []
   };
 
   deck.forEach(card => {
-    const cmc = card.cmc || 0;
-    if (cmc <= 1) cmcGroups['0-1'].push(card);
-    else if (cmc === 2) cmcGroups['2'].push(card);
-    else if (cmc === 3) cmcGroups['3'].push(card);
-    else if (cmc === 4) cmcGroups['4'].push(card);
-    else if (cmc === 5) cmcGroups['5'].push(card);
-    else if (cmc === 6) cmcGroups['6'].push(card);
-    else cmcGroups['7+'].push(card);
+    cmcGroups[getCmcKey(card)].push(card);
   });
 
   // Build all content in a fragment first (off-DOM)
@@ -821,16 +825,27 @@ function renderDeck() {
     fragment.appendChild(groupEl);
   });
 
-  // Add lands column for basics
+  // Add lands column (non-basic lands from deck + basic lands)
+  const nonBasicLands = cmcGroups['lands'];
   const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
+  const landsTotal = nonBasicLands.length + basicsTotal;
   const landsEl = document.createElement('div');
   landsEl.className = 'card-column';
-  landsEl.innerHTML = '<div class="column-header">lands' + (basicsTotal > 0 ? ' (' + basicsTotal + ')' : '') + '</div>';
+  landsEl.innerHTML = '<div class="column-header">lands' + (landsTotal > 0 ? ' (' + landsTotal + ')' : '') + '</div>';
 
   const landsStack = document.createElement('div');
   landsStack.className = 'card-stack';
 
   let idx = 0;
+
+  // Non-basic lands first
+  nonBasicLands.forEach(card => {
+    const cardEl = createCardElement(card, 'deck');
+    cardEl.style.setProperty('--stack-index', idx++);
+    landsStack.appendChild(cardEl);
+  });
+
+  // Then basic lands
   ['W', 'U', 'B', 'R', 'G'].forEach(color => {
     if (basics[color] > 0 && basicLandCards[color]) {
       const cardEl = createDeckBasicElement(basicLandCards[color], color);
