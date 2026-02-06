@@ -1168,11 +1168,14 @@ function renderSubmissionsList() {
   allSubmissions.forEach(sub => {
     const isFeatured = featured.has(sub.id);
     const isMine = mySubmission && sub.id === mySubmission.id;
-    const colors = (sub.colors || []).join('');
+    const colors = sub.colors || [];
     const cardCount = sub.cardIds.length + Object.values(sub.basics || {}).reduce((a, b) => a + b, 0);
+    const dots = colors.length > 0
+      ? colors.map(c => '<span class="color-dot color-' + c + '"></span>').join('')
+      : '<span class="color-dot color-C"></span>';
     html += '<div class="submission-row' + (isFeatured ? ' featured' : '') + (isMine ? ' mine' : '') + '" data-id="' + sub.id + '">' +
+      '<span class="sub-colors">' + dots + '</span>' +
       '<span class="sub-name">' + sub.name + (isMine ? ' (you)' : '') + '</span>' +
-      '<span class="sub-colors">' + (colors || 'C') + '</span>' +
       '<span class="sub-count">' + cardCount + ' cards</span>' +
       '</div>';
   });
@@ -1193,68 +1196,90 @@ function showComparison(otherSub) {
   const el = document.getElementById('results-comparison');
   el.classList.remove('hidden');
 
-  if (!mySubmission) {
-    el.innerHTML = '<p>submit your deck first to compare</p>';
-    return;
-  }
+  // Resolve card IDs to card objects from pool
+  const theirDeck = otherSub.cardIds.map(id => currentPool.find(c => c.id === id)).filter(Boolean);
+  const theirBasics = otherSub.basics || {};
 
-  // Multi-set diff: count occurrences of each card ID
-  const myCards = countIds(mySubmission.cardIds);
-  const theirCards = countIds(otherSub.cardIds);
-  const allIds = new Set([...myCards.keys(), ...theirCards.keys()]);
+  // Build header
+  const dots = (otherSub.colors || []).map(c => '<span class="color-dot color-' + c + '"></span>').join('');
+  let html = '<div class="comparison-header">' +
+    '<h3 class="results-section-title">' + otherSub.name + '\'s deck ' + dots + '</h3>' +
+    '</div>';
 
-  const both = [];
-  const onlyMe = [];
-  const onlyThem = [];
+  // Render their deck visually in CMC columns
+  const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7+': [], 'lands': [] };
+  theirDeck.forEach(card => { cmcGroups[getCmcKey(card)].push(card); });
 
-  allIds.forEach(id => {
-    const myCount = myCards.get(id) || 0;
-    const theirCount = theirCards.get(id) || 0;
-    const shared = Math.min(myCount, theirCount);
-
-    const card = currentPool.find(c => c.id === id);
-    const name = card ? card.name : id.slice(0, 8);
-
-    for (let i = 0; i < shared; i++) both.push(name);
-    for (let i = 0; i < myCount - shared; i++) onlyMe.push(name);
-    for (let i = 0; i < theirCount - shared; i++) onlyThem.push(name);
+  html += '<div class="comparison-deck deck-columns">';
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  cmcOrder.forEach(key => {
+    const cards = cmcGroups[key];
+    html += '<div class="card-column"><div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div><div class="card-stack">';
+    cards.forEach((card, idx) => {
+      const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+      const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+      const diffClass = mySubmission ? (mySubmission.cardIds.includes(card.id) ? 'shared' : 'only-theirs') : '';
+      html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + normalUrl + '">' +
+        '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
+    });
+    html += '</div></div>';
   });
 
-  let html = '<h3 class="results-section-title">comparing with ' + otherSub.name + '</h3>';
-  html += '<div class="comparison-columns">';
-
-  html += '<div class="comparison-col">';
-  html += '<div class="comparison-col-header">both picked (' + both.length + ')</div>';
-  both.sort().forEach(name => { html += '<div class="comparison-card">' + name + '</div>'; });
-  html += '</div>';
-
-  html += '<div class="comparison-col">';
-  html += '<div class="comparison-col-header">only you (' + onlyMe.length + ')</div>';
-  onlyMe.sort().forEach(name => { html += '<div class="comparison-card only-mine">' + name + '</div>'; });
-  html += '</div>';
-
-  html += '<div class="comparison-col">';
-  html += '<div class="comparison-col-header">only them (' + onlyThem.length + ')</div>';
-  onlyThem.sort().forEach(name => { html += '<div class="comparison-card only-theirs">' + name + '</div>'; });
-  html += '</div>';
-
-  html += '</div>';
-
-  // Basics diff
-  const myBasics = mySubmission.basics || {};
-  const theirBasics = otherSub.basics || {};
-  html += '<div class="comparison-basics"><span class="results-section-title">basics</span><div class="basics-diff">';
-  ['W', 'U', 'B', 'R', 'G'].forEach(c => {
-    const mine = myBasics[c] || 0;
-    const theirs = theirBasics[c] || 0;
-    const diff = mine - theirs;
-    const diffStr = diff > 0 ? '+' + diff : diff < 0 ? String(diff) : '';
-    html += '<span class="basic-diff">' + BASIC_LAND_NAMES[c].toLowerCase() + ': ' + mine + ' vs ' + theirs +
-      (diffStr ? ' <span class="diff-indicator">' + diffStr + '</span>' : '') + '</span>';
+  // Lands column
+  const nonBasicLands = cmcGroups['lands'];
+  const basicsTotal = Object.values(theirBasics).reduce((a, b) => a + b, 0);
+  const landsTotal = nonBasicLands.length + basicsTotal;
+  html += '<div class="card-column"><div class="column-header">lands' + (landsTotal > 0 ? ' (' + landsTotal + ')' : '') + '</div><div class="card-stack">';
+  let idx = 0;
+  nonBasicLands.forEach(card => {
+    const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+    const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+    const diffClass = mySubmission ? (mySubmission.cardIds.includes(card.id) ? 'shared' : 'only-theirs') : '';
+    html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + normalUrl + '">' +
+      '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
+  });
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    if (theirBasics[color] > 0 && basicLandCards[color]) {
+      const card = basicLandCards[color];
+      const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
+      const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+      html += '<div class="card basic-land" style="--stack-index:' + idx++ + '" data-normal-url="' + normalUrl + '">' +
+        '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">' +
+        '<span class="card-count-badge">' + theirBasics[color] + '</span></div>';
+    }
   });
   html += '</div></div>';
+  html += '</div>';
+
+  // Diff summary (compact)
+  if (mySubmission) {
+    const myCardIds = countIds(mySubmission.cardIds);
+    const theirCardIds = countIds(otherSub.cardIds);
+    const allIds = new Set([...myCardIds.keys(), ...theirCardIds.keys()]);
+    let shared = 0, onlyYou = 0, onlyThem = 0;
+    allIds.forEach(id => {
+      const m = myCardIds.get(id) || 0;
+      const t = theirCardIds.get(id) || 0;
+      shared += Math.min(m, t);
+      onlyYou += Math.max(0, m - t);
+      onlyThem += Math.max(0, t - m);
+    });
+    html += '<div class="diff-summary">' +
+      '<span>' + shared + ' shared</span>' +
+      '<span class="only-mine-text">+' + onlyYou + ' only you</span>' +
+      '<span class="only-theirs-text">+' + onlyThem + ' only them</span>' +
+      '</div>';
+  }
 
   el.innerHTML = html;
+
+  // Attach hover previews to comparison deck cards
+  el.querySelectorAll('.card').forEach(cardEl => {
+    cardEl.dataset.normalUrl = cardEl.dataset.normalUrl || cardEl.getAttribute('data-normal-url');
+    cardEl.addEventListener('mouseenter', showCardPreview);
+    cardEl.addEventListener('mouseleave', hideCardPreview);
+  });
+
   el.scrollIntoView({ behavior: 'smooth' });
 }
 
