@@ -456,6 +456,192 @@ h1 {
   border-radius: 2px;
 }
 
+/* Deck Actions */
+.deck-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Submission Teaser */
+.submission-teaser {
+  font-size: 0.8rem;
+  color: #999;
+  margin-left: 12px;
+}
+
+/* Results Section */
+#results-section {
+  max-width: 100%;
+  padding: 0 30px;
+}
+
+.results-header {
+  margin-bottom: 20px;
+}
+
+.results-count {
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.results-section-title {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #666;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Field Stats */
+.field-cards {
+  margin-bottom: 24px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 0.8rem;
+}
+
+.field-name {
+  width: 200px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: #eee;
+  max-width: 300px;
+}
+
+.field-bar {
+  display: block;
+  height: 100%;
+  background: #000;
+}
+
+.field-pct {
+  width: 36px;
+  text-align: right;
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.field-basics,
+.field-combos {
+  margin-top: 16px;
+}
+
+.basics-row,
+.combos-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.combo-tag {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Submissions List */
+.submissions-list {
+  margin-bottom: 24px;
+}
+
+.submission-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+}
+
+.submission-row:hover {
+  background: #edecea;
+}
+
+.submission-row.featured {
+  border-left-color: #000;
+}
+
+.submission-row.mine {
+  background: #f0efe8;
+}
+
+.sub-name {
+  flex: 1;
+}
+
+.sub-colors {
+  color: #666;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.sub-count {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+/* Comparison View */
+.comparison-columns {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.comparison-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.comparison-col-header {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.comparison-card {
+  font-size: 0.8rem;
+  padding: 2px 0;
+}
+
+.comparison-card.only-mine {
+  color: #2a7d2a;
+}
+
+.comparison-card.only-theirs {
+  color: #b33;
+}
+
+.comparison-basics {
+  margin-top: 16px;
+}
+
+.basics-diff {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.diff-indicator {
+  font-size: 0.75rem;
+  color: #999;
+}
+
 /* Utilities */
 .hidden {
   display: none !important;

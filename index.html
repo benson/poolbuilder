@@ -25,6 +25,7 @@
       </div>
       <div id="daily-controls" class="header-controls">
         <span class="daily-info"><span id="daily-set-name">loading...</span> <span class="daily-seed">(seed: <span id="daily-seed"></span>)</span></span>
+        <span id="submission-teaser" class="submission-teaser hidden"></span>
       </div>
       <div id="generator-controls" class="header-controls hidden">
         <div class="autocomplete-wrapper">
@@ -48,7 +49,11 @@
         <div class="deck-area collapsed" id="deck-area">
           <div class="deck-header">
             <h3>your deck <span id="deck-count">0</span>/40</h3>
-            <button type="button" id="clear-deck" class="text-btn">[clear]</button>
+            <div class="deck-actions">
+              <button type="button" id="submit-deck" class="text-btn hidden">[submit deck]</button>
+              <button type="button" id="view-results" class="text-btn hidden">[view results]</button>
+              <button type="button" id="clear-deck" class="text-btn">[clear]</button>
+            </div>
           </div>
           <div id="deck-grid" class="deck-columns"></div>
         </div>
@@ -69,6 +74,16 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="results-section" class="hidden">
+    <div class="results-header">
+      <button type="button" id="back-to-deck" class="text-btn">[back to deck]</button>
+    </div>
+    <div id="results-overview"></div>
+    <div id="results-field"></div>
+    <div id="results-submissions"></div>
+    <div id="results-comparison" class="hidden"></div>
   </div>
 
   <div id="card-preview"><img src="" alt=""></div>

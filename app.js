@@ -13,11 +13,18 @@ let sets = [];
 let currentPool = [];
 let deck = [];
 let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-let basicLandCards = {}; // { W: cardObj, U: cardObj, ... }
+let basicLandCards = {};
 let currentSort = 'color';
 let currentMode = 'daily';
 let selectedSet = null;
 let autocomplete = null;
+
+// Submission state
+let mySubmission = null;
+let allSubmissions = null;
+let submissionMeta = null;
+let loadedDailyDate = null;
+const API_URL = 'https://poolbuilder-api.brostar.workers.dev';
 
 // Basic land names
 const BASIC_LAND_NAMES = {
@@ -43,6 +50,10 @@ const poolCount = document.getElementById('pool-count');
 const deckCount = document.getElementById('deck-count');
 const dailySetName = document.getElementById('daily-set-name');
 const dailySeed = document.getElementById('daily-seed');
+const submitBtn = document.getElementById('submit-deck');
+const viewResultsBtn = document.getElementById('view-results');
+const resultsSection = document.getElementById('results-section');
+const submissionTeaser = document.getElementById('submission-teaser');
 
 // Initialize
 async function init() {
@@ -103,6 +114,11 @@ function setupEventListeners() {
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
+
+  // Submission buttons
+  submitBtn.addEventListener('click', submitDeck);
+  viewResultsBtn.addEventListener('click', showResults);
+  document.getElementById('back-to-deck').addEventListener('click', hideResults);
 }
 
 // Mode toggle
@@ -113,9 +129,14 @@ function handleModeToggle(mode) {
   });
   generatorControls.classList.toggle('hidden', mode !== 'generator');
   dailyControls.classList.toggle('hidden', mode !== 'daily');
+  resultsSection.classList.add('hidden');
 
   if (mode === 'daily') {
     handleDailyGenerate();
+  } else {
+    submitBtn.classList.add('hidden');
+    viewResultsBtn.classList.add('hidden');
+    submissionTeaser.classList.add('hidden');
   }
 }
 
@@ -169,12 +190,14 @@ async function handleDailyGenerate() {
         dailySetName.textContent = daily.set.name;
         dailySeed.textContent = daily.seed;
 
+        loadedDailyDate = today;
         deck = [];
         basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
         renderPool();
         renderDeck();
         poolSection.classList.remove('hidden');
         loadingEl.classList.add('hidden');
+        checkSubmissionStatus();
         return;
       }
     }
@@ -187,6 +210,8 @@ async function handleDailyGenerate() {
   if (!setCode) { loadingEl.classList.add('hidden'); return; }
   const seed = getDailySeed();
   await generatePool(setCode, seed);
+  loadedDailyDate = new Date().toISOString().split('T')[0];
+  checkSubmissionStatus();
 }
 
 async function generatePool(setCode, seed = null) {
@@ -733,6 +758,7 @@ function updateDeckBasicsColumn() {
 function updateDeckCount() {
   const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
   deckCount.textContent = totalCards;
+  updateSubmitButtonVisibility();
 }
 
 // Update 'in-deck' class on pool cards without re-rendering
@@ -783,6 +809,7 @@ function clearDeck() {
   renderDeck();
   renderPool();
   updateAllPoolCardClasses();
+  updateSubmitButtonVisibility();
 }
 
 function renderDeck() {
@@ -931,6 +958,310 @@ function showCardPreview(e) {
 
 function hideCardPreview() {
   cardPreview.classList.remove('visible');
+}
+
+// --- Submission & Results ---
+
+function getFingerprint() {
+  let fp = localStorage.getItem('pb-fingerprint');
+  if (!fp) {
+    fp = crypto.randomUUID();
+    localStorage.setItem('pb-fingerprint', fp);
+  }
+  return fp;
+}
+
+function getDeckColors() {
+  const colorSet = new Set();
+  deck.forEach(card => {
+    (card.colors || []).forEach(c => colorSet.add(c));
+  });
+  return [...colorSet].sort();
+}
+
+function updateSubmitButtonVisibility() {
+  if (currentMode !== 'daily' || !loadedDailyDate) {
+    submitBtn.classList.add('hidden');
+    return;
+  }
+  const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
+  if (mySubmission) {
+    submitBtn.classList.add('hidden');
+    viewResultsBtn.classList.remove('hidden');
+  } else if (totalCards >= 40) {
+    submitBtn.classList.remove('hidden');
+    viewResultsBtn.classList.add('hidden');
+  } else {
+    submitBtn.classList.add('hidden');
+    viewResultsBtn.classList.add('hidden');
+  }
+}
+
+async function checkSubmissionStatus() {
+  if (!loadedDailyDate) return;
+  try {
+    const fp = getFingerprint();
+    const res = await fetch(`${API_URL}/submissions/${loadedDailyDate}?fingerprint=${fp}`);
+    if (res.ok) {
+      const data = await res.json();
+      allSubmissions = data.submissions;
+      submissionMeta = data.meta;
+      mySubmission = allSubmissions.find(s => s.fingerprint === fp);
+      updateSubmitButtonVisibility();
+    } else if (res.status === 403) {
+      const data = await res.json();
+      if (data.count > 0) {
+        submissionTeaser.textContent = data.count + ' builders today';
+        submissionTeaser.classList.remove('hidden');
+      }
+      updateSubmitButtonVisibility();
+    }
+  } catch {
+    // silently degrade
+  }
+}
+
+async function submitDeck() {
+  const savedName = localStorage.getItem('pb-name') || '';
+  const name = prompt('name (optional):', savedName);
+  if (name === null) return; // cancelled
+
+  if (name) localStorage.setItem('pb-name', name);
+
+  const cardIds = deck.map(c => c.id);
+  const body = {
+    date: loadedDailyDate,
+    name: name || undefined,
+    fingerprint: getFingerprint(),
+    cardIds,
+    basics: { ...basics },
+    colors: getDeckColors(),
+  };
+
+  try {
+    const res = await fetch(`${API_URL}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok || res.status === 409) {
+      const data = await res.json();
+      allSubmissions = data.submissions;
+      submissionMeta = data.meta;
+      mySubmission = allSubmissions.find(s => s.fingerprint === getFingerprint()) ||
+                     allSubmissions.find(s => s.id === data.id);
+      localStorage.setItem('pb-submitted-date', loadedDailyDate);
+      localStorage.setItem('pb-submission-id', data.id);
+      submissionTeaser.classList.add('hidden');
+      updateSubmitButtonVisibility();
+      showResults();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'submission failed');
+    }
+  } catch {
+    alert('could not reach server');
+  }
+}
+
+function showResults() {
+  poolSection.classList.add('hidden');
+  resultsSection.classList.remove('hidden');
+  renderOverview();
+  renderTheField();
+  renderSubmissionsList();
+}
+
+function hideResults() {
+  resultsSection.classList.add('hidden');
+  poolSection.classList.remove('hidden');
+  document.getElementById('results-comparison').classList.add('hidden');
+}
+
+function renderOverview() {
+  const el = document.getElementById('results-overview');
+  const count = allSubmissions ? allSubmissions.length : 0;
+  el.innerHTML = '<p class="results-count">' + count + ' builder' + (count !== 1 ? 's' : '') + ' today</p>';
+}
+
+function renderTheField() {
+  const el = document.getElementById('results-field');
+  if (!allSubmissions || !currentPool.length) { el.innerHTML = ''; return; }
+
+  const total = allSubmissions.length;
+
+  // Count inclusion rate for each card in pool
+  const cardCounts = new Map();
+  currentPool.forEach(card => {
+    if (!cardCounts.has(card.id)) {
+      cardCounts.set(card.id, { name: card.name, count: 0, id: card.id });
+    }
+  });
+
+  allSubmissions.forEach(sub => {
+    const seen = new Set();
+    sub.cardIds.forEach(id => {
+      if (cardCounts.has(id) && !seen.has(id)) {
+        cardCounts.get(id).count++;
+        seen.add(id);
+      }
+    });
+  });
+
+  // Sort by inclusion rate
+  const sorted = [...cardCounts.values()].sort((a, b) => b.count - a.count);
+
+  let html = '<h3 class="results-section-title">the field</h3>';
+  html += '<div class="field-cards">';
+  sorted.forEach(({ name, count }) => {
+    const pct = Math.round((count / total) * 100);
+    html += '<div class="field-row">' +
+      '<span class="field-name">' + name + '</span>' +
+      '<span class="field-bar-wrap"><span class="field-bar" style="width:' + pct + '%"></span></span>' +
+      '<span class="field-pct">' + pct + '%</span>' +
+      '</div>';
+  });
+  html += '</div>';
+
+  // Average basics
+  const avgBasics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+  allSubmissions.forEach(sub => {
+    ['W', 'U', 'B', 'R', 'G'].forEach(c => {
+      avgBasics[c] += (sub.basics?.[c] || 0);
+    });
+  });
+  html += '<div class="field-basics"><span class="results-section-title">avg basics</span><div class="basics-row">';
+  ['W', 'U', 'B', 'R', 'G'].forEach(c => {
+    const avg = (avgBasics[c] / total).toFixed(1);
+    html += '<span class="basic-avg">' + BASIC_LAND_NAMES[c].toLowerCase() + ': ' + avg + '</span>';
+  });
+  html += '</div></div>';
+
+  // Color combo distribution
+  const combos = new Map();
+  allSubmissions.forEach(sub => {
+    const key = (sub.colors || []).sort().join('');
+    combos.set(key, (combos.get(key) || 0) + 1);
+  });
+  const sortedCombos = [...combos.entries()].sort((a, b) => b[1] - a[1]);
+  if (sortedCombos.length > 0) {
+    html += '<div class="field-combos"><span class="results-section-title">color combos</span><div class="combos-row">';
+    sortedCombos.forEach(([combo, count]) => {
+      html += '<span class="combo-tag">' + (combo || 'C') + ': ' + count + '</span>';
+    });
+    html += '</div></div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function renderSubmissionsList() {
+  const el = document.getElementById('results-submissions');
+  if (!allSubmissions) { el.innerHTML = ''; return; }
+
+  const featured = new Set(submissionMeta?.featured || []);
+
+  let html = '<h3 class="results-section-title">submissions</h3>';
+  html += '<div class="submissions-list">';
+
+  allSubmissions.forEach(sub => {
+    const isFeatured = featured.has(sub.id);
+    const isMine = mySubmission && sub.id === mySubmission.id;
+    const colors = (sub.colors || []).join('');
+    const cardCount = sub.cardIds.length + Object.values(sub.basics || {}).reduce((a, b) => a + b, 0);
+    html += '<div class="submission-row' + (isFeatured ? ' featured' : '') + (isMine ? ' mine' : '') + '" data-id="' + sub.id + '">' +
+      '<span class="sub-name">' + sub.name + (isMine ? ' (you)' : '') + '</span>' +
+      '<span class="sub-colors">' + (colors || 'C') + '</span>' +
+      '<span class="sub-count">' + cardCount + ' cards</span>' +
+      '</div>';
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+
+  // Attach click handlers
+  el.querySelectorAll('.submission-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const sub = allSubmissions.find(s => s.id === row.dataset.id);
+      if (sub) showComparison(sub);
+    });
+  });
+}
+
+function showComparison(otherSub) {
+  const el = document.getElementById('results-comparison');
+  el.classList.remove('hidden');
+
+  if (!mySubmission) {
+    el.innerHTML = '<p>submit your deck first to compare</p>';
+    return;
+  }
+
+  // Multi-set diff: count occurrences of each card ID
+  const myCards = countIds(mySubmission.cardIds);
+  const theirCards = countIds(otherSub.cardIds);
+  const allIds = new Set([...myCards.keys(), ...theirCards.keys()]);
+
+  const both = [];
+  const onlyMe = [];
+  const onlyThem = [];
+
+  allIds.forEach(id => {
+    const myCount = myCards.get(id) || 0;
+    const theirCount = theirCards.get(id) || 0;
+    const shared = Math.min(myCount, theirCount);
+
+    const card = currentPool.find(c => c.id === id);
+    const name = card ? card.name : id.slice(0, 8);
+
+    for (let i = 0; i < shared; i++) both.push(name);
+    for (let i = 0; i < myCount - shared; i++) onlyMe.push(name);
+    for (let i = 0; i < theirCount - shared; i++) onlyThem.push(name);
+  });
+
+  let html = '<h3 class="results-section-title">comparing with ' + otherSub.name + '</h3>';
+  html += '<div class="comparison-columns">';
+
+  html += '<div class="comparison-col">';
+  html += '<div class="comparison-col-header">both picked (' + both.length + ')</div>';
+  both.sort().forEach(name => { html += '<div class="comparison-card">' + name + '</div>'; });
+  html += '</div>';
+
+  html += '<div class="comparison-col">';
+  html += '<div class="comparison-col-header">only you (' + onlyMe.length + ')</div>';
+  onlyMe.sort().forEach(name => { html += '<div class="comparison-card only-mine">' + name + '</div>'; });
+  html += '</div>';
+
+  html += '<div class="comparison-col">';
+  html += '<div class="comparison-col-header">only them (' + onlyThem.length + ')</div>';
+  onlyThem.sort().forEach(name => { html += '<div class="comparison-card only-theirs">' + name + '</div>'; });
+  html += '</div>';
+
+  html += '</div>';
+
+  // Basics diff
+  const myBasics = mySubmission.basics || {};
+  const theirBasics = otherSub.basics || {};
+  html += '<div class="comparison-basics"><span class="results-section-title">basics</span><div class="basics-diff">';
+  ['W', 'U', 'B', 'R', 'G'].forEach(c => {
+    const mine = myBasics[c] || 0;
+    const theirs = theirBasics[c] || 0;
+    const diff = mine - theirs;
+    const diffStr = diff > 0 ? '+' + diff : diff < 0 ? String(diff) : '';
+    html += '<span class="basic-diff">' + BASIC_LAND_NAMES[c].toLowerCase() + ': ' + mine + ' vs ' + theirs +
+      (diffStr ? ' <span class="diff-indicator">' + diffStr + '</span>' : '') + '</span>';
+  });
+  html += '</div></div>';
+
+  el.innerHTML = html;
+  el.scrollIntoView({ behavior: 'smooth' });
+}
+
+function countIds(ids) {
+  const map = new Map();
+  ids.forEach(id => map.set(id, (map.get(id) || 0) + 1));
+  return map;
 }
 
 // Start

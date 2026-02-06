@@ -1,0 +1,7 @@
+name = "poolbuilder-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "SUBS"
+id = "5f02d3f2817a4d279acfd79d91faf7c4"
