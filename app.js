@@ -982,18 +982,23 @@ function getDeckColors() {
 function updateSubmitButtonVisibility() {
   if (currentMode !== 'daily' || !loadedDailyDate) {
     submitBtn.classList.add('hidden');
+    viewResultsBtn.classList.add('hidden');
     return;
   }
   const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
   if (mySubmission) {
     submitBtn.classList.add('hidden');
     viewResultsBtn.classList.remove('hidden');
-  } else if (totalCards >= 40) {
+  } else {
     submitBtn.classList.remove('hidden');
     viewResultsBtn.classList.add('hidden');
-  } else {
-    submitBtn.classList.add('hidden');
-    viewResultsBtn.classList.add('hidden');
+    if (totalCards >= 40) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '[submit deck]';
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.textContent = '[submit deck — ' + (40 - totalCards) + ' more cards needed]';
+    }
   }
 }
 
