@@ -1095,7 +1095,7 @@ function renderTheField() {
   const cardCounts = new Map();
   currentPool.forEach(card => {
     if (!cardCounts.has(card.id)) {
-      cardCounts.set(card.id, { name: card.name, count: 0, id: card.id });
+      cardCounts.set(card.id, { card, count: 0 });
     }
   });
 
@@ -1109,22 +1109,44 @@ function renderTheField() {
     });
   });
 
-  // Sort by inclusion rate
-  const sorted = [...cardCounts.values()].sort((a, b) => b.count - a.count);
+  // Group by color
+  const colorGroups = { W: [], U: [], B: [], R: [], G: [], multi: [], colorless: [], land: [] };
+  const colorNames = { W: 'white', U: 'blue', B: 'black', R: 'red', G: 'green', multi: 'multi', colorless: 'colorless', land: 'land' };
+
+  cardCounts.forEach(({ card, count }) => {
+    const cat = getColorCategory(card);
+    if (colorGroups[cat]) {
+      colorGroups[cat].push({ card, count, pct: Math.round((count / total) * 100) });
+    }
+  });
+
+  // Sort each group by inclusion rate
+  Object.values(colorGroups).forEach(group => group.sort((a, b) => b.pct - a.pct));
 
   let html = '<h3 class="results-section-title">the field</h3>';
-  html += '<div class="field-cards">';
-  sorted.forEach(({ name, count }) => {
-    const pct = Math.round((count / total) * 100);
-    html += '<div class="field-row">' +
-      '<span class="field-name">' + name + '</span>' +
-      '<span class="field-bar-wrap"><span class="field-bar" style="width:' + pct + '%"></span></span>' +
-      '<span class="field-pct">' + pct + '%</span>' +
-      '</div>';
+  html += '<div class="field-columns">';
+
+  const columnOrder = ['W', 'U', 'B', 'R', 'G', 'multi', 'colorless', 'land'];
+  columnOrder.forEach(key => {
+    const group = colorGroups[key];
+    if (group.length === 0) return;
+    html += '<div class="field-column">';
+    html += '<div class="column-header">' + colorNames[key] + '</div>';
+    group.forEach(({ card, pct }) => {
+      const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+      html += '<div class="field-row" data-normal-url="' + normalUrl + '">' +
+        '<span class="field-name">' + card.name + '</span>' +
+        '<span class="field-bar-wrap"><span class="field-bar" style="width:' + pct + '%"></span></span>' +
+        '<span class="field-pct">' + pct + '%</span>' +
+        '</div>';
+    });
+    html += '</div>';
   });
   html += '</div>';
 
-  // Average basics
+  // Average basics + color combos row
+  html += '<div class="field-footer">';
+
   const avgBasics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
   allSubmissions.forEach(sub => {
     ['W', 'U', 'B', 'R', 'G'].forEach(c => {
@@ -1138,7 +1160,6 @@ function renderTheField() {
   });
   html += '</div></div>';
 
-  // Color combo distribution
   const combos = new Map();
   allSubmissions.forEach(sub => {
     const key = (sub.colors || []).sort().join('');
@@ -1148,12 +1169,21 @@ function renderTheField() {
   if (sortedCombos.length > 0) {
     html += '<div class="field-combos"><span class="results-section-title">color combos</span><div class="combos-row">';
     sortedCombos.forEach(([combo, count]) => {
-      html += '<span class="combo-tag">' + (combo || 'C') + ': ' + count + '</span>';
+      const dots = (combo || 'C').split('').map(c => '<span class="color-dot color-' + c + '"></span>').join('');
+      html += '<span class="combo-tag">' + dots + ' ' + count + '</span>';
     });
     html += '</div></div>';
   }
 
+  html += '</div>';
   el.innerHTML = html;
+
+  // Attach hover previews
+  el.querySelectorAll('.field-row').forEach(row => {
+    row.dataset.normalUrl = row.getAttribute('data-normal-url');
+    row.addEventListener('mouseenter', showCardPreview);
+    row.addEventListener('mouseleave', hideCardPreview);
+  });
 }
 
 function renderSubmissionsList() {

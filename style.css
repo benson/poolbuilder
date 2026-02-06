@@ -493,31 +493,46 @@ h1 {
 }
 
 /* Field Stats */
-.field-cards {
+.field-columns {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
   margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.field-column {
+  min-width: 150px;
+  flex-shrink: 0;
 }
 
 .field-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 3px 0;
-  font-size: 0.8rem;
+  gap: 6px;
+  padding: 3px 4px;
+  font-size: 0.75rem;
+  cursor: default;
+  border-radius: 2px;
+}
+
+.field-row:hover {
+  background: #edecea;
 }
 
 .field-name {
-  width: 200px;
-  flex-shrink: 0;
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .field-bar-wrap {
-  flex: 1;
-  height: 8px;
+  width: 40px;
+  height: 6px;
   background: #eee;
-  max-width: 300px;
+  flex-shrink: 0;
 }
 
 .field-bar {
@@ -527,26 +542,37 @@ h1 {
 }
 
 .field-pct {
-  width: 36px;
+  width: 28px;
   text-align: right;
   color: #999;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.field-footer {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
 .field-basics,
 .field-combos {
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .basics-row,
 .combos-row {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
   font-size: 0.8rem;
 }
 
 .combo-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.8rem;
   color: #666;
 }
