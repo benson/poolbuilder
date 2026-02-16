@@ -348,7 +348,13 @@ function sortCards(cards) {
 }
 
 function getColorCategory(card) {
-  const colors = card.colors || [];
+  let colors = card.colors;
+  if (!colors && card.card_faces) {
+    const faceColors = new Set();
+    card.card_faces.forEach(f => (f.colors || []).forEach(c => faceColors.add(c)));
+    colors = [...faceColors];
+  }
+  colors = colors || [];
   if (card.type_line?.includes('Land')) return 'land';
   if (colors.length === 0) return 'colorless';
   if (colors.length > 1) return 'multi';
