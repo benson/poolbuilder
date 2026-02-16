@@ -137,6 +137,10 @@ function handleModeToggle(mode) {
     submitBtn.classList.add('hidden');
     viewResultsBtn.classList.add('hidden');
     submissionTeaser.classList.add('hidden');
+    poolSection.classList.add('hidden');
+    currentPool = [];
+    deck = [];
+    basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
   }
 }
 
@@ -399,6 +403,8 @@ function renderPoolByColor(cards) {
     }
 
     if (groupCards.length === 0) return;
+
+    groupCards.sort((a, b) => a.name.localeCompare(b.name));
 
     const groupEl = document.createElement('div');
     groupEl.className = 'card-column';
