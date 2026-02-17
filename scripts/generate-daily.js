@@ -1,10 +1,9 @@
 // Pre-generate the daily challenge pool
 // Runs via GitHub Actions on a daily schedule
 
-import { fetchWithRetry, fetchAllSetCards, generateSealedPoolFromBoosterData, getDailySeed, pickDailySet } from './mtg.js';
+import { fetchWithRetry, fetchSets, fetchAllSetCards, generateSealedPoolFromBoosterData, getDailySeed, pickDailySet } from './mtg.js';
 
 const SCRYFALL_API = 'https://api.scryfall.com';
-const SETS_URL = 'https://bensonperry.com/shared/sets.json';
 
 // ============ Basic lands fetching ============
 
@@ -70,7 +69,7 @@ async function main() {
   console.log(`generating daily pool for ${date} (seed: ${seed})`);
 
   // Load sets
-  const sets = await fetchWithRetry(SETS_URL);
+  const sets = await fetchSets();
   const dailySet = pickDailySet(sets);
   console.log(`daily set: ${dailySet.name} (${dailySet.code})`);
 
