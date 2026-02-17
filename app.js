@@ -528,8 +528,7 @@ function renderPoolByCmc(cards) {
     '3': [],
     '4': [],
     '5': [],
-    '6': [],
-    '7+': [],
+    '6+': [],
     land: []
   };
 
@@ -549,14 +548,13 @@ function renderPoolByCmc(cards) {
     else if (cmc === 3) groups['3'].push(card);
     else if (cmc === 4) groups['4'].push(card);
     else if (cmc === 5) groups['5'].push(card);
-    else if (cmc === 6) groups['6'].push(card);
-    else groups['7+'].push(card);
+    else groups['6+'].push(card);
   });
 
   poolGrid.innerHTML = '';
   poolGrid.className = 'pool-columns';
 
-  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
   cmcOrder.forEach(key => {
     const groupCards = groups[key];
     if (groupCards.length === 0) return;
@@ -676,13 +674,13 @@ function getCmcKey(card) {
   if (card.type_line?.includes('Land')) return 'lands';
   const cmc = card.cmc || 0;
   if (cmc <= 1) return '0-1';
-  if (cmc >= 7) return '7+';
+  if (cmc >= 6) return '6+';
   return String(cmc);
 }
 
 // Get column index for CMC key
 function getCmcColumnIndex(cmcKey) {
-  const order = ['0-1', '2', '3', '4', '5', '6', '7+', 'lands'];
+  const order = ['0-1', '2', '3', '4', '5', '6+', 'lands'];
   return order.indexOf(cmcKey);
 }
 
@@ -835,8 +833,7 @@ function renderDeck() {
     '3': [],
     '4': [],
     '5': [],
-    '6': [],
-    '7+': [],
+    '6+': [],
     'lands': []
   };
 
@@ -847,7 +844,7 @@ function renderDeck() {
   // Build all content in a fragment first (off-DOM)
   const fragment = document.createDocumentFragment();
 
-  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
   cmcOrder.forEach(key => {
     const cards = cmcGroups[key];
     const groupEl = document.createElement('div');
@@ -1254,11 +1251,11 @@ function showComparison(otherSub) {
     '</div>';
 
   // Render their deck visually in CMC columns
-  const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7+': [], 'lands': [] };
+  const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6+': [], 'lands': [] };
   theirDeck.forEach(card => { cmcGroups[getCmcKey(card)].push(card); });
 
   html += '<div class="comparison-deck deck-columns">';
-  const cmcOrder = ['0-1', '2', '3', '4', '5', '6', '7+'];
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
   cmcOrder.forEach(key => {
     const cards = cmcGroups[key];
     html += '<div class="card-column"><div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div><div class="card-stack">';
