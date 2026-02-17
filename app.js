@@ -5,6 +5,7 @@ import {
   fetchAllSetCards,
   generateSealedPoolFromBoosterData,
   getDailySeed,
+  pickDailySet,
   getBoosterEra
 } from 'https://bensonperry.com/shared/mtg.js';
 
@@ -147,27 +148,12 @@ function handleModeToggle(mode) {
 // Daily challenge
 function updateDailyInfo() {
   const seed = getDailySeed();
-  const dateStr = seed.replace('daily-', '');
-
-  // Pick a set based on the date (rotate through recent sets)
-  const recentSets = sets.filter(s => s.released && s.released >= '2020-01-01');
-  if (recentSets.length > 0) {
-    const dayIndex = hashDate(dateStr) % recentSets.length;
-    const dailySet = recentSets[dayIndex];
+  const dailySet = pickDailySet(sets);
+  if (dailySet) {
     dailySetName.textContent = dailySet.name;
     dailyControls.dataset.setCode = dailySet.code;
   }
-
   dailySeed.textContent = seed;
-}
-
-function hashDate(dateStr) {
-  let hash = 0;
-  for (let i = 0; i < dateStr.length; i++) {
-    hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
 }
 
 // Generate pool
