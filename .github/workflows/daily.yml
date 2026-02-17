@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Download shared modules
+        run: curl -s https://bensonperry.com/shared/mtg.js -o scripts/mtg.js
+
       - name: Generate daily pool
         run: node scripts/generate-daily.js
 
