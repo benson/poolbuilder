@@ -59,7 +59,8 @@ const submissionTeaser = document.getElementById('submission-teaser');
 // Initialize
 async function init() {
   try {
-    sets = await fetchSets();
+    const cutoff = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    sets = (await fetchSets()).filter(s => s.released <= cutoff);
 
     // Set up autocomplete using shared module
     autocomplete = createSetAutocomplete({
