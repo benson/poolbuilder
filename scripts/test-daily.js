@@ -1,5 +1,5 @@
 // Test that pool generation via mtg.js produces correct results
-import { fetchAllSetCards, generateSealedPoolFromBoosterData } from '../../homepage/shared/mtg.js';
+import { fetchAllSetCards, generateSealedPoolFromBoosterData } from './mtg.js';
 
 const SET = 'dsk'; // Duskmourn — a known play booster set
 const SEED = 'test-determinism-seed';
