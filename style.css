@@ -4,13 +4,90 @@
   padding: 0;
 }
 
+:root {
+  --bg: #f8f7f4;
+  --bg-alt: #edecea;
+  --bg-mine: #f0efe8;
+  --text: #000;
+  --text-muted: #666;
+  --text-faint: #999;
+  --border: #000;
+  --border-light: #ccc;
+  --border-faint: #eee;
+  --btn-bg: #000;
+  --btn-text: #fff;
+  --btn-bg-hover: #333;
+  --btn-bg-disabled: #ccc;
+  --footer-bg: rgba(248, 247, 244, 0.85);
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --bg-alt: #2a2a2a;
+  --bg-mine: #232319;
+  --text: #e8e8e8;
+  --text-muted: #aaa;
+  --text-faint: #777;
+  --border: #e8e8e8;
+  --border-light: #555;
+  --border-faint: #333;
+  --btn-bg: #e8e8e8;
+  --btn-text: #1a1a1a;
+  --btn-bg-hover: #ccc;
+  --btn-bg-disabled: #444;
+  --footer-bg: rgba(26, 26, 26, 0.85);
+}
+
 body {
   font-family: "Times New Roman", Times, Georgia, serif;
-  background: #f8f7f4;
-  color: #000;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   padding: 40px 30px 80px;
   text-transform: lowercase;
+}
+
+/* theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--text-muted);
+}
+
+.theme-icon {
+  margin-right: 4px;
+}
+
+/* override shared footer for dark mode */
+body:not(.no-shared-footer) footer {
+  background: var(--footer-bg);
+  color: var(--text-faint);
+}
+
+body:not(.no-shared-footer) footer a {
+  color: var(--text-faint);
+  border-bottom-color: var(--border-light);
+}
+
+body:not(.no-shared-footer) footer a:hover {
+  color: var(--text);
+  border-bottom-color: var(--border);
 }
 
 .container {
@@ -38,21 +115,21 @@ header {
 }
 
 .mode-link {
-  color: #999;
+  color: var(--text-faint);
   text-decoration: underline;
   font-size: 0.85rem;
 }
 
 .mode-link:hover {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .mode-link.active {
-  color: #000;
+  color: var(--text);
 }
 
 .mode-links .sep {
-  color: #ccc;
+  color: var(--border-light);
   font-size: 0.8rem;
 }
 
@@ -69,7 +146,7 @@ h1 {
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -90,7 +167,7 @@ h1 {
 
 .control-group label {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-faint);
   letter-spacing: 0.03em;
 }
 
@@ -105,15 +182,15 @@ h1 {
   font-family: inherit;
   font-size: 0.9rem;
   border: none;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid var(--border);
   background: transparent;
-  color: #000;
+  color: var(--text);
   text-transform: lowercase;
   outline: none;
 }
 
 .autocomplete-wrapper input::placeholder {
-  color: #999;
+  color: var(--text-faint);
 }
 
 .autocomplete-wrapper input:focus {
@@ -127,8 +204,8 @@ h1 {
   width: 100%;
   max-height: 300px;
   overflow-y: auto;
-  background: #f8f7f4;
-  border: 1px solid #000;
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-top: none;
   z-index: 100;
 }
@@ -137,7 +214,7 @@ h1 {
   padding: 10px 8px;
   cursor: pointer;
   font-size: 0.9rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-faint);
 }
 
 .autocomplete-dropdown .option:last-child {
@@ -146,11 +223,11 @@ h1 {
 
 .autocomplete-dropdown .option:hover,
 .autocomplete-dropdown .option.highlighted {
-  background: #edecea;
+  background: var(--bg-alt);
 }
 
 .autocomplete-dropdown .option .year {
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.8rem;
   margin-left: 8px;
 }
@@ -158,8 +235,8 @@ h1 {
 /* Buttons */
 .primary-btn {
   appearance: none;
-  background: #000;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   border: none;
   padding: 10px 20px;
   font-family: inherit;
@@ -169,11 +246,11 @@ h1 {
 }
 
 .primary-btn:hover {
-  background: #333;
+  background: var(--btn-bg-hover);
 }
 
 .primary-btn:disabled {
-  background: #ccc;
+  background: var(--btn-bg-disabled);
   cursor: not-allowed;
 }
 
@@ -181,7 +258,7 @@ h1 {
   appearance: none;
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-faint);
   font-family: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -191,24 +268,24 @@ h1 {
 }
 
 .text-btn:hover {
-  color: #000;
+  color: var(--text);
 }
 
 .text-btn:disabled {
-  color: #ccc;
+  color: var(--border-light);
   cursor: default;
   text-decoration: none;
 }
 
 .text-btn:disabled:hover {
-  color: #ccc;
+  color: var(--border-light);
 }
 
 .sort-btn {
   appearance: none;
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-faint);
   font-family: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -218,11 +295,11 @@ h1 {
 }
 
 .sort-btn:hover {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .sort-btn.active {
-  color: #000;
+  color: var(--text);
 }
 
 /* Daily Challenge */
@@ -231,7 +308,7 @@ h1 {
 }
 
 .daily-seed {
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.85rem;
 }
 
@@ -242,13 +319,13 @@ h1 {
 #daily-seed {
   font-size: 0.85rem;
   font-family: monospace;
-  color: #666;
+  color: var(--text-muted);
 }
 
 /* Loading */
 .loading {
   padding: 40px 0;
-  color: #999;
+  color: var(--text-faint);
 }
 
 /* Pool Section */
@@ -265,7 +342,7 @@ h1 {
 }
 
 #pool-count {
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.9rem;
 }
 
@@ -323,8 +400,8 @@ h1 {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #000;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 2px;
@@ -344,10 +421,10 @@ h1 {
 
 .column-header {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-faint);
   margin-bottom: 8px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-faint);
   white-space: nowrap;
 }
 
@@ -411,7 +488,7 @@ h1 {
 .section-divider hr {
   flex: 1;
   border: none;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border-light);
 }
 
 .view-toggle {
@@ -420,7 +497,7 @@ h1 {
   border: none;
   font-family: inherit;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   text-transform: lowercase;
   padding: 4px 8px;
@@ -428,7 +505,7 @@ h1 {
 }
 
 .view-toggle:hover {
-  color: #000;
+  color: var(--text);
 }
 
 .deck-header {
@@ -459,8 +536,8 @@ h1 {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: #000;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   font-size: 0.65rem;
   padding: 2px 5px;
   border-radius: 2px;
@@ -475,7 +552,7 @@ h1 {
 /* Submission Teaser */
 .submission-teaser {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--text-faint);
   margin-left: 12px;
 }
 
@@ -500,7 +577,7 @@ h1 {
 .results-section-title {
   font-size: 0.85rem;
   font-weight: 400;
-  color: #666;
+  color: var(--text-muted);
   margin-bottom: 12px;
   display: block;
 }
@@ -530,7 +607,7 @@ h1 {
 }
 
 .field-row:hover {
-  background: #edecea;
+  background: var(--bg-alt);
 }
 
 .field-name {
@@ -544,20 +621,20 @@ h1 {
 .field-bar-wrap {
   width: 40px;
   height: 6px;
-  background: #eee;
+  background: var(--border-faint);
   flex-shrink: 0;
 }
 
 .field-bar {
   display: block;
   height: 100%;
-  background: #000;
+  background: var(--text);
 }
 
 .field-pct {
   width: 28px;
   text-align: right;
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.7rem;
   flex-shrink: 0;
 }
@@ -587,7 +664,7 @@ h1 {
   align-items: center;
   gap: 4px;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-muted);
 }
 
 /* Submissions List */
@@ -606,15 +683,15 @@ h1 {
 }
 
 .submission-row:hover {
-  background: #edecea;
+  background: var(--bg-alt);
 }
 
 .submission-row.featured {
-  border-left-color: #000;
+  border-left-color: var(--border);
 }
 
 .submission-row.mine {
-  background: #f0efe8;
+  background: var(--bg-mine);
 }
 
 .sub-name {
@@ -640,10 +717,10 @@ h1 {
 .color-dot.color-B { background: #2b2520; }
 .color-dot.color-R { background: #d3202a; }
 .color-dot.color-G { background: #00733e; }
-.color-dot.color-C { background: #ccc; }
+.color-dot.color-C { background: var(--border-light); }
 
 .sub-count {
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.75rem;
 }
 
@@ -677,7 +754,7 @@ h1 {
   font-size: 0.8rem;
   padding: 8px 0;
   margin-bottom: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-faint);
 }
 
 .only-mine-text { color: #2a7d2a; }

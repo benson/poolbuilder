@@ -9,6 +9,33 @@ import {
   getBoosterEra
 } from 'https://bensonperry.com/shared/mtg.js';
 
+// ============ Theme Toggle ============
+function applyTheme(theme) {
+  const toggle = document.getElementById('theme-toggle');
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (toggle) toggle.innerHTML = '<span class="theme-icon">☀</span> light';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if (toggle) toggle.innerHTML = '<span class="theme-icon">☽</span> dark';
+  }
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+
 // State
 let sets = [];
 let currentPool = [];
