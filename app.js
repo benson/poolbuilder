@@ -2,6 +2,7 @@
 import {
   fetchSets,
   createSetAutocomplete,
+  fetchWithRetry,
   fetchAllSetCards,
   generateSealedPoolFromBoosterData,
   getDailySeed,
@@ -271,13 +272,7 @@ async function fetchBasicLands(setCode) {
   const query = `set:${setCode} (${basicNames.map(n => `!"${n}"`).join(' or ')}) type:basic`;
 
   try {
-    const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
-    if (!response.ok) {
-      // Fallback to default basics if set doesn't have them
-      await fetchDefaultBasics();
-      return;
-    }
-    const data = await response.json();
+    const data = await fetchWithRetry(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
 
     // Group by color and pick one of each
     basicLandCards = {};
@@ -311,10 +306,7 @@ async function fetchDefaultBasics() {
 async function fetchDefaultBasic(color) {
   const name = BASIC_LAND_NAMES[color];
   try {
-    const response = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
-    if (response.ok) {
-      basicLandCards[color] = await response.json();
-    }
+    basicLandCards[color] = await fetchWithRetry(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
   } catch (error) {
     console.error(`Failed to fetch ${name}:`, error);
   }
