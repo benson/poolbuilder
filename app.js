@@ -149,6 +149,21 @@ function setupEventListeners() {
   submitBtn.addEventListener('click', submitDeck);
   viewResultsBtn.addEventListener('click', showResults);
   document.getElementById('back-to-deck').addEventListener('click', hideResults);
+
+  // Pool info toggle
+  const infoToggle = document.getElementById('pool-info-toggle');
+  const infoPanel = document.getElementById('pool-info');
+  infoToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = infoPanel.classList.toggle('hidden');
+    infoToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+  document.addEventListener('click', (e) => {
+    if (infoPanel.classList.contains('hidden')) return;
+    if (infoPanel.contains(e.target) || infoToggle.contains(e.target)) return;
+    infoPanel.classList.add('hidden');
+    infoToggle.setAttribute('aria-expanded', 'false');
+  });
 }
 
 // Mode toggle

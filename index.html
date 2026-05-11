@@ -10,7 +10,7 @@
   <meta property="og:url" content="https://bensonperry.com/poolbuilder">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="https://bensonperry.com/shared/common.css">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <button id="theme-toggle" class="theme-toggle" type="button"><span class="theme-icon">☽</span> dark</button>
@@ -64,12 +64,41 @@
         <!-- Card Pool -->
         <div class="pool-area expanded" id="pool-area">
           <div class="pool-header">
-            <h3>your pool <span id="pool-count"></span></h3>
+            <h3>your pool <span id="pool-count"></span> <button type="button" id="pool-info-toggle" class="info-toggle" aria-label="about pool generation" aria-expanded="false">?</button></h3>
             <div class="pool-actions">
               <button type="button" id="sort-color" class="sort-btn active">[by color]</button>
               <button type="button" id="sort-rarity" class="sort-btn">[by rarity]</button>
               <button type="button" id="sort-cmc" class="sort-btn">[by cost]</button>
             </div>
+          </div>
+          <div id="pool-info" class="pool-info hidden">
+            <section>
+              <h4>how is this pool generated?</h4>
+              <p>each set has a slot-by-slot booster config based on wotc's official "collecting [set]" articles. configs live in the <a href="https://github.com/benson/booster-data" target="_blank" rel="noopener">booster-data</a> repo. slots are filled by sampling cards with replacement from the legal rarity pool — same as opening a real sealed pack.</p>
+            </section>
+            <section>
+              <h4>why does the card count vary by set?</h4>
+              <p>standard play boosters are 13 playable cards = 78 in a 6-pack sealed pool. some sets add a 14th slot:</p>
+              <ul>
+                <li>modern horizons 3 — new-to-modern reprint slot</li>
+                <li>outlaws of thunder junction — big score bonus sheet</li>
+                <li>strixhaven — mystical archive</li>
+                <li>tarkir: mutant turtles — guaranteed legendary turtle</li>
+                <li>edge of eternities — stellar sights</li>
+              </ul>
+              <p>older sets used 15-card draft boosters (90 per sealed pool).</p>
+            </section>
+            <section>
+              <h4>is this really random? these duplicates look fishy</h4>
+              <p>yes — each slot draws independently with replacement, exactly like real packs. wotc does not anti-duplicate across packs in a box (collation balances colors and rarities <em>within</em> each pack, not <em>between</em> packs).</p>
+              <p>a typical sealed pool has ~10 duplicate pairs, almost all commons and uncommons. rare/mythic dupes feel surprising because they're memorable, but they come from the same random process. from 500 simulated bloomburrow pools:</p>
+              <ul>
+                <li>~15% of pools have a duplicate rare</li>
+                <li>~1% have a duplicate mythic</li>
+                <li>~1.6% have both a duplicate rare and a duplicate mythic</li>
+              </ul>
+              <p>so an unusually dupe-heavy pool happens roughly every 60 sealed.</p>
+            </section>
           </div>
           <div id="pool-grid" class="pool-columns"></div>
         </div>
@@ -91,6 +120,6 @@
 
   <footer>made by <a href="https://bensonperry.com">benson</a></footer>
 
-  <script type="module" src="app.js?v=1"></script>
+  <script type="module" src="app.js?v=2"></script>
 </body>
 </html>

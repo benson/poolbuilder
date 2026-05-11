@@ -346,6 +346,72 @@ h1 {
   font-size: 0.9rem;
 }
 
+.info-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: 1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.info-toggle:hover,
+.info-toggle[aria-expanded="true"] {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.pool-info {
+  margin: 0 0 16px;
+  padding: 16px 20px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 760px;
+}
+
+.pool-info section + section {
+  margin-top: 14px;
+}
+
+.pool-info h4 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+
+.pool-info p {
+  margin: 0 0 6px;
+}
+
+.pool-info ul {
+  margin: 4px 0 6px;
+  padding-left: 18px;
+}
+
+.pool-info li {
+  margin: 1px 0;
+}
+
+.pool-info a {
+  color: var(--text);
+  text-decoration: underline;
+}
+
 .pool-actions {
   display: flex;
   gap: 4px;
