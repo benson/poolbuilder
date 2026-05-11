@@ -431,7 +431,10 @@ function renderPoolByColor(cards) {
 
     if (groupCards.length === 0) return;
 
-    groupCards.sort((a, b) => a.name.localeCompare(b.name));
+    groupCards.sort((a, b) => {
+      if (a.cmc !== b.cmc) return a.cmc - b.cmc;
+      return a.name.localeCompare(b.name);
+    });
 
     const groupEl = document.createElement('div');
     groupEl.className = 'card-column';
