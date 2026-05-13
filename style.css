@@ -79,6 +79,7 @@ body:not(.no-shared-footer) footer.site-footer {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  z-index: 900;
   max-width: min(420px, calc(100vw - 60px));
   line-height: 1.3;
   text-align: right;
