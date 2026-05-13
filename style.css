@@ -18,7 +18,7 @@
   --btn-text: #fff;
   --btn-bg-hover: #333;
   --btn-bg-disabled: #ccc;
-  --footer-bg: rgba(248, 247, 244, 0.85);
+  --footer-bg: #f8f7f4;
 }
 
 [data-theme="dark"] {
@@ -35,7 +35,7 @@
   --btn-text: #1a1a1a;
   --btn-bg-hover: #ccc;
   --btn-bg-disabled: #444;
-  --footer-bg: rgba(26, 26, 26, 0.85);
+  --footer-bg: #1a1a1a;
 }
 
 body {
