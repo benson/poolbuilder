@@ -75,17 +75,23 @@ body {
 }
 
 /* override shared footer for dark mode */
-body:not(.no-shared-footer) footer {
+body:not(.no-shared-footer) footer.site-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: min(420px, calc(100vw - 60px));
+  line-height: 1.3;
+  text-align: right;
   background: var(--footer-bg);
   color: var(--text-faint);
 }
 
-body:not(.no-shared-footer) footer a {
+body:not(.no-shared-footer) footer.site-footer a {
   color: var(--text-faint);
   border-bottom-color: var(--border-light);
 }
 
-body:not(.no-shared-footer) footer a:hover {
+body:not(.no-shared-footer) footer.site-footer a:hover {
   color: var(--text);
   border-bottom-color: var(--border);
 }

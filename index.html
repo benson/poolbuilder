@@ -10,7 +10,7 @@
   <meta property="og:url" content="https://bensonperry.com/poolbuilder">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="https://bensonperry.com/shared/common.css">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <button id="theme-toggle" class="theme-toggle" type="button"><span class="theme-icon">☽</span> dark</button>
@@ -40,7 +40,7 @@
 
     <!-- Loading State -->
     <div id="loading" class="loading hidden">
-      <p>fetching cards from scryfall...</p>
+      <p>building packs from mtgjson...</p>
     </div>
 
     <!-- Pool View -->
@@ -74,7 +74,7 @@
           <div id="pool-info" class="pool-info hidden">
             <section>
               <h4>how is this pool generated?</h4>
-              <p>each set has a slot-by-slot booster config based on wotc's official "collecting [set]" articles. configs live in the <a href="https://github.com/benson/booster-data" target="_blank" rel="noopener">booster-data</a> repo. slots are filled by sampling cards with replacement from the legal rarity pool — same as opening a real sealed pack.</p>
+              <p>each set uses mtgjson's weighted booster configs: pack variants, sheets, and card weights are sampled directly from the published model. scryfall is only used afterward for card images.</p>
             </section>
             <section>
               <h4>why does the card count vary by set?</h4>
@@ -90,7 +90,7 @@
             </section>
             <section>
               <h4>is this really random? these duplicates look fishy</h4>
-              <p>yes — each slot draws independently with replacement, exactly like real packs. wotc does not anti-duplicate across packs in a box (collation balances colors and rarities <em>within</em> each pack, not <em>between</em> packs).</p>
+              <p>yes — each pack is sampled independently from mtgjson's sheet weights. real collation can balance colors and rarities <em>within</em> a pack, not <em>between</em> packs.</p>
               <p>a typical sealed pool has ~10 duplicate pairs, almost all commons and uncommons. rare/mythic dupes feel surprising because they're memorable, but they come from the same random process. from 500 simulated bloomburrow pools:</p>
               <ul>
                 <li>~15% of pools have a duplicate rare</li>
@@ -118,7 +118,10 @@
 
   <div id="card-preview"><img src="" alt=""></div>
 
-  <footer>made by <a href="https://bensonperry.com">benson</a></footer>
+  <footer class="site-footer">
+    <span>made by <a href="https://bensonperry.com">benson</a></span>
+    <span>booster data by <a href="https://mtgjson.com">mtgjson</a>; card images by <a href="https://scryfall.com">scryfall</a></span>
+  </footer>
 
   <script type="module" src="app.js?v=3"></script>
 </body>

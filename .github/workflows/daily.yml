@@ -2,7 +2,7 @@ name: Generate Daily Challenge
 
 on:
   schedule:
-    # Keep this away from Pack Cracker's cache refresh and other Scryfall-backed jobs.
+    # Run after homepage publishes MTGJSON-derived shared artifacts.
     - cron: '40 10 * * *'
   workflow_dispatch:
 

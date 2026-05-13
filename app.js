@@ -3,11 +3,9 @@ import {
   fetchSets,
   createSetAutocomplete,
   fetchWithRetry,
-  fetchAllSetCards,
-  generateSealedPoolFromBoosterData,
+  generateSealedPoolFromMtgjson,
   getDailySeed,
   pickDailySet,
-  getBoosterEra
 } from 'https://bensonperry.com/shared/mtg.js';
 
 // ============ Theme Toggle ============
@@ -253,14 +251,7 @@ async function generatePool(setCode, seed = null) {
   poolSection.classList.add('hidden');
 
   try {
-    const set = sets.find(s => s.code === setCode);
-    const era = set ? getBoosterEra(set.released) : 'play';
-    const boosterType = era === 'play' ? 'play' : 'draft';
-
-    const cards = await fetchAllSetCards(setCode, boosterType);
-
-    // Use booster-data aware pool generation (respects slot definitions and mythic rates)
-    currentPool = await generateSealedPoolFromBoosterData(setCode, cards, 6, seed);
+    currentPool = await generateSealedPoolFromMtgjson(setCode, 'play', 6, seed);
 
     // Fetch basic lands for this set
     await fetchBasicLands(setCode);
