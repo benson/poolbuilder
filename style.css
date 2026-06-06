@@ -565,14 +565,13 @@ h1 {
 }
 
 .pool-area {
-  height: var(--builder-pool-height, min(52vh, 560px));
-  min-height: 260px;
+  min-height: 0;
+  overflow: visible;
   --card-column-width: 155px;
   --card-stack-overlap: -183px;
 }
 
-.deck-area::after,
-.pool-area::after {
+.deck-area::after {
   content: '';
   position: absolute;
   right: 0;
@@ -632,10 +631,10 @@ h1 {
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  padding: 0 0 18px;
+  flex: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 0 0 26px;
 }
 
 .card-column {

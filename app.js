@@ -68,7 +68,7 @@ const BASIC_LAND_NAMES = {
 
 const BUILDER_PREFS_KEY = 'pb-builder-layout';
 const BUILDER_MIN_DECK_HEIGHT = 180;
-const BUILDER_MIN_POOL_HEIGHT = 260;
+const BUILDER_MAX_DECK_HEIGHT = 720;
 const DEFAULT_DECK_CARD_SIZE = 150;
 const DEFAULT_POOL_CARD_SIZE = 155;
 
@@ -214,13 +214,12 @@ function setupBuilderLayoutControls() {
     deckCardSize: DEFAULT_DECK_CARD_SIZE,
     poolCardSize: DEFAULT_POOL_CARD_SIZE,
     deckHeight: defaults.deckHeight,
-    poolHeight: defaults.poolHeight,
     ...saved,
   };
 
   applySectionCardSize(deckArea, deckSizeInput, prefs.deckCardSize);
   applySectionCardSize(poolArea, poolSizeInput, prefs.poolCardSize);
-  applyBuilderHeights(prefs.deckHeight, prefs.poolHeight);
+  applyBuilderDeckHeight(prefs.deckHeight);
 
   deckSizeInput?.addEventListener('input', () => {
     applySectionCardSize(deckArea, deckSizeInput, Number(deckSizeInput.value));
@@ -236,7 +235,7 @@ function setupBuilderLayoutControls() {
 }
 
 function setupBuilderDivider() {
-  if (!builderDivider || !deckArea || !poolArea) return;
+  if (!builderDivider || !deckArea) return;
 
   let dragState = null;
 
@@ -246,7 +245,6 @@ function setupBuilderDivider() {
       pointerId: event.pointerId,
       startY: event.clientY,
       deckHeight: deckArea.getBoundingClientRect().height,
-      poolHeight: poolArea.getBoundingClientRect().height,
     };
     builderDivider.setPointerCapture?.(event.pointerId);
     document.body.classList.add('resizing-builder');
@@ -277,31 +275,27 @@ function setupBuilderDivider() {
 
   builderDivider.addEventListener('dblclick', () => {
     const defaults = getDefaultBuilderLayout();
-    applyBuilderHeights(defaults.deckHeight, defaults.poolHeight);
+    applyBuilderDeckHeight(defaults.deckHeight);
     saveCurrentBuilderPrefs();
   });
 }
 
 function resizeBuilderPanes(startState, deltaY) {
-  const totalHeight = startState.deckHeight + startState.poolHeight;
-  const maxDeckHeight = Math.max(BUILDER_MIN_DECK_HEIGHT, totalHeight - BUILDER_MIN_POOL_HEIGHT);
-  const deckHeight = clampNumber(startState.deckHeight + deltaY, BUILDER_MIN_DECK_HEIGHT, maxDeckHeight);
-  const poolHeight = Math.max(BUILDER_MIN_POOL_HEIGHT, totalHeight - deckHeight);
-  applyBuilderHeights(deckHeight, poolHeight);
+  const deckHeight = clampNumber(startState.deckHeight + deltaY, BUILDER_MIN_DECK_HEIGHT, getMaxDeckHeight());
+  applyBuilderDeckHeight(deckHeight);
 }
 
 function adjustBuilderPanes(deltaY) {
   const startState = {
     deckHeight: deckArea.getBoundingClientRect().height,
-    poolHeight: poolArea.getBoundingClientRect().height,
   };
   resizeBuilderPanes(startState, deltaY);
   saveCurrentBuilderPrefs();
 }
 
-function applyBuilderHeights(deckHeight, poolHeight) {
-  deckArea.style.setProperty('--builder-deck-height', Math.round(deckHeight) + 'px');
-  poolArea.style.setProperty('--builder-pool-height', Math.round(poolHeight) + 'px');
+function applyBuilderDeckHeight(deckHeight) {
+  const height = deckHeight ?? getDefaultBuilderLayout().deckHeight;
+  deckArea.style.setProperty('--builder-deck-height', Math.round(clampNumber(height, BUILDER_MIN_DECK_HEIGHT, getMaxDeckHeight())) + 'px');
 }
 
 function applySectionCardSize(area, input, rawSize) {
@@ -317,7 +311,6 @@ function saveCurrentBuilderPrefs() {
     deckCardSize: Number(deckSizeInput?.value) || DEFAULT_DECK_CARD_SIZE,
     poolCardSize: Number(poolSizeInput?.value) || DEFAULT_POOL_CARD_SIZE,
     deckHeight: Math.round(deckArea.getBoundingClientRect().height),
-    poolHeight: Math.round(poolArea.getBoundingClientRect().height),
   };
   localStorage.setItem(BUILDER_PREFS_KEY, JSON.stringify(prefs));
 }
@@ -332,10 +325,8 @@ function readBuilderPrefs() {
       deckCardSize: sanitizeNumber(parsed.deckCardSize, DEFAULT_DECK_CARD_SIZE, 110, 220),
       poolCardSize: sanitizeNumber(parsed.poolCardSize, DEFAULT_POOL_CARD_SIZE, 110, 220),
     };
-    const deckHeight = sanitizeNumber(parsed.deckHeight, null, BUILDER_MIN_DECK_HEIGHT, 900);
-    const poolHeight = sanitizeNumber(parsed.poolHeight, null, BUILDER_MIN_POOL_HEIGHT, 1100);
+    const deckHeight = sanitizeNumber(parsed.deckHeight, null, BUILDER_MIN_DECK_HEIGHT, BUILDER_MAX_DECK_HEIGHT);
     if (deckHeight != null) prefs.deckHeight = deckHeight;
-    if (poolHeight != null) prefs.poolHeight = poolHeight;
     return prefs;
   } catch {
     return {};
@@ -346,8 +337,11 @@ function getDefaultBuilderLayout() {
   const availableHeight = Math.max(640, window.innerHeight - 210);
   return {
     deckHeight: clampNumber(Math.round(availableHeight * 0.36), 230, 380),
-    poolHeight: clampNumber(Math.round(availableHeight * 0.58), 340, 640),
   };
+}
+
+function getMaxDeckHeight() {
+  return clampNumber(Math.round(window.innerHeight * 0.72), 360, BUILDER_MAX_DECK_HEIGHT);
 }
 
 function sanitizeNumber(value, fallback, min, max) {

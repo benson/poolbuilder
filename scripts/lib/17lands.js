@@ -460,6 +460,7 @@ export function combineCandidateQueues(queues, {
   filters = DEFAULT_FILTERS,
   launchEpoch = '2026-06-06',
   label = 'Anonymous 17Lands Expert Ghost',
+  shuffleSeed = 'poolbuilder-expert-ghosts-v1',
 } = {}) {
   const cards = {};
   const basicLandsByExpansion = {};
@@ -479,12 +480,8 @@ export function combineCandidateQueues(queues, {
     }
   }
 
-  candidates.sort((a, b) => {
-    const winRateA = Number(a.userBuckets?.winRate || 0);
-    const winRateB = Number(b.userBuckets?.winRate || 0);
-    if (winRateA !== winRateB) return winRateB - winRateA;
-    return a.sourceId.localeCompare(b.sourceId);
-  });
+  candidates.sort((a, b) => a.sourceId.localeCompare(b.sourceId));
+  shuffleCandidates(candidates, shuffleSeed);
 
   return {
     version: 1,
@@ -497,6 +494,7 @@ export function combineCandidateQueues(queues, {
       expansions,
       datasetUrls,
       filters,
+      shuffleSeed,
       launchEpoch,
       minRunwayDays: candidates.length,
     },
@@ -504,6 +502,33 @@ export function combineCandidateQueues(queues, {
     basicLands: queues[0]?.basicLands || {},
     basicLandsByExpansion,
     candidates,
+  };
+}
+
+function shuffleCandidates(candidates, seed) {
+  const random = mulberry32(hashString(seed));
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function mulberry32(seed) {
+  return function nextRandom() {
+    seed |= 0;
+    seed = seed + 0x6d2b79f5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
 

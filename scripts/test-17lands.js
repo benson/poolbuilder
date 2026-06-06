@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {
   buildCandidateQueue,
   buildNameResolver,
+  combineCandidateQueues,
   DEFAULT_FILTERS,
   parseCsvLine,
   trimCard,
@@ -165,6 +166,27 @@ const normalizedQueue = buildCandidateQueue({
   filters: DEFAULT_FILTERS,
 });
 assert.deepEqual(normalizedQueue.candidates[0].reference.deck, { solkanar: 1 }, 'case-normalized names resolve');
+
+const combinedQueue = combineCandidateQueues([{
+  source: { expansion: 'TST', datasetUrl: 'https://example.test/game.csv.gz' },
+  cards: {},
+  basicLands: {},
+  candidates: [
+    { sourceId: '17l-tst-001', userBuckets: { winRate: 0.86 } },
+    { sourceId: '17l-tst-002', userBuckets: { winRate: 0.84 } },
+    { sourceId: '17l-tst-003', userBuckets: { winRate: 0.82 } },
+    { sourceId: '17l-tst-004', userBuckets: { winRate: 0.80 } },
+    { sourceId: '17l-tst-005', userBuckets: { winRate: 0.78 } },
+  ],
+}], {
+  shuffleSeed: 'poolbuilder-expert-ghosts-v1',
+});
+assert.deepEqual(
+  combinedQueue.candidates.map(candidate => candidate.sourceId),
+  ['17l-tst-004', '17l-tst-003', '17l-tst-005', '17l-tst-001', '17l-tst-002'],
+  'combined queue uses a deterministic shuffled order'
+);
+assert.equal(combinedQueue.source.shuffleSeed, 'poolbuilder-expert-ghosts-v1');
 
 assert.throws(
   () => buildCandidateQueue({
