@@ -35,7 +35,7 @@ jobs:
       - name: Generate daily expert ghost
         env:
           POOLBUILDER_ADMIN_SECRET: ${{ secrets.POOLBUILDER_ADMIN_SECRET }}
-          POOLBUILDER_API_URL: https://poolbuilder-api.brostar.workers.dev
+          POOLBUILDER_API_URL: https://poolbuilder-api.bensonperry.workers.dev
         run: node scripts/generate-daily.js --require-worker
 
       - name: Commit and push

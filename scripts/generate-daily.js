@@ -7,7 +7,7 @@ import {
 } from './lib/17lands.js';
 
 const DEFAULT_QUEUE = 'data/17lands-sos-candidates.json';
-const DEFAULT_API_URL = 'https://poolbuilder-api.brostar.workers.dev';
+const DEFAULT_API_URL = 'https://poolbuilder-api.bensonperry.workers.dev';
 
 function parseArgs(argv) {
   const args = {};
