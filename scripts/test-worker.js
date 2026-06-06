@@ -115,6 +115,9 @@ assert.equal(response.status, 200, 'submitted user can fetch submissions');
 data = await jsonResponse(response);
 assert.equal(data.reference.id, 'expert-ghost');
 
+response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp&sourceId=17l-tst-001`), env);
+assert.equal(response.status, 200, 'submitted user can fetch submissions with matching source');
+
 response = await worker.fetch(request('/admin/daily', {
   method: 'POST',
   auth: true,
@@ -122,13 +125,19 @@ response = await worker.fetch(request('/admin/daily', {
 }), env);
 assert.equal(response.status, 200, 'admin can reseed the same date with a new source');
 
-response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp`), env);
+response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp&sourceId=17l-tst-001`), env);
+assert.equal(response.status, 409, 'stale source hint rejects after the daily source changes');
+
+response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp&sourceId=17l-tst-002`), env);
 assert.equal(response.status, 403, 'old same-date submissions do not reveal a changed daily source');
 data = await jsonResponse(response);
 assert.equal(data.count, 0, 'changed daily source starts with an empty public count');
 assert.equal(Object.hasOwn(data, 'reference'), false, 'changed source response does not leak reference before resubmit');
 
-response = await worker.fetch(request('/submit', { method: 'POST', body: submitBody }), env);
+response = await worker.fetch(request('/submit', { method: 'POST', body: { ...submitBody, sourceId: '17l-tst-001' } }), env);
+assert.equal(response.status, 409, 'stale source submit rejects after the daily source changes');
+
+response = await worker.fetch(request('/submit', { method: 'POST', body: { ...submitBody, sourceId: '17l-tst-002' } }), env);
 assert.equal(response.status, 200, 'same fingerprint can submit after the daily source changes');
 data = await jsonResponse(response);
 assert.equal(data.reference.sourceId, '17l-tst-002');

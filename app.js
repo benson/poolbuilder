@@ -1470,7 +1470,8 @@ async function checkSubmissionStatus() {
   if (!loadedDailyDate) return;
   try {
     const fp = getFingerprint();
-    const res = await fetch(`${API_URL}/submissions/${loadedDailyDate}?fingerprint=${fp}`);
+    const sourceId = currentDaily?.source?.sourceId || '';
+    const res = await fetch(`${API_URL}/submissions/${loadedDailyDate}?fingerprint=${encodeURIComponent(fp)}&sourceId=${encodeURIComponent(sourceId)}`);
     if (res.ok) {
       const data = await res.json();
       if (!isCurrentDailyReference(data.reference)) {
@@ -1515,6 +1516,7 @@ async function submitDeck() {
     date: loadedDailyDate,
     name: name || undefined,
     fingerprint: getFingerprint(),
+    sourceId: currentDaily?.source?.sourceId,
     cardIds,
     basics: { ...basics },
     colors: getDeckColors(),

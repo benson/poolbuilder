@@ -85,7 +85,7 @@ async function handleSubmit(request, env) {
     return json({ error: 'invalid json' }, 400, request);
   }
 
-  const { date, name, fingerprint, cardIds, basics, colors } = body;
+  const { date, name, fingerprint, cardIds, basics, colors, sourceId } = body;
 
   if (!date || !fingerprint || !cardIds || !basics || !colors) {
     return json({ error: 'missing required fields' }, 400, request);
@@ -98,6 +98,9 @@ async function handleSubmit(request, env) {
   const daily = await getDaily(date, env);
   if (!daily?.reference) {
     return json({ error: 'daily reference unavailable' }, 503, request);
+  }
+  if (sourceId && sourceId !== daily.sourceId) {
+    return json({ error: 'daily source changed; refresh and try again' }, 409, request);
   }
 
   const { subsKey, metaKey } = submissionKeys(date, daily.sourceId);
@@ -138,6 +141,7 @@ async function handleSubmit(request, env) {
 
 async function handleGetSubmissions(date, url, env, request) {
   const fingerprint = url.searchParams.get('fingerprint');
+  const sourceId = url.searchParams.get('sourceId');
 
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return json({ error: 'invalid date' }, 400, request);
@@ -146,6 +150,9 @@ async function handleGetSubmissions(date, url, env, request) {
   const daily = await getDaily(date, env);
   if (!daily?.reference) {
     return json({ error: 'daily reference unavailable' }, 503, request);
+  }
+  if (sourceId && sourceId !== daily.sourceId) {
+    return json({ error: 'daily source changed; refresh and try again' }, 409, request);
   }
 
   const { subsKey, metaKey } = submissionKeys(date, daily.sourceId);
