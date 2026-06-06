@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "scripts": {
+    "sync:ui": "node scripts/sync-ui.js",
+    "test": "node scripts/test-17lands.js && node scripts/test-daily.js && node scripts/test-worker.js",
+    "test:17lands": "node scripts/test-17lands.js",
+    "test:daily": "node scripts/test-daily.js",
+    "test:worker": "node scripts/test-worker.js",
+    "dev:api": "node scripts/dev-api.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  },
+  "dependencies": {
+    "@benson/ui": "file:../benson-ui"
+  }
+}

@@ -5,19 +5,39 @@
 }
 
 :root {
-  --bg: var(--bui-color-bg);
-  --bg-alt: var(--bui-color-surface);
-  --bg-mine: var(--bui-color-surface-sunken);
-  --text: var(--bui-color-text);
-  --text-muted: var(--bui-color-text-muted);
-  --text-faint: var(--bui-color-neutral-350);
-  --border: var(--bui-color-line-strong);
-  --border-light: var(--bui-color-line);
-  --border-faint: var(--bui-color-line-faint);
-  --btn-bg: var(--bui-color-accent);
-  --btn-text: var(--bui-color-text-inverse);
-  --btn-bg-hover: var(--bui-color-text-muted);
-  --btn-bg-disabled: var(--bui-color-neutral-200);
+  --pb-font-body: var(--bui-font-body, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+  --pb-font-mono: var(--bui-font-mono, "Courier New", Courier, monospace);
+  --pb-font-weight-title: var(--bui-font-weight-title, 900);
+  --pb-border-width: var(--bui-border-width, 3px);
+  --pb-control-height-compact: var(--bui-control-height-compact, 28px);
+  --pb-shadow-firm: var(--bui-shadow-hard, 4px 4px 0 #3d2b22);
+  --pb-shadow-press: 2px 2px 0 var(--bui-color-shadow, #3d2b22);
+  --pb-shadow-sunken: var(
+    --bui-shadow-sunken,
+    inset 3px 3px 0 rgba(0, 0, 0, 0.18),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.32)
+  );
+  --pb-color-shadow: var(--bui-color-shadow, #3d2b22);
+  --bg: var(--bui-color-bg, #f1eef6);
+  --bg-alt: var(--bui-color-surface, #e7e2ee);
+  --bg-mine: var(--bui-color-surface-sunken, #cec4dd);
+  --bg-raised: var(--bui-color-surface-raised, #faf8fd);
+  --text: var(--bui-color-text, #15100d);
+  --text-muted: var(--bui-color-text-muted, #5b3b25);
+  --text-inverse: var(--bui-color-text-inverse, #fff5d2);
+  --text-faint: var(--bui-color-neutral-350, #999);
+  --border: var(--bui-color-line-strong, #15100d);
+  --border-light: var(--bui-color-line, rgba(21, 16, 13, 0.4));
+  --border-faint: var(--bui-color-line-faint, #eee);
+  --accent: var(--bui-color-accent, #6c3aa4);
+  --accent-soft: var(--bui-color-accent-soft, #e7d8f5);
+  --warn: var(--bui-color-warn, #f2c452);
+  --info: var(--bui-color-info, #4aa6c8);
+  --danger: var(--bui-color-danger, #a73528);
+  --btn-bg: var(--accent);
+  --btn-text: var(--text-inverse);
+  --btn-bg-hover: var(--text-muted);
+  --btn-bg-disabled: var(--bui-color-neutral-200, #ccc);
   --footer-bg: rgba(248, 247, 244, 0.85);
 }
 
@@ -39,12 +59,158 @@
 }
 
 body {
-  font-family: var(--bui-font-body);
+  font-family: var(--pb-font-body);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   padding: 40px 30px 80px;
   text-transform: lowercase;
+}
+
+/* Shared UI fallback. Pool Builder normally consumes @benson/ui, but these
+   local definitions keep the app usable if the vendored shared stylesheet is
+   missing from a static deploy or cached HTML points at an old asset path. */
+.btn {
+  align-items: center;
+  border: var(--pb-border-width) solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--pb-shadow-firm);
+  display: inline-flex;
+  justify-content: center;
+  min-height: var(--pb-control-height-compact);
+  padding: 5px 10px;
+  background-color: var(--warn);
+  background-image:
+    radial-gradient(rgba(21, 16, 13, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(255, 245, 210, 0.08), rgba(0, 0, 0, 0.05));
+  background-size:
+    6px 6px,
+    auto;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--pb-font-mono);
+  font-size: 0.78rem;
+  font-weight: var(--pb-font-weight-title);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: lowercase;
+  transition:
+    transform 120ms steps(2, end),
+    box-shadow 120ms steps(2, end),
+    filter 120ms;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--pb-shadow-press);
+  filter: brightness(1.05);
+}
+
+.btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--pb-color-shadow);
+  filter: brightness(0.94);
+}
+
+.btn:disabled {
+  background-color: var(--border-light);
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.btn-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0;
+  text-decoration: underline;
+  text-transform: lowercase;
+}
+
+.btn-link:hover,
+.btn-link:focus-visible {
+  color: var(--text);
+  outline: none;
+}
+
+.segmented {
+  display: inline-flex;
+  width: fit-content;
+}
+
+.segment-btn {
+  appearance: none;
+  position: relative;
+  z-index: 2;
+  border: var(--pb-border-width) solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow:
+    var(--pb-shadow-firm),
+    0 4px 0 var(--pb-color-shadow);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 7px 12px;
+  font-family: var(--pb-font-mono);
+  font-size: 0.78rem;
+  font-weight: var(--pb-font-weight-title);
+  line-height: 1;
+  text-decoration: none;
+  text-transform: lowercase;
+  transition:
+    transform 120ms steps(2, end),
+    box-shadow 120ms steps(2, end),
+    background-color 120ms;
+}
+
+.segment-btn + .segment-btn {
+  margin-left: calc(var(--pb-border-width) * -1);
+}
+
+.segment-btn:hover:not(.active) {
+  background: var(--accent-soft);
+  transform: translate(2px, 2px);
+  box-shadow:
+    2px 2px 0 var(--pb-color-shadow),
+    0 2px 0 var(--pb-color-shadow);
+}
+
+.segment-btn.active,
+.segment-btn[aria-pressed='true'] {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--pb-color-shadow);
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+input[type='text'],
+input[type='search'],
+select,
+textarea {
+  border: var(--pb-border-width) solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text);
+  padding: 8px 14px 8px 10px;
+  font-family: var(--pb-font-mono);
+  box-shadow: var(--pb-shadow-sunken);
+}
+
+input[type='text']:focus,
+input[type='search']:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* theme toggle */
