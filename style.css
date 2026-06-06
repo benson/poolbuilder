@@ -263,6 +263,11 @@ body:not(.no-shared-footer) footer.site-footer a:hover {
   border-bottom-color: var(--border);
 }
 
+.ui-modal,
+.ui-modal-backdrop {
+  z-index: 1200;
+}
+
 .container {
   max-width: 100%;
 }
