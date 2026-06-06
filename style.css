@@ -678,6 +678,7 @@ h1 {
 
 /* Daily Welcome */
 .daily-welcome-card {
+  overflow: visible;
   width: min(520px, calc(100vw - 40px));
 }
 
@@ -685,7 +686,10 @@ h1 {
   color: var(--text-muted);
   font-size: 0.9rem;
   line-height: 1.5;
+  overflow: visible;
+  position: relative;
   text-transform: none;
+  z-index: 2;
 }
 
 .daily-welcome-copy p + p {
@@ -703,8 +707,8 @@ h1 {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 8px);
-  z-index: 120;
+  top: calc(100% + 8px);
+  z-index: 240;
   width: min(260px, calc(100vw - 48px));
   padding: 8px 10px;
   border: var(--pb-border-width) solid var(--border);
@@ -717,7 +721,8 @@ h1 {
   opacity: 0;
   pointer-events: none;
   text-align: left;
-  transform: translate(-50%, 4px);
+  text-transform: none;
+  transform: translate(-50%, -4px);
   transition: opacity 120ms ease, transform 120ms ease;
 }
 
