@@ -7,5 +7,7 @@ const target = join('vendor', 'benson-ui');
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true, force: true });
+await rm(join(target, 'design-system.html'), { force: true });
+await rm(join(target, 'demo'), { recursive: true, force: true });
 
 console.log(`synced ${source} -> ${target}`);
