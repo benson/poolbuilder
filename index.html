@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="https://bensonperry.com/shared/common.css">
   <link rel="stylesheet" href="vendor/benson-ui/benson-ui.css?v=3">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body class="bui-app">
   <button id="theme-toggle" class="theme-toggle" type="button"><span class="theme-icon">☽</span> dark</button>
@@ -51,25 +51,41 @@
         <div class="deck-area collapsed" id="deck-area">
           <div class="deck-header">
             <h3>your deck <span id="deck-count">0</span>/40</h3>
-            <div class="deck-actions">
-              <button type="button" id="submit-deck" class="btn-link text-btn hidden">submit deck</button>
-              <button type="button" id="view-results" class="btn-link text-btn hidden">view results</button>
-              <button type="button" id="clear-deck" class="btn-link text-btn">clear</button>
+            <div class="section-controls">
+              <label class="size-control" for="deck-card-size">
+                <span>size</span>
+                <input type="range" id="deck-card-size" min="110" max="220" step="5" value="150" aria-label="deck card size">
+              </label>
+              <div class="deck-actions">
+                <button type="button" id="submit-deck" class="btn-link text-btn hidden">submit deck</button>
+                <button type="button" id="view-results" class="btn-link text-btn hidden">view results</button>
+                <button type="button" id="clear-deck" class="btn-link text-btn">clear</button>
+              </div>
             </div>
           </div>
           <div id="deck-grid" class="deck-columns"></div>
         </div>
 
-        <hr class="section-divider">
+        <div class="section-divider" id="builder-divider" role="separator" aria-orientation="horizontal" aria-label="resize deck and pool sections" tabindex="0">
+          <span class="divider-line"></span>
+          <span class="divider-grip" aria-hidden="true"></span>
+          <span class="divider-line"></span>
+        </div>
 
         <!-- Card Pool -->
         <div class="pool-area expanded" id="pool-area">
           <div class="pool-header">
             <h3>your pool <span id="pool-count"></span> <button type="button" id="pool-info-toggle" class="info-toggle" aria-label="about pool generation" aria-expanded="false">?</button></h3>
-            <div class="pool-actions segmented">
-              <button type="button" id="sort-color" class="segment-btn sort-btn active">by color</button>
-              <button type="button" id="sort-rarity" class="segment-btn sort-btn">by rarity</button>
-              <button type="button" id="sort-cmc" class="segment-btn sort-btn">by cost</button>
+            <div class="section-controls">
+              <label class="size-control" for="pool-card-size">
+                <span>size</span>
+                <input type="range" id="pool-card-size" min="110" max="220" step="5" value="155" aria-label="pool card size">
+              </label>
+              <div class="pool-actions segmented">
+                <button type="button" id="sort-color" class="segment-btn sort-btn active">by color</button>
+                <button type="button" id="sort-rarity" class="segment-btn sort-btn">by rarity</button>
+                <button type="button" id="sort-cmc" class="segment-btn sort-btn">by cost</button>
+              </div>
             </div>
           </div>
           <div id="pool-info" class="pool-info hidden">
@@ -125,6 +141,6 @@
     <span>daily data by <a href="https://www.17lands.com/public_datasets">17Lands</a>; booster data by <a href="https://mtgjson.com">mtgjson</a>; card images by <a href="https://scryfall.com">scryfall</a></span>
   </footer>
 
-  <script type="module" src="app.js?v=7"></script>
+  <script type="module" src="app.js?v=8"></script>
 </body>
 </html>
