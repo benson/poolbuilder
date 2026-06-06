@@ -41,6 +41,7 @@ let deck = [];
 let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
 let basicLandCards = {};
 let currentSort = 'color';
+let currentDeckSort = 'cmc';
 let currentMode = 'daily';
 let selectedSet = null;
 let autocomplete = null;
@@ -176,6 +177,9 @@ function setupEventListeners() {
   document.getElementById('sort-color').addEventListener('click', () => setSort('color'));
   document.getElementById('sort-rarity').addEventListener('click', () => setSort('rarity'));
   document.getElementById('sort-cmc').addEventListener('click', () => setSort('cmc'));
+  document.getElementById('deck-sort-color').addEventListener('click', () => setDeckSort('color'));
+  document.getElementById('deck-sort-rarity').addEventListener('click', () => setDeckSort('rarity'));
+  document.getElementById('deck-sort-cmc').addEventListener('click', () => setDeckSort('cmc'));
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
@@ -667,17 +671,25 @@ async function fetchDefaultBasic(color) {
 // Sorting
 function setSort(sort) {
   currentSort = sort;
-  document.querySelectorAll('.sort-btn').forEach(btn => {
+  document.querySelectorAll('.pool-sort-btn').forEach(btn => {
     btn.classList.toggle('active', btn.id === 'sort-' + sort);
   });
   renderPool();
   updateAllPoolCardClasses();
 }
 
-function sortCards(cards) {
+function setDeckSort(sort) {
+  currentDeckSort = sort;
+  document.querySelectorAll('.deck-sort-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.id === 'deck-sort-' + sort);
+  });
+  renderDeck();
+}
+
+function sortCards(cards, sort = currentSort) {
   const sorted = [...cards];
 
-  if (currentSort === 'color') {
+  if (sort === 'color') {
     const colorOrder = { W: 0, U: 1, B: 2, R: 3, G: 4, multi: 5, colorless: 6, land: 7 };
     sorted.sort((a, b) => {
       const aColor = getColorCategory(a);
@@ -687,7 +699,7 @@ function sortCards(cards) {
       }
       return a.cmc - b.cmc;
     });
-  } else if (currentSort === 'rarity') {
+  } else if (sort === 'rarity') {
     const rarityOrder = { mythic: 0, rare: 1, uncommon: 2, common: 3 };
     sorted.sort((a, b) => {
       if (rarityOrder[a.rarity] !== rarityOrder[b.rarity]) {
@@ -695,7 +707,7 @@ function sortCards(cards) {
       }
       return a.name.localeCompare(b.name);
     });
-  } else if (currentSort === 'cmc') {
+  } else if (sort === 'cmc') {
     sorted.sort((a, b) => {
       if (a.cmc !== b.cmc) return a.cmc - b.cmc;
       return a.name.localeCompare(b.name);
@@ -1000,7 +1012,7 @@ function createBasicLandElement(card, color) {
 
 function addBasicToDeck(color) {
   basics[color]++;
-  updateDeckBasicsColumn();
+  renderDeck();
   updateDeckCount();
   updatePoolBasicBadge(color);
 }
@@ -1008,7 +1020,7 @@ function addBasicToDeck(color) {
 function removeBasicFromDeck(color) {
   if (basics[color] > 0) {
     basics[color]--;
-    updateDeckBasicsColumn();
+    renderDeck();
     updateDeckCount();
     updatePoolBasicBadge(color);
   }
@@ -1023,7 +1035,7 @@ function addToDeck(card) {
 
   if (inDeckCount < inPoolCount) {
     deck.push(card);
-    addCardToDeckColumn(card);
+    renderDeck();
     updateDeckCount();
     updatePoolCardClasses(card.id);
   }
@@ -1035,7 +1047,7 @@ function removeFromDeck(card) {
     : deck.findIndex(c => c.id === card.id);
   if (idx !== -1) {
     deck.splice(idx, 1);
-    removeCardFromDeckColumn(card);
+    renderDeck();
     updateDeckCount();
     updatePoolCardClasses(card.id);
   }
@@ -1213,7 +1225,16 @@ function renderDeck() {
   const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
   deckCount.textContent = totalCards;
 
-  // Group into CMC columns (no deduplication - show each card individually)
+  if (currentDeckSort === 'color') {
+    renderDeckByColor();
+  } else if (currentDeckSort === 'rarity') {
+    renderDeckByRarity();
+  } else {
+    renderDeckByCmc();
+  }
+}
+
+function renderDeckByCmc() {
   const cmcGroups = {
     '0-1': [],
     '2': [],
@@ -1228,31 +1249,69 @@ function renderDeck() {
     cmcGroups[getCmcKey(card)].push(card);
   });
 
-  // Build all content in a fragment first (off-DOM)
-  const fragment = document.createDocumentFragment();
+  renderDeckColumns([
+    { key: '0-1', label: '0-1', cards: cmcGroups['0-1'] },
+    { key: '2', label: '2', cards: cmcGroups['2'] },
+    { key: '3', label: '3', cards: cmcGroups['3'] },
+    { key: '4', label: '4', cards: cmcGroups['4'] },
+    { key: '5', label: '5', cards: cmcGroups['5'] },
+    { key: '6+', label: '6+', cards: cmcGroups['6+'] },
+  ], cmcGroups['lands']);
+}
 
-  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
-  cmcOrder.forEach(key => {
-    const cards = cmcGroups[key];
-    const groupEl = document.createElement('div');
-    groupEl.className = 'card-column';
+function renderDeckByColor() {
+  const groups = {
+    W: [], U: [], B: [], R: [], G: [],
+    multi: [], colorless: [], land: []
+  };
 
-    groupEl.innerHTML = '<div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div>';
-
-    const stackEl = document.createElement('div');
-    stackEl.className = 'card-stack';
-    cards.forEach((card, idx) => {
-      const cardEl = createCardElement(card, 'deck');
-      cardEl.style.setProperty('--stack-index', idx);
-      stackEl.appendChild(cardEl);
-    });
-
-    groupEl.appendChild(stackEl);
-    fragment.appendChild(groupEl);
+  sortCards(deck, 'color').forEach(card => {
+    const cat = getColorCategory(card);
+    if (groups[cat]) groups[cat].push(card);
   });
 
-  // Add lands column (non-basic lands from deck + basic lands)
-  const nonBasicLands = cmcGroups['lands'];
+  renderDeckColumns([
+    { key: 'W', label: 'white', cards: groups.W },
+    { key: 'U', label: 'blue', cards: groups.U },
+    { key: 'B', label: 'black', cards: groups.B },
+    { key: 'R', label: 'red', cards: groups.R },
+    { key: 'G', label: 'green', cards: groups.G },
+    { key: 'multi', label: 'multi', cards: groups.multi },
+    { key: 'colorless', label: 'colorless', cards: groups.colorless },
+  ], groups.land);
+}
+
+function renderDeckByRarity() {
+  const groups = {
+    'mythic+rare': [],
+    uncommon: [],
+    common: [],
+  };
+
+  sortCards(deck, 'rarity').forEach(card => {
+    if (card.rarity === 'mythic' || card.rarity === 'rare') {
+      groups['mythic+rare'].push(card);
+    } else if (card.rarity === 'uncommon') {
+      groups.uncommon.push(card);
+    } else {
+      groups.common.push(card);
+    }
+  });
+
+  renderDeckColumns([
+    { key: 'mythic+rare', label: 'rare/mythic', cards: groups['mythic+rare'] },
+    { key: 'uncommon', label: 'uncommon', cards: groups.uncommon },
+    { key: 'common', label: 'common', cards: groups.common },
+  ], []);
+}
+
+function renderDeckColumns(columns, nonBasicLands) {
+  const fragment = document.createDocumentFragment();
+
+  columns.forEach(({ label, cards }) => {
+    fragment.appendChild(renderDeckCardColumn(label, cards));
+  });
+
   const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
   const landsTotal = nonBasicLands.length + basicsTotal;
   const landsEl = document.createElement('div');
@@ -1282,9 +1341,24 @@ function renderDeck() {
 
   landsEl.appendChild(landsStack);
   fragment.appendChild(landsEl);
-
-  // Atomic swap - replaces all children in one operation
   deckGrid.replaceChildren(fragment);
+}
+
+function renderDeckCardColumn(label, cards, countOverride = cards.length) {
+  const groupEl = document.createElement('div');
+  groupEl.className = 'card-column';
+  groupEl.innerHTML = '<div class="column-header">' + label + (countOverride > 0 ? ' (' + countOverride + ')' : '') + '</div>';
+
+  const stackEl = document.createElement('div');
+  stackEl.className = 'card-stack';
+  cards.forEach((card, idx) => {
+    const cardEl = createCardElement(card, 'deck');
+    cardEl.style.setProperty('--stack-index', idx);
+    stackEl.appendChild(cardEl);
+  });
+
+  groupEl.appendChild(stackEl);
+  return groupEl;
 }
 
 function createDeckBasicElement(card, color) {
