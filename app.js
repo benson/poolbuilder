@@ -5,6 +5,7 @@ import {
   fetchWithRetry,
   generateSealedPoolFromMtgjson,
 } from 'https://bensonperry.com/shared/mtg.js';
+import { modal } from './vendor/benson-ui/modal.js';
 
 // ============ Theme Toggle ============
 function applyTheme(theme) {
@@ -43,6 +44,8 @@ let currentSort = 'color';
 let currentMode = 'daily';
 let selectedSet = null;
 let autocomplete = null;
+let dailyWelcomeModal = null;
+let dailyWelcomeShown = false;
 
 // Submission state
 let mySubmission = null;
@@ -112,6 +115,7 @@ const poolArea = document.getElementById('pool-area');
 const builderDivider = document.getElementById('builder-divider');
 const deckSizeInput = document.getElementById('deck-card-size');
 const poolSizeInput = document.getElementById('pool-card-size');
+const dailyWelcomeModalEl = document.getElementById('daily-welcome-modal');
 
 // Initialize
 async function init() {
@@ -140,6 +144,7 @@ async function init() {
 
     setupEventListeners();
     setupBuilderLayoutControls();
+    setupDailyWelcomeModal();
     updateDailyInfo();
 
     // Auto-load daily challenge on startup
@@ -351,6 +356,18 @@ function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function setupDailyWelcomeModal() {
+  dailyWelcomeModal = modal(dailyWelcomeModalEl);
+}
+
+function maybeShowDailyWelcome() {
+  if (currentMode !== 'daily' || dailyWelcomeShown || !dailyWelcomeModal || !dailyWelcomeModalEl) return;
+  dailyWelcomeShown = true;
+  window.setTimeout(() => {
+    if (currentMode === 'daily') dailyWelcomeModal.open();
+  }, 200);
+}
+
 // Mode toggle
 function handleModeToggle(mode) {
   currentMode = mode;
@@ -411,7 +428,7 @@ async function handleDailyGenerate() {
     }
 
     currentDaily = daily;
-    currentPool = daily.pool;
+    currentPool = preparePoolCopies(daily.pool);
     basicLandCards = daily.basicLands || {};
 
     dailySetName.textContent = daily.set?.name || 'daily challenge';
@@ -425,6 +442,7 @@ async function handleDailyGenerate() {
     updateSubmitButtonVisibility();
     poolSection.classList.remove('hidden');
     loadingEl.classList.add('hidden');
+    maybeShowDailyWelcome();
     if (shouldPreviewGhost()) {
       showLocalGhostPreview();
     } else {
@@ -561,12 +579,25 @@ function expandMapCounts(counts) {
   return ids;
 }
 
+function preparePoolCopies(cards = []) {
+  const seen = new Map();
+  return cards.map(card => {
+    const baseId = card.id || card.name || crypto.randomUUID();
+    const copyNumber = (seen.get(baseId) || 0) + 1;
+    seen.set(baseId, copyNumber);
+    return {
+      ...card,
+      _poolCopyId: baseId + ':' + copyNumber,
+    };
+  });
+}
+
 async function generatePool(setCode, seed = null) {
   loadingEl.classList.remove('hidden');
   poolSection.classList.add('hidden');
 
   try {
-    currentPool = await generateSealedPoolFromMtgjson(setCode, 'play', 6, seed);
+    currentPool = preparePoolCopies(await generateSealedPoolFromMtgjson(setCode, 'play', 6, seed));
 
     // Fetch basic lands for this set
     await fetchBasicLands(setCode);
@@ -806,9 +837,7 @@ function renderPoolByRarity(cards) {
     if (basicLandNames.includes(card.name) && card.type_line?.includes('Basic')) {
       return; // Skip basic lands
     }
-    if (card.type_line?.includes('Land')) {
-      groups.land.push(card);
-    } else if (card.rarity === 'mythic' || card.rarity === 'rare') {
+    if (card.rarity === 'mythic' || card.rarity === 'rare') {
       groups['mythic+rare'].push(card);
     } else if (card.rarity === 'uncommon') {
       groups.uncommon.push(card);
@@ -913,12 +942,12 @@ function createCardElement(card, context) {
   const el = document.createElement('div');
   el.className = 'card';
   el.dataset.id = card.id;
+  if (card._poolCopyId) el.dataset.poolCopyId = card._poolCopyId;
 
-  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+  const normalUrl = getCardImageUrl(card, 'normal');
   // Only use lazy loading for pool cards (deck cards are always visible)
   const lazy = context === 'pool' ? ' loading="lazy"' : '';
-  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '"' + lazy + '>';
+  el.innerHTML = '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '"' + lazy + '>';
   el.dataset.normalUrl = normalUrl;
 
   // Hover preview
@@ -934,15 +963,24 @@ function createCardElement(card, context) {
   return el;
 }
 
+function getCardImageUrl(card, size = 'normal') {
+  return card.image_uris?.[size] ||
+    card.card_faces?.[0]?.image_uris?.[size] ||
+    card.image_uris?.normal ||
+    card.card_faces?.[0]?.image_uris?.normal ||
+    card.image_uris?.small ||
+    card.card_faces?.[0]?.image_uris?.small ||
+    '';
+}
+
 function createBasicLandElement(card, color) {
   const el = document.createElement('div');
   el.className = 'card basic-land';
   el.dataset.id = card.id;
   el.dataset.color = color;
 
-  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  const normalUrl = getCardImageUrl(card, 'normal');
+  el.innerHTML = '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy">';
   el.dataset.normalUrl = normalUrl;
 
   // Show count if in deck
@@ -978,6 +1016,8 @@ function removeBasicFromDeck(color) {
 
 // Deck management
 function addToDeck(card) {
+  if (card._poolCopyId && deck.some(c => c._poolCopyId === card._poolCopyId)) return;
+
   const inDeckCount = deck.filter(c => c.id === card.id).length;
   const inPoolCount = currentPool.filter(c => c.id === card.id).length;
 
@@ -990,7 +1030,9 @@ function addToDeck(card) {
 }
 
 function removeFromDeck(card) {
-  const idx = deck.findIndex(c => c.id === card.id);
+  const idx = card._poolCopyId
+    ? deck.findIndex(c => c._poolCopyId === card._poolCopyId)
+    : deck.findIndex(c => c.id === card.id);
   if (idx !== -1) {
     deck.splice(idx, 1);
     removeCardFromDeckColumn(card);
@@ -1046,7 +1088,9 @@ function removeCardFromDeckColumn(card) {
   const header = column.querySelector('.column-header');
 
   // Find and remove one instance of this card
-  const cardEl = stack.querySelector(`.card[data-id="${card.id}"]`);
+  const cardEl = card._poolCopyId
+    ? Array.from(stack.querySelectorAll('.card')).find(el => el.dataset.poolCopyId === card._poolCopyId)
+    : stack.querySelector(`.card[data-id="${card.id}"]`);
   if (cardEl) {
     cardEl.remove();
 
@@ -1104,17 +1148,26 @@ function updateDeckCount() {
 // Update 'in-deck' class on pool cards without re-rendering
 // Dims individual copies: if 2 in pool and 1 in deck, dim 1 card
 function updatePoolCardClasses(cardId) {
+  const selectedCopies = new Set(deck.filter(c => c.id === cardId).map(c => c._poolCopyId).filter(Boolean));
   const inDeckCount = deck.filter(c => c.id === cardId).length;
 
   poolGrid.querySelectorAll(`.card[data-id="${cardId}"]`).forEach((el, idx) => {
-    el.classList.toggle('in-deck', idx < inDeckCount);
+    if (el.dataset.poolCopyId && selectedCopies.size) {
+      el.classList.toggle('in-deck', selectedCopies.has(el.dataset.poolCopyId));
+    } else {
+      el.classList.toggle('in-deck', idx < inDeckCount);
+    }
   });
 }
 
 // Update all pool card classes (used after full pool re-render)
 function updateAllPoolCardClasses() {
   const deckCounts = new Map();
+  const selectedCopies = new Set();
   deck.forEach(c => deckCounts.set(c.id, (deckCounts.get(c.id) || 0) + 1));
+  deck.forEach(c => {
+    if (c._poolCopyId) selectedCopies.add(c._poolCopyId);
+  });
 
   const seen = new Map();
   poolGrid.querySelectorAll('.card[data-id]').forEach(el => {
@@ -1122,7 +1175,11 @@ function updateAllPoolCardClasses() {
     const idx = seen.get(id) || 0;
     seen.set(id, idx + 1);
     const inDeckCount = deckCounts.get(id) || 0;
-    el.classList.toggle('in-deck', idx < inDeckCount);
+    if (el.dataset.poolCopyId && selectedCopies.size) {
+      el.classList.toggle('in-deck', selectedCopies.has(el.dataset.poolCopyId));
+    } else {
+      el.classList.toggle('in-deck', idx < inDeckCount);
+    }
   });
 }
 
@@ -1235,9 +1292,8 @@ function createDeckBasicElement(card, color) {
   el.className = 'card basic-land';
   el.dataset.color = color;
 
-  const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-  const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-  el.innerHTML = '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">';
+  const normalUrl = getCardImageUrl(card, 'normal');
+  el.innerHTML = '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy">';
   el.dataset.normalUrl = normalUrl;
 
   // Show count badge
@@ -1846,11 +1902,10 @@ function showComparison(otherSub) {
     const cards = cmcGroups[key];
     html += '<div class="card-column"><div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div><div class="card-stack">';
     cards.forEach((card, idx) => {
-      const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-      const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+      const normalUrl = getCardImageUrl(card, 'normal');
       const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
-      html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + normalUrl + '">' +
-        '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
+      html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+        '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy"></div>';
     });
     html += '</div></div>';
   });
@@ -1862,19 +1917,17 @@ function showComparison(otherSub) {
   html += '<div class="card-column"><div class="column-header">lands' + (landsTotal > 0 ? ' (' + landsTotal + ')' : '') + '</div><div class="card-stack">';
   let idx = 0;
   nonBasicLands.forEach(card => {
-    const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-    const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
+    const normalUrl = getCardImageUrl(card, 'normal');
     const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
-    html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + normalUrl + '">' +
-      '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
+    html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+      '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy"></div>';
   });
   ['W', 'U', 'B', 'R', 'G'].forEach(color => {
     if (theirBasics[color] > 0 && basicLandCards[color]) {
       const card = basicLandCards[color];
-      const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
-      const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-      html += '<div class="card basic-land" style="--stack-index:' + idx++ + '" data-normal-url="' + normalUrl + '">' +
-        '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy">' +
+      const normalUrl = getCardImageUrl(card, 'normal');
+      html += '<div class="card basic-land" style="--stack-index:' + idx++ + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+        '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy">' +
         '<span class="card-count-badge">' + theirBasics[color] + '</span></div>';
     }
   });

@@ -555,6 +555,7 @@ h1 {
   flex-direction: column;
   overflow: hidden;
   min-height: 180px;
+  position: relative;
 }
 
 .deck-area {
@@ -568,6 +569,19 @@ h1 {
   min-height: 260px;
   --card-column-width: 155px;
   --card-stack-overlap: -183px;
+}
+
+.deck-area::after,
+.pool-area::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  z-index: 4;
+  height: 42px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--bg) 82%);
 }
 
 /* Card Grid */
@@ -660,6 +674,62 @@ h1 {
 
 .card-stack .card.in-deck {
   opacity: 0.3;
+}
+
+/* Daily Welcome */
+.daily-welcome-card {
+  width: min(520px, calc(100vw - 40px));
+}
+
+.daily-welcome-copy {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+.daily-welcome-copy p + p {
+  margin-top: 12px;
+}
+
+.tooltip-term {
+  position: relative;
+  color: var(--text);
+  border-bottom: 1px dotted var(--border-light);
+  cursor: help;
+}
+
+.tooltip-term::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 120;
+  width: min(260px, calc(100vw - 48px));
+  padding: 8px 10px;
+  border: var(--pb-border-width) solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+  box-shadow: var(--pb-shadow-firm);
+  color: var(--text);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translate(-50%, 4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.tooltip-term:hover::after,
+.tooltip-term:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.tooltip-term:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Card Preview */
