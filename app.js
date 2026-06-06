@@ -1473,6 +1473,14 @@ async function checkSubmissionStatus() {
     const res = await fetch(`${API_URL}/submissions/${loadedDailyDate}?fingerprint=${fp}`);
     if (res.ok) {
       const data = await res.json();
+      if (!isCurrentDailyReference(data.reference)) {
+        mySubmission = null;
+        allSubmissions = null;
+        submissionMeta = null;
+        dailyReference = null;
+        updateSubmitButtonVisibility();
+        return;
+      }
       allSubmissions = data.submissions;
       submissionMeta = data.meta;
       dailyReference = data.reference || null;
@@ -1521,12 +1529,16 @@ async function submitDeck() {
 
     if (res.ok || res.status === 409) {
       const data = await res.json();
+      if (!isCurrentDailyReference(data.reference)) {
+        throw new Error('daily reference changed; refresh and submit again');
+      }
       allSubmissions = data.submissions;
       submissionMeta = data.meta;
       dailyReference = data.reference || null;
       mySubmission = allSubmissions.find(s => s.fingerprint === getFingerprint()) ||
                      allSubmissions.find(s => s.id === data.id);
       localStorage.setItem('pb-submitted-date', loadedDailyDate);
+      localStorage.setItem('pb-submitted-source-id', currentDaily?.source?.sourceId || '');
       localStorage.setItem('pb-submission-id', data.id);
       submissionTeaser.classList.add('hidden');
       updateSubmitButtonVisibility();
@@ -1536,10 +1548,16 @@ async function submitDeck() {
       showSubmissionMessage(err.error || 'submission failed');
       alert(err.error || 'submission failed');
     }
-  } catch {
-    showSubmissionMessage('could not reach API at ' + API_URL);
-    alert('could not reach server');
+  } catch (error) {
+    const message = error?.message || 'could not reach server';
+    showSubmissionMessage(message);
+    alert(message);
   }
+}
+
+function isCurrentDailyReference(reference) {
+  const expectedSourceId = currentDaily?.source?.sourceId;
+  return Boolean(reference?.sourceId && expectedSourceId && reference.sourceId === expectedSourceId);
 }
 
 function showResults() {

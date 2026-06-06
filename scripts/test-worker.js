@@ -53,6 +53,14 @@ const reference = {
   mainColors: ['W', 'U'],
   splashColors: [],
 };
+const changedReference = {
+  ...reference,
+  sourceId: '17l-tst-002',
+  cardIds: ['c', 'd', 'd'],
+  colors: ['B', 'R'],
+  mainColors: ['B', 'R'],
+  basics: { W: 0, U: 0, B: 8, R: 9, G: 0 },
+};
 
 let response = await worker.fetch(request('/submit', {
   method: 'POST',
@@ -95,6 +103,7 @@ assert.equal(response.status, 200, 'submit succeeds after daily reference is see
 data = await jsonResponse(response);
 assert.equal(data.reference.name, 'Expert Ghost');
 assert.equal(data.submissions.length, 1);
+assert.equal(data.submissions[0].sourceId, '17l-tst-001');
 
 response = await worker.fetch(request('/submit', { method: 'POST', body: submitBody }), env);
 assert.equal(response.status, 409, 'duplicate submit preserves existing submission');
@@ -105,6 +114,26 @@ response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp`), en
 assert.equal(response.status, 200, 'submitted user can fetch submissions');
 data = await jsonResponse(response);
 assert.equal(data.reference.id, 'expert-ghost');
+
+response = await worker.fetch(request('/admin/daily', {
+  method: 'POST',
+  auth: true,
+  body: { date, sourceId: '17l-tst-002', reference: changedReference },
+}), env);
+assert.equal(response.status, 200, 'admin can reseed the same date with a new source');
+
+response = await worker.fetch(request(`/submissions/${date}?fingerprint=fp`), env);
+assert.equal(response.status, 403, 'old same-date submissions do not reveal a changed daily source');
+data = await jsonResponse(response);
+assert.equal(data.count, 0, 'changed daily source starts with an empty public count');
+assert.equal(Object.hasOwn(data, 'reference'), false, 'changed source response does not leak reference before resubmit');
+
+response = await worker.fetch(request('/submit', { method: 'POST', body: submitBody }), env);
+assert.equal(response.status, 200, 'same fingerprint can submit after the daily source changes');
+data = await jsonResponse(response);
+assert.equal(data.reference.sourceId, '17l-tst-002');
+assert.equal(data.submissions.length, 1);
+assert.equal(data.submissions[0].sourceId, '17l-tst-002');
 
 response = await worker.fetch(request('/submit', {
   method: 'POST',

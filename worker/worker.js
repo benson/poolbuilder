@@ -100,8 +100,7 @@ async function handleSubmit(request, env) {
     return json({ error: 'daily reference unavailable' }, 503, request);
   }
 
-  const subsKey = `subs:${date}`;
-  const metaKey = `meta:${date}`;
+  const { subsKey, metaKey } = submissionKeys(date, daily.sourceId);
   let submissions = await env.SUBS.get(subsKey, 'json') || [];
   let meta = await env.SUBS.get(metaKey, 'json') || { count: 0, featured: [] };
 
@@ -122,6 +121,7 @@ async function handleSubmit(request, env) {
     name: cleanName,
     fingerprint,
     submittedAt: new Date().toISOString(),
+    sourceId: daily.sourceId,
     cardIds,
     basics,
     colors,
@@ -143,16 +143,16 @@ async function handleGetSubmissions(date, url, env, request) {
     return json({ error: 'invalid date' }, 400, request);
   }
 
-  const subsKey = `subs:${date}`;
-  const metaKey = `meta:${date}`;
+  const daily = await getDaily(date, env);
+  if (!daily?.reference) {
+    return json({ error: 'daily reference unavailable' }, 503, request);
+  }
+
+  const { subsKey, metaKey } = submissionKeys(date, daily.sourceId);
   const submissions = await env.SUBS.get(subsKey, 'json') || [];
   const meta = await env.SUBS.get(metaKey, 'json') || { count: 0, featured: [] };
 
   if (fingerprint && submissions.some(s => s.fingerprint === fingerprint)) {
-    const daily = await getDaily(date, env);
-    if (!daily?.reference) {
-      return json({ error: 'daily reference unavailable' }, 503, request);
-    }
     return json({ submissions, meta, reference: daily.reference }, 200, request, 30);
   }
 
@@ -207,6 +207,14 @@ async function getDaily(date, env) {
   return env.SUBS.get(`daily:${date}`, 'json');
 }
 
+function submissionKeys(date, sourceId) {
+  const safeSourceId = String(sourceId || 'legacy').replace(/[^a-zA-Z0-9_-]/g, '-');
+  return {
+    subsKey: `subs:${date}:${safeSourceId}`,
+    metaKey: `meta:${date}:${safeSourceId}`,
+  };
+}
+
 function normalizeBasics(basics = {}) {
   return {
     W: toInt(basics.W),
@@ -245,7 +253,12 @@ async function handleFeature(request, env) {
     return json({ error: 'missing date or submissionId' }, 400, request);
   }
 
-  const metaKey = `meta:${date}`;
+  const daily = await getDaily(date, env);
+  if (!daily?.sourceId) {
+    return json({ error: 'daily reference unavailable' }, 503, request);
+  }
+
+  const { metaKey } = submissionKeys(date, daily.sourceId);
   let meta = await env.SUBS.get(metaKey, 'json') || { count: 0, featured: [] };
 
   if (featured) {
