@@ -10,10 +10,8 @@ const queue = {
     provider: '17Lands',
     label: 'Anonymous 17Lands Expert Ghost',
     format: 'Sealed',
-    expansion: 'TST',
-    set: { code: 'tst', name: 'Test Set' },
-    filters: { buildIndex: 0, minUserGamesBucket: 100, minUserWinRateBucket: 0.60 },
-    datasetUrl: 'https://example.test/game.csv.gz',
+    expansion: 'MULTI',
+    filters: { buildIndex: 0, minUserGamesBucket: 100, minUserWinRateBucket: 0.76 },
     launchEpoch: '2026-06-06',
   },
   cards: {
@@ -27,9 +25,26 @@ const queue = {
     R: { id: 'mountain', name: 'Mountain', type_line: 'Basic Land - Mountain' },
     G: { id: 'forest', name: 'Forest', type_line: 'Basic Land - Forest' },
   },
+  basicLandsByExpansion: {
+    TST: {
+      W: { id: 'tst-plains', name: 'Plains', set: 'tst', type_line: 'Basic Land - Plains' },
+      U: { id: 'tst-island', name: 'Island', set: 'tst', type_line: 'Basic Land - Island' },
+      B: { id: 'tst-swamp', name: 'Swamp', set: 'tst', type_line: 'Basic Land - Swamp' },
+      R: { id: 'tst-mountain', name: 'Mountain', set: 'tst', type_line: 'Basic Land - Mountain' },
+      G: { id: 'tst-forest', name: 'Forest', set: 'tst', type_line: 'Basic Land - Forest' },
+    },
+  },
   candidates: [
     {
       sourceId: '17l-tst-001',
+      source: {
+        provider: '17Lands',
+        label: 'Anonymous 17Lands Expert Ghost',
+        format: 'Sealed',
+        expansion: 'TST',
+        set: { code: 'tst', name: 'Test Set' },
+        datasetUrl: 'https://example.test/game.csv.gz',
+      },
       pool: { a: 2, b: 1 },
       reference: {
         deck: { a: 1 },
@@ -42,6 +57,14 @@ const queue = {
     },
     {
       sourceId: '17l-tst-002',
+      source: {
+        provider: '17Lands',
+        label: 'Anonymous 17Lands Expert Ghost',
+        format: 'Sealed',
+        expansion: 'TST',
+        set: { code: 'tst', name: 'Test Set' },
+        datasetUrl: 'https://example.test/game.csv.gz',
+      },
       pool: { b: 2 },
       reference: {
         deck: { b: 2 },
@@ -63,6 +86,9 @@ const { candidate, index } = selectCandidate(queue.candidates, '2026-06-06', que
 const daily = buildDailyPayload(queue, candidate, '2026-06-06', index);
 assert.equal(daily.mode, 'expert-ghost');
 assert.equal(daily.source.sourceId, '17l-tst-001');
+assert.equal(daily.source.expansion, 'TST');
+assert.deepEqual(daily.set, { code: 'tst', name: 'Test Set' });
+assert.equal(daily.basicLands.W.id, 'tst-plains');
 assert.equal(daily.pool.length, 3, 'daily pool expands card counts');
 assert.equal(daily.reference, undefined, 'public daily payload does not include reference');
 assert.equal(JSON.stringify(daily).includes('cardIds'), false, 'public daily payload does not leak reference card IDs');
@@ -71,5 +97,6 @@ const workerPayload = buildWorkerSeedPayload(queue, candidate, '2026-06-06');
 assert.deepEqual(workerPayload.reference.cardIds, ['a']);
 assert.deepEqual(workerPayload.reference.basics, { W: 9, U: 8, B: 0, R: 0, G: 0 });
 assert.equal(workerPayload.reference.name, 'Expert Ghost');
+assert.equal(workerPayload.reference.source.expansion, 'TST');
 
 console.log('daily generation tests passed');

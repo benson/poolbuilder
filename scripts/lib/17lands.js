@@ -32,13 +32,15 @@ export const EXPANSION_CONFIGS = {
 export const DEFAULT_FILTERS = {
   buildIndex: 0,
   minUserGamesBucket: 100,
-  minUserWinRateBucket: 0.60,
+  minUserWinRateBucket: 0.76,
 };
 
 export const SCRYFALL_HEADERS = {
   'Accept': 'application/json',
   'User-Agent': 'poolbuilder/17lands-ingest (https://bensonperry.com/poolbuilder)',
 };
+
+const SCRYFALL_REQUEST_DELAY_MS = 250;
 
 export function parseCsvLine(line) {
   const fields = [];
@@ -85,7 +87,7 @@ export async function readGzipCsv(filePath) {
       continue;
     }
 
-    if (!line) continue;
+    if (!line || isNullPaddingLine(line)) continue;
     const fields = parseCsvLine(line);
     if (fields.length !== header.length) {
       throw new Error(`CSV row ${lineNumber} has ${fields.length} fields; expected ${header.length}`);
@@ -122,7 +124,7 @@ export async function buildCandidateQueueFromGzipCsv({ filePath, expansionConfig
       continue;
     }
 
-    if (!line) continue;
+    if (!line || isNullPaddingLine(line)) continue;
     const fields = parseCsvLine(line);
     if (fields.length !== header.length) {
       throw new Error(`CSV row ${lineNumber} has ${fields.length} fields; expected ${header.length}`);
@@ -145,6 +147,10 @@ export async function buildCandidateQueueFromGzipCsv({ filePath, expansionConfig
 
 function stripBom(value) {
   return value.charCodeAt(0) === 0xfeff ? value.slice(1) : value;
+}
+
+function isNullPaddingLine(value) {
+  return /^\0+$/.test(value);
 }
 
 export async function downloadFile(url, outputPath) {
@@ -174,12 +180,23 @@ export async function fetchScryfallPrints(setCodes) {
 }
 
 async function fetchScryfallJson(url) {
+  await sleep(SCRYFALL_REQUEST_DELAY_MS);
   const response = await fetch(url, { headers: SCRYFALL_HEADERS });
+  if (response.status === 429) {
+    const retryAfter = Number(response.headers.get('Retry-After') || 60);
+    await sleep(Math.max(retryAfter, 1) * 1000);
+    return fetchScryfallJson(url);
+  }
+
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(`Scryfall request failed ${response.status}: ${text.slice(0, 300)}`);
   }
   return response.json();
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function buildNameResolver(cards, setCodes) {
@@ -188,10 +205,12 @@ export function buildNameResolver(cards, setCodes) {
   for (const rawCard of cards) {
     const card = trimCard(rawCard);
     addNameCandidate(byName, card.name, card, setCodes);
+    addNameCandidate(byName, normalizedNameKey(card.name), card, setCodes);
 
     for (const face of card.card_faces || []) {
       if (face.name) {
         addNameCandidate(byName, face.name, card, setCodes);
+        addNameCandidate(byName, normalizedNameKey(face.name), card, setCodes);
       }
     }
   }
@@ -225,6 +244,25 @@ function compareCollectorNumbers(a = '', b = '') {
   const numB = Number.parseInt(String(b).match(/\d+/)?.[0] || '9999', 10);
   if (numA !== numB) return numA - numB;
   return String(a).localeCompare(String(b));
+}
+
+export function resolveCardName(cardByName, name) {
+  return cardByName.get(name)
+    || cardByName.get(normalizedNameKey(name))
+    || cardByName.get(normalizedNameKey(stripArenaRebalancePrefix(name)));
+}
+
+function normalizedNameKey(name) {
+  return `normalized:${String(name)
+    .trim()
+    .normalize('NFKD')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/\s+/g, ' ')
+    .toLowerCase()}`;
+}
+
+function stripArenaRebalancePrefix(name) {
+  return String(name).replace(/^A-/i, '');
 }
 
 export function trimCard(card) {
@@ -322,7 +360,7 @@ export function createCandidateQueueBuilder({ expansionConfig, header, cardByNam
         continue;
       }
 
-      const card = cardByName.get(cardName);
+      const card = resolveCardName(cardByName, cardName);
       if (!card) {
         missingNames.add(cardName);
         continue;
@@ -335,6 +373,14 @@ export function createCandidateQueueBuilder({ expansionConfig, header, cardByNam
     candidates.push({
       draftId: row.draft_id,
       buildIndex,
+      source: {
+        provider: '17Lands',
+        label: 'Anonymous 17Lands Expert Ghost',
+        format: expansionConfig.format,
+        expansion: expansionConfig.expansion,
+        set: expansionConfig.set,
+        datasetUrl: expansionConfig.datasetUrl,
+      },
       userBuckets: {
         games: userGamesBucket,
         winRate: userWinRateBucket,
@@ -408,6 +454,57 @@ export function createCandidateQueueBuilder({ expansionConfig, header, cardByNam
   }
 
   return { addRow, finish };
+}
+
+export function combineCandidateQueues(queues, {
+  filters = DEFAULT_FILTERS,
+  launchEpoch = '2026-06-06',
+  label = 'Anonymous 17Lands Expert Ghost',
+} = {}) {
+  const cards = {};
+  const basicLandsByExpansion = {};
+  const candidates = [];
+  const expansions = [];
+  const datasetUrls = [];
+
+  for (const queue of queues) {
+    const expansion = queue.source.expansion;
+    expansions.push(expansion);
+    datasetUrls.push(queue.source.datasetUrl);
+    Object.assign(cards, queue.cards);
+    basicLandsByExpansion[expansion] = queue.basicLands;
+
+    for (const candidate of queue.candidates) {
+      candidates.push(candidate);
+    }
+  }
+
+  candidates.sort((a, b) => {
+    const winRateA = Number(a.userBuckets?.winRate || 0);
+    const winRateB = Number(b.userBuckets?.winRate || 0);
+    if (winRateA !== winRateB) return winRateB - winRateA;
+    return a.sourceId.localeCompare(b.sourceId);
+  });
+
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    source: {
+      provider: '17Lands',
+      label,
+      format: 'Sealed',
+      expansion: 'MULTI',
+      expansions,
+      datasetUrls,
+      filters,
+      launchEpoch,
+      minRunwayDays: candidates.length,
+    },
+    cards: sortCardsObject(cards),
+    basicLands: queues[0]?.basicLands || {},
+    basicLandsByExpansion,
+    candidates,
+  };
 }
 
 function cardByIdFromNames(cardByName) {

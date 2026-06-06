@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   buildCandidateQueue,
+  buildNameResolver,
   DEFAULT_FILTERS,
   parseCsvLine,
   trimCard,
@@ -59,6 +60,21 @@ const cardByName = new Map([
   ['Abrade', card('Abrade', 'abrade')],
   ['Test Duplicate', card('Test Duplicate', 'duplicate')],
 ]);
+const normalizedCardByName = buildNameResolver([
+  {
+    id: 'solkanar',
+    name: "Sol'Kanar the Tainted",
+    set: 'tst',
+    set_name: 'Test Set',
+    rarity: 'rare',
+    cmc: 5,
+    colors: ['B', 'R', 'U'],
+    color_identity: ['B', 'R', 'U'],
+    type_line: 'Legendary Creature',
+    collector_number: '2',
+    image_uris: { small: 'https://img.test/solkanar-small', normal: 'https://img.test/solkanar' },
+  },
+], ['tst']);
 
 assert.deepEqual(
   parseCsvLine('"deck_Abigale, Poet Laureate",deck_Abrade,"a ""quoted"" card"'),
@@ -78,7 +94,7 @@ const rows = [
     'deck_Test Duplicate': '1',
     'sideboard_Test Duplicate': '2',
     user_n_games_bucket: '100',
-    user_game_win_rate_bucket: '0.60',
+    user_game_win_rate_bucket: '0.76',
   }),
   row({
     draft_id: 'draft-a',
@@ -91,21 +107,21 @@ const rows = [
     'deck_Test Duplicate': '1',
     'sideboard_Test Duplicate': '2',
     user_n_games_bucket: '100',
-    user_game_win_rate_bucket: '0.60',
+    user_game_win_rate_bucket: '0.76',
   }),
   row({
     draft_id: 'draft-low',
     build_index: '0',
     deck_Abrade: '1',
     user_n_games_bucket: '50',
-    user_game_win_rate_bucket: '0.70',
+    user_game_win_rate_bucket: '0.80',
   }),
   row({
     draft_id: 'draft-sideboard-build',
     build_index: '1',
     deck_Abrade: '1',
     user_n_games_bucket: '500',
-    user_game_win_rate_bucket: '0.70',
+    user_game_win_rate_bucket: '0.80',
   }),
 ];
 
@@ -127,6 +143,29 @@ assert.equal(candidate.stats.referenceDeckSize, 12, 'reference deck size include
 assert.deepEqual(candidate.reference.mainColors, ['R', 'G']);
 assert.deepEqual(candidate.reference.splashColors, ['U']);
 
+const normalizedQueue = buildCandidateQueue({
+  expansionConfig: config,
+  header: [
+    'draft_id',
+    'build_index',
+    "deck_Sol'kanar the Tainted",
+    "sideboard_Sol'kanar the Tainted",
+    'user_n_games_bucket',
+    'user_game_win_rate_bucket',
+  ],
+  rows: [{
+    draft_id: 'draft-normalized',
+    build_index: '0',
+    "deck_Sol'kanar the Tainted": '1',
+    "sideboard_Sol'kanar the Tainted": '0',
+    user_n_games_bucket: '100',
+    user_game_win_rate_bucket: '0.76',
+  }],
+  cardByName: normalizedCardByName,
+  filters: DEFAULT_FILTERS,
+});
+assert.deepEqual(normalizedQueue.candidates[0].reference.deck, { solkanar: 1 }, 'case-normalized names resolve');
+
 assert.throws(
   () => buildCandidateQueue({
     expansionConfig: config,
@@ -137,7 +176,7 @@ assert.throws(
         build_index: '0',
         'deck_Unresolved Card': '1',
         user_n_games_bucket: '100',
-        user_game_win_rate_bucket: '0.60',
+        user_game_win_rate_bucket: '0.76',
       }),
     ],
     cardByName,

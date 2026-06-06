@@ -5,7 +5,7 @@ import { readJson } from './lib/17lands.js';
 const port = Number(process.env.PORT || 4190);
 const host = process.env.HOST || '127.0.0.1';
 const daily = await readJson('daily.json');
-const queue = await readJson('data/17lands-sos-candidates.json');
+const queue = await readJson('data/17lands-sealed-candidates.json');
 const candidate = queue.candidates.find(item => item.sourceId === daily.source?.sourceId);
 
 if (!candidate) {

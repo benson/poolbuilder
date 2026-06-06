@@ -6,7 +6,7 @@ import {
   readJson,
 } from './lib/17lands.js';
 
-const DEFAULT_QUEUE = 'data/17lands-sos-candidates.json';
+const DEFAULT_QUEUE = 'data/17lands-sealed-candidates.json';
 const DEFAULT_API_URL = 'https://poolbuilder-api.bensonperry.workers.dev';
 
 function parseArgs(argv) {
@@ -42,6 +42,7 @@ export function selectCandidate(candidates, date, launchEpoch) {
 }
 
 export function buildDailyPayload(queue, candidate, date, index) {
+  const source = candidate.source || queue.source;
   const poolIds = expandCounts(candidate.pool);
   const pool = poolIds.map(id => {
     const card = queue.cards[id];
@@ -53,23 +54,24 @@ export function buildDailyPayload(queue, candidate, date, index) {
     date,
     seed: `expert-${date}`,
     mode: 'expert-ghost',
-    set: queue.source.set,
+    set: source.set || queue.source.set,
     source: {
-      provider: queue.source.provider,
-      label: queue.source.label,
-      format: queue.source.format,
-      expansion: queue.source.expansion,
+      provider: source.provider || queue.source.provider,
+      label: source.label || queue.source.label,
+      format: source.format || queue.source.format,
+      expansion: source.expansion || queue.source.expansion,
       sourceId: candidate.sourceId,
       queueIndex: index,
-      filters: queue.source.filters,
-      datasetUrl: queue.source.datasetUrl,
+      filters: source.filters || queue.source.filters,
+      datasetUrl: source.datasetUrl || queue.source.datasetUrl,
     },
     pool,
-    basicLands: queue.basicLands,
+    basicLands: queue.basicLandsByExpansion?.[source.expansion] || queue.basicLands,
   };
 }
 
 export function buildWorkerSeedPayload(queue, candidate, date) {
+  const source = candidate.source || queue.source;
   return {
     date,
     sourceId: candidate.sourceId,
@@ -85,10 +87,10 @@ export function buildWorkerSeedPayload(queue, candidate, date) {
       splashColors: candidate.reference.splashColors || [],
       stats: candidate.stats,
       source: {
-        provider: queue.source.provider,
-        label: queue.source.label,
-        format: queue.source.format,
-        expansion: queue.source.expansion,
+        provider: source.provider || queue.source.provider,
+        label: source.label || queue.source.label,
+        format: source.format || queue.source.format,
+        expansion: source.expansion || queue.source.expansion,
       },
     },
   };

@@ -1,7 +1,8 @@
 node_modules/
 .claude/
 nul
-data/
+data/*
+!data/17lands-sealed-candidates.json
 .cache/
 scripts/mtg.js
 worker/.wrangler/

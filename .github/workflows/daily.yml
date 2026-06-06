@@ -29,9 +29,6 @@ jobs:
       - name: Run tests
         run: node scripts/test-17lands.js && node scripts/test-daily.js && node scripts/test-worker.js
 
-      - name: Import 17Lands candidate queue
-        run: node scripts/import-17lands.js --expansion SOS --output data/17lands-sos-candidates.json
-
       - name: Generate daily expert ghost
         env:
           POOLBUILDER_ADMIN_SECRET: ${{ secrets.POOLBUILDER_ADMIN_SECRET }}

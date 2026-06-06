@@ -2,6 +2,7 @@
   "type": "module",
   "scripts": {
     "sync:ui": "node scripts/sync-ui.js",
+    "import:17lands": "node scripts/import-17lands-multi.js --minWinRate 0.76",
     "test": "node scripts/test-17lands.js && node scripts/test-daily.js && node scripts/test-worker.js",
     "test:17lands": "node scripts/test-17lands.js",
     "test:daily": "node scripts/test-daily.js",

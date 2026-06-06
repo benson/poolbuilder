@@ -488,11 +488,12 @@ function shouldPreviewGhost() {
 
 async function showLocalGhostPreview() {
   try {
-    const res = await fetch('data/17lands-sos-candidates.json');
+    const res = await fetch('data/17lands-sealed-candidates.json');
     if (!res.ok) throw new Error(`candidate queue returned ${res.status}`);
     const queue = await res.json();
     const candidate = queue.candidates.find(item => item.sourceId === currentDaily?.source?.sourceId);
     if (!candidate) throw new Error(`missing candidate ${currentDaily?.source?.sourceId}`);
+    const source = candidate.source || queue.source;
 
     dailyReference = {
       id: 'expert-ghost',
@@ -506,10 +507,10 @@ async function showLocalGhostPreview() {
       splashColors: candidate.reference.splashColors || [],
       stats: candidate.stats || {},
       source: {
-        provider: queue.source.provider,
-        label: queue.source.label,
-        format: queue.source.format,
-        expansion: queue.source.expansion,
+        provider: source.provider || queue.source.provider,
+        label: source.label || queue.source.label,
+        format: source.format || queue.source.format,
+        expansion: source.expansion || queue.source.expansion,
       },
     };
 
