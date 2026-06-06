@@ -86,6 +86,29 @@ function isLocalDev() {
   return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 }
 
+function isResultsRoute() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('view') === 'results' || params.get('results') === 'today' || window.location.hash === '#results';
+}
+
+function setDailyRoute(view, { replace = false } = {}) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('cache');
+  url.searchParams.delete('preview');
+  url.searchParams.delete('results');
+  if (view === 'results') {
+    url.searchParams.set('view', 'results');
+  } else {
+    url.searchParams.delete('view');
+  }
+  url.hash = '';
+
+  const nextUrl = url.pathname + url.search + url.hash;
+  if (nextUrl === window.location.pathname + window.location.search + window.location.hash) return;
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method]({}, '', nextUrl);
+}
+
 function showSubmissionMessage(message) {
   submissionTeaser.textContent = message;
   submissionTeaser.classList.remove('hidden');
@@ -186,8 +209,9 @@ function setupEventListeners() {
 
   // Submission buttons
   submitBtn.addEventListener('click', submitDeck);
-  viewResultsBtn.addEventListener('click', showResults);
-  document.getElementById('back-to-deck').addEventListener('click', hideResults);
+  viewResultsBtn.addEventListener('click', () => showResults({ updateUrl: true }));
+  document.getElementById('back-to-deck').addEventListener('click', () => hideResults({ updateUrl: true }));
+  window.addEventListener('popstate', handleRouteChange);
 
   // Pool info toggle
   const infoToggle = document.getElementById('pool-info-toggle');
@@ -359,10 +383,10 @@ function setupDailyWelcomeModal() {
 }
 
 function maybeShowDailyWelcome() {
-  if (currentMode !== 'daily' || dailyWelcomeShown || !dailyWelcomeModal || !dailyWelcomeModalEl) return;
+  if (currentMode !== 'daily' || isResultsRoute() || dailyWelcomeShown || !dailyWelcomeModal || !dailyWelcomeModalEl) return;
   dailyWelcomeShown = true;
   window.setTimeout(() => {
-    if (currentMode === 'daily') dailyWelcomeModal.open();
+    if (currentMode === 'daily' && !isResultsRoute()) dailyWelcomeModal.open();
   }, 200);
 }
 
@@ -395,6 +419,19 @@ function handleModeToggle(mode) {
   }
 }
 
+function handleRouteChange() {
+  if (currentMode !== 'daily' || !loadedDailyDate) return;
+  if (isResultsRoute()) {
+    if (mySubmission) {
+      showResults({ updateUrl: false });
+    } else {
+      showSubmissionMessage('submit a deck to reveal today\'s results');
+    }
+  } else {
+    hideResults({ updateUrl: false });
+  }
+}
+
 // Daily challenge
 function updateDailyInfo() {
   dailySetName.textContent = 'daily challenge';
@@ -412,6 +449,7 @@ async function handleDailyGenerate() {
   poolSection.classList.add('hidden');
   resultsSection.classList.add('hidden');
   resetSubmissionState();
+  const shouldOpenResults = isResultsRoute();
 
   try {
     const today = new Date().toISOString().split('T')[0];
@@ -440,12 +478,19 @@ async function handleDailyGenerate() {
     updateSubmitButtonVisibility();
     poolSection.classList.remove('hidden');
     loadingEl.classList.add('hidden');
-    maybeShowDailyWelcome();
     if (shouldPreviewGhost()) {
-      showLocalGhostPreview();
+      await showLocalGhostPreview();
     } else {
-      checkSubmissionStatus();
+      await checkSubmissionStatus();
+      if (shouldOpenResults) {
+        if (mySubmission) {
+          showResults({ updateUrl: false });
+        } else {
+          showSubmissionMessage('submit a deck to reveal today\'s results');
+        }
+      }
     }
+    if (!shouldOpenResults) maybeShowDailyWelcome();
     return;
   } catch (e) {
     showDailyUnavailable(e);
@@ -1544,7 +1589,7 @@ async function submitDeck() {
       localStorage.setItem('pb-submission-id', data.id);
       submissionTeaser.classList.add('hidden');
       updateSubmitButtonVisibility();
-      showResults();
+      showResults({ updateUrl: true });
     } else {
       const err = await res.json().catch(() => ({}));
       showSubmissionMessage(err.error || 'submission failed');
@@ -1562,16 +1607,24 @@ function isCurrentDailyReference(reference) {
   return Boolean(reference?.sourceId && expectedSourceId && reference.sourceId === expectedSourceId);
 }
 
-function showResults() {
+function showResults({ updateUrl = false } = {}) {
+  if (updateUrl) setDailyRoute('results');
+  dailyWelcomeModal?.close();
   poolSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
   renderReferenceComparison();
+  if (mySubmission && dailyReference) {
+    showComparison(dailyReference, { scroll: false });
+  } else {
+    document.getElementById('results-comparison').classList.add('hidden');
+  }
   renderOverview();
   renderTheField();
   renderSubmissionsList();
 }
 
-function hideResults() {
+function hideResults({ updateUrl = false } = {}) {
+  if (updateUrl) setDailyRoute('deck');
   resultsSection.classList.add('hidden');
   poolSection.classList.remove('hidden');
   document.getElementById('results-comparison').classList.add('hidden');
@@ -1597,7 +1650,6 @@ function renderReferenceComparison() {
   let html = '<section class="reference-panel">';
   html += '<div class="reference-header">';
   html += '<div><span class="results-section-title">expert ghost</span><h3>' + escapeHtml(dailyReference.name || 'Expert Ghost') + ' ' + ghostDots + '</h3></div>';
-  html += '<button type="button" id="view-reference-deck" class="text-btn">view ghost deck</button>';
   html += '</div>';
 
   html += '<div class="reference-metrics">';
@@ -1614,11 +1666,6 @@ function renderReferenceComparison() {
   html += '</section>';
 
   resultsReference.innerHTML = html;
-
-  const viewDeck = document.getElementById('view-reference-deck');
-  if (viewDeck) {
-    viewDeck.addEventListener('click', () => showComparison(dailyReference));
-  }
 
   resultsReference.querySelectorAll('.reference-card-row').forEach(row => {
     row.addEventListener('mouseenter', showCardPreview);
@@ -1966,7 +2013,7 @@ function renderSubmissionsList() {
   });
 }
 
-function showComparison(otherSub) {
+function showComparison(otherSub, { scroll = true } = {}) {
   const el = document.getElementById('results-comparison');
   el.classList.remove('hidden');
 
@@ -2052,7 +2099,7 @@ function showComparison(otherSub) {
     cardEl.addEventListener('mouseleave', hideCardPreview);
   });
 
-  el.scrollIntoView({ behavior: 'smooth' });
+  if (scroll) el.scrollIntoView({ behavior: 'smooth' });
 }
 
 function countIds(ids) {
