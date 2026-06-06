@@ -5,39 +5,39 @@
 }
 
 :root {
-  --pb-font-body: var(--bui-font-body, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
-  --pb-font-mono: var(--bui-font-mono, "Courier New", Courier, monospace);
-  --pb-font-weight-title: var(--bui-font-weight-title, 900);
-  --pb-border-width: var(--bui-border-width, 3px);
-  --pb-control-height-compact: var(--bui-control-height-compact, 28px);
-  --pb-shadow-firm: var(--bui-shadow-hard, 4px 4px 0 #3d2b22);
-  --pb-shadow-press: 2px 2px 0 var(--bui-color-shadow, #3d2b22);
+  --pb-font-body: var(--vui-font-body, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+  --pb-font-mono: var(--vui-font-mono, "Courier New", Courier, monospace);
+  --pb-font-weight-title: var(--vui-font-weight-title, 900);
+  --pb-border-width: var(--vui-border-width, 3px);
+  --pb-control-height-compact: var(--vui-control-height-compact, 28px);
+  --pb-shadow-firm: var(--vui-shadow-firm, 4px 4px 0 #3d2b22);
+  --pb-shadow-press: 2px 2px 0 var(--vui-color-shadow, #3d2b22);
   --pb-shadow-sunken: var(
-    --bui-shadow-sunken,
+    --vui-shadow-sunken,
     inset 3px 3px 0 rgba(0, 0, 0, 0.18),
     inset -2px -2px 0 rgba(255, 255, 255, 0.32)
   );
-  --pb-color-shadow: var(--bui-color-shadow, #3d2b22);
-  --bg: var(--bui-color-bg, #f1eef6);
-  --bg-alt: var(--bui-color-surface, #e7e2ee);
-  --bg-mine: var(--bui-color-surface-sunken, #cec4dd);
-  --bg-raised: var(--bui-color-surface-raised, #faf8fd);
-  --text: var(--bui-color-text, #15100d);
-  --text-muted: var(--bui-color-text-muted, #5b3b25);
-  --text-inverse: var(--bui-color-text-inverse, #fff5d2);
-  --text-faint: var(--bui-color-neutral-350, #999);
-  --border: var(--bui-color-line-strong, #15100d);
-  --border-light: var(--bui-color-line, rgba(21, 16, 13, 0.4));
-  --border-faint: var(--bui-color-line-faint, #eee);
-  --accent: var(--bui-color-accent, #6c3aa4);
-  --accent-soft: var(--bui-color-accent-soft, #e7d8f5);
-  --warn: var(--bui-color-warn, #f2c452);
-  --info: var(--bui-color-info, #4aa6c8);
-  --danger: var(--bui-color-danger, #a73528);
+  --pb-color-shadow: var(--vui-color-shadow, #3d2b22);
+  --bg: var(--vui-color-bg, #f1eef6);
+  --bg-alt: var(--vui-color-surface, #e7e2ee);
+  --bg-mine: var(--vui-color-surface-sunken, #cec4dd);
+  --bg-raised: var(--vui-color-surface-raised, #faf8fd);
+  --text: var(--vui-color-text, #15100d);
+  --text-muted: var(--vui-color-text-muted, #5b3b25);
+  --text-inverse: var(--vui-color-text-inverse, #fff5d2);
+  --text-faint: var(--vui-color-neutral-350, #999);
+  --border: var(--vui-color-line-strong, #15100d);
+  --border-light: var(--vui-color-line, rgba(21, 16, 13, 0.4));
+  --border-faint: var(--vui-color-line-faint, #eee);
+  --accent: var(--vui-color-accent, #6c3aa4);
+  --accent-soft: var(--vui-color-accent-soft, #e7d8f5);
+  --warn: var(--vui-color-warn, #f2c452);
+  --info: var(--vui-color-info, #4aa6c8);
+  --danger: var(--vui-color-danger, #a73528);
   --btn-bg: var(--accent);
   --btn-text: var(--text-inverse);
   --btn-bg-hover: var(--text-muted);
-  --btn-bg-disabled: var(--bui-color-neutral-200, #ccc);
+  --btn-bg-disabled: var(--vui-color-neutral-200, #ccc);
   --footer-bg: rgba(248, 247, 244, 0.85);
 }
 
@@ -67,7 +67,7 @@ body {
   text-transform: lowercase;
 }
 
-/* Shared UI fallback. Pool Builder normally consumes @benson/ui, but these
+/* Shared UI fallback. PoolBuilder normally consumes @benson/vellum-ui, but these
    local definitions keep the app usable if the vendored shared stylesheet is
    missing from a static deploy or cached HTML points at an old asset path. */
 .btn {
@@ -576,12 +576,12 @@ h1 {
   content: '';
   position: absolute;
   right: 0;
-  bottom: 18px;
+  bottom: 0;
   left: 0;
   z-index: 4;
-  height: 42px;
+  height: 62px;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--bg) 82%);
+  background: linear-gradient(to bottom, transparent, var(--bg) 76%, var(--bg));
 }
 
 /* Card Grid */
