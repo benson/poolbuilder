@@ -1,102 +1,164 @@
-// Pre-generate the daily challenge pool
-// Runs via GitHub Actions on a daily schedule
+import { fileURLToPath } from 'url';
+import { writeFile } from 'fs/promises';
+import {
+  COLOR_ORDER,
+  expandCounts,
+  readJson,
+} from './lib/17lands.js';
 
-import { fetchWithRetry, generateSealedPoolFromMtgjson, getDailySeed, pickDailySet } from './mtg.js';
+const DEFAULT_QUEUE = 'data/17lands-sos-candidates.json';
+const DEFAULT_API_URL = 'https://poolbuilder-api.brostar.workers.dev';
 
-const SCRYFALL_API = 'https://api.scryfall.com';
-const SETS_URL = 'https://bensonperry.com/shared/sets.json';
-
-// ============ Basic lands fetching ============
-
-async function fetchBasicLands(setCode) {
-  const basicNames = ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest'];
-  const query = `set:${setCode} (${basicNames.map(n => `!"${n}"`).join(' or ')}) type:basic`;
-  const url = `${SCRYFALL_API}/cards/search?q=${encodeURIComponent(query)}&unique=cards`;
-
-  let lands = {};
-  const colorMap = { Plains: 'W', Island: 'U', Swamp: 'B', Mountain: 'R', Forest: 'G' };
-
-  try {
-    const data = await fetchWithRetry(url);
-    for (const card of data.data) {
-      const color = colorMap[card.name];
-      if (color && !lands[color]) lands[color] = trimCard(card);
-    }
-  } catch (e) {
-    // Fall back to default basics
-  }
-
-  // Fill in missing with defaults
-  for (const [name, color] of Object.entries(colorMap)) {
-    if (!lands[color]) {
-      try {
-        const card = await fetchWithRetry(`${SCRYFALL_API}/cards/named?exact=${encodeURIComponent(name)}`);
-        lands[color] = trimCard(card);
-      } catch (e) { /* skip */ }
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (!arg.startsWith('--')) continue;
+    const key = arg.slice(2);
+    const next = argv[i + 1];
+    if (!next || next.startsWith('--')) {
+      args[key] = true;
+    } else {
+      args[key] = next;
+      i++;
     }
   }
-
-  return lands;
+  return args;
 }
 
-// ============ Trim card data ============
+export function getTodayUTC() {
+  return new Date().toISOString().split('T')[0];
+}
 
-function trimCard(card) {
-  const trimmed = {
-    id: card.id,
-    name: card.name,
-    rarity: card.rarity,
-    cmc: card.cmc,
-    colors: card.colors,
-    type_line: card.type_line,
-    collector_number: card.collector_number,
+export function selectCandidate(candidates, date, launchEpoch) {
+  if (!candidates.length) {
+    throw new Error('candidate queue is empty');
+  }
+
+  const dayMs = 24 * 60 * 60 * 1000;
+  const offset = Math.floor((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${launchEpoch}T00:00:00Z`)) / dayMs);
+  const index = ((offset % candidates.length) + candidates.length) % candidates.length;
+  return { candidate: candidates[index], index };
+}
+
+export function buildDailyPayload(queue, candidate, date, index) {
+  const poolIds = expandCounts(candidate.pool);
+  const pool = poolIds.map(id => {
+    const card = queue.cards[id];
+    if (!card) throw new Error(`candidate ${candidate.sourceId} references missing card ${id}`);
+    return card;
+  });
+
+  return {
+    date,
+    seed: `expert-${date}`,
+    mode: 'expert-ghost',
+    set: queue.source.set,
+    source: {
+      provider: queue.source.provider,
+      label: queue.source.label,
+      format: queue.source.format,
+      expansion: queue.source.expansion,
+      sourceId: candidate.sourceId,
+      queueIndex: index,
+      filters: queue.source.filters,
+      datasetUrl: queue.source.datasetUrl,
+    },
+    pool,
+    basicLands: queue.basicLands,
   };
-  if (card.image_uris) {
-    trimmed.image_uris = { small: card.image_uris.small, normal: card.image_uris.normal };
-  }
-  if (card.card_faces?.[0]?.image_uris) {
-    trimmed.card_faces = card.card_faces.map(face => ({
-      image_uris: { small: face.image_uris?.small, normal: face.image_uris?.normal }
-    }));
-  }
-  return trimmed;
 }
 
-// ============ Main ============
+export function buildWorkerSeedPayload(queue, candidate, date) {
+  return {
+    date,
+    sourceId: candidate.sourceId,
+    reference: {
+      id: 'expert-ghost',
+      kind: 'reference',
+      name: 'Expert Ghost',
+      sourceId: candidate.sourceId,
+      cardIds: expandCounts(candidate.reference.deck),
+      basics: normalizeBasics(candidate.reference.basics),
+      colors: candidate.reference.colors || [],
+      mainColors: candidate.reference.mainColors || [],
+      splashColors: candidate.reference.splashColors || [],
+      stats: candidate.stats,
+      source: {
+        provider: queue.source.provider,
+        label: queue.source.label,
+        format: queue.source.format,
+        expansion: queue.source.expansion,
+      },
+    },
+  };
+}
+
+function normalizeBasics(basics = {}) {
+  return Object.fromEntries(COLOR_ORDER.map(color => [color, Number(basics[color] || 0)]));
+}
+
+export async function seedWorker(payload, { apiUrl, adminSecret, required = false } = {}) {
+  if (!adminSecret) {
+    const message = 'POOLBUILDER_ADMIN_SECRET is not set; skipping worker reference seed';
+    if (required) throw new Error(message);
+    console.warn(message);
+    return false;
+  }
+
+  const response = await fetch(`${apiUrl || DEFAULT_API_URL}/admin/daily`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${adminSecret}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'poolbuilder-daily-generator/1.0',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`worker seed failed: ${response.status} ${text}`);
+  }
+
+  return true;
+}
+
+export async function generateDaily({ date, queuePath = DEFAULT_QUEUE, outputPath = 'daily.json', seed = true, requireWorker = false } = {}) {
+  const queue = await readJson(queuePath);
+  const selectedDate = date || getTodayUTC();
+  const { candidate, index } = selectCandidate(queue.candidates, selectedDate, queue.source.launchEpoch);
+  const daily = buildDailyPayload(queue, candidate, selectedDate, index);
+  const workerPayload = buildWorkerSeedPayload(queue, candidate, selectedDate);
+
+  await writeFile(outputPath, JSON.stringify(daily));
+  console.log(`wrote ${outputPath} for ${selectedDate} (${candidate.sourceId})`);
+
+  if (seed) {
+    await seedWorker(workerPayload, {
+      apiUrl: process.env.POOLBUILDER_API_URL || DEFAULT_API_URL,
+      adminSecret: process.env.POOLBUILDER_ADMIN_SECRET || process.env.ADMIN_SECRET,
+      required: requireWorker,
+    });
+  }
+
+  return { daily, workerPayload, candidate, index };
+}
 
 async function main() {
-  const seed = getDailySeed();
-  const date = new Date().toISOString().split('T')[0];
-  console.log(`generating daily pool for ${date} (seed: ${seed})`);
-
-  // Load sets directly via https — fetchSets() in mtg.js resolves the URL
-  // relative to import.meta.url, which becomes file:// when mtg.js is curled
-  // to disk in CI, and Node's fetch doesn't support file://.
-  const sets = await (await fetch(SETS_URL)).json();
-  const dailySet = pickDailySet(sets);
-  console.log(`daily set: ${dailySet.name} (${dailySet.code})`);
-
-  // Generate pool
-  console.log('generating pool from mtgjson booster weights...');
-  const pool = await generateSealedPoolFromMtgjson(dailySet.code, 'play', 6, seed);
-  console.log(`generated pool with ${pool.length} cards`);
-
-  // Fetch basic lands
-  console.log('fetching basic lands...');
-  const basicLands = await fetchBasicLands(dailySet.code);
-
-  // Trim and write
-  const daily = {
-    date,
-    seed,
-    set: { code: dailySet.code, name: dailySet.name },
-    pool: pool.map(trimCard),
-    basicLands
-  };
-
-  const { writeFileSync } = await import('fs');
-  writeFileSync('daily.json', JSON.stringify(daily));
-  console.log(`wrote daily.json (${(JSON.stringify(daily).length / 1024).toFixed(1)} KB)`);
+  const args = parseArgs(process.argv.slice(2));
+  await generateDaily({
+    date: args.date || process.env.DAILY_DATE,
+    queuePath: args.queue || DEFAULT_QUEUE,
+    outputPath: args.output || 'daily.json',
+    seed: !args['skip-worker'],
+    requireWorker: Boolean(args['require-worker']),
+  });
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(error => {
+    console.error(error);
+    process.exit(1);
+  });
+}

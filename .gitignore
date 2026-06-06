@@ -1,5 +1,7 @@
 node_modules/
 nul
+data/
+.cache/
 scripts/mtg.js
 worker/.wrangler/
 worker/node_modules/

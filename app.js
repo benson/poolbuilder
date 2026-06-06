@@ -4,8 +4,6 @@ import {
   createSetAutocomplete,
   fetchWithRetry,
   generateSealedPoolFromMtgjson,
-  getDailySeed,
-  pickDailySet,
 } from 'https://bensonperry.com/shared/mtg.js';
 
 // ============ Theme Toggle ============
@@ -50,8 +48,10 @@ let autocomplete = null;
 let mySubmission = null;
 let allSubmissions = null;
 let submissionMeta = null;
+let dailyReference = null;
+let currentDaily = null;
 let loadedDailyDate = null;
-const API_URL = 'https://poolbuilder-api.brostar.workers.dev';
+const API_URL = getApiUrl();
 
 // Basic land names
 const BASIC_LAND_NAMES = {
@@ -61,6 +61,25 @@ const BASIC_LAND_NAMES = {
   R: 'Mountain',
   G: 'Forest'
 };
+
+function getApiUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const override = params.get('api');
+  if (override) {
+    localStorage.setItem('pb-api-url', override);
+    return override.replace(/\/$/, '');
+  }
+  return (localStorage.getItem('pb-api-url') || 'https://poolbuilder-api.bensonperry.workers.dev').replace(/\/$/, '');
+}
+
+function isLocalDev() {
+  return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+}
+
+function showSubmissionMessage(message) {
+  submissionTeaser.textContent = message;
+  submissionTeaser.classList.remove('hidden');
+}
 
 // DOM elements
 const setInput = document.getElementById('set-input');
@@ -80,6 +99,7 @@ const dailySeed = document.getElementById('daily-seed');
 const submitBtn = document.getElementById('submit-deck');
 const viewResultsBtn = document.getElementById('view-results');
 const resultsSection = document.getElementById('results-section');
+const resultsReference = document.getElementById('results-reference');
 const submissionTeaser = document.getElementById('submission-teaser');
 
 // Initialize
@@ -184,18 +204,19 @@ function handleModeToggle(mode) {
     currentPool = [];
     deck = [];
     basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    loadedDailyDate = null;
+    currentDaily = null;
+    dailyReference = null;
+    mySubmission = null;
+    allSubmissions = null;
+    submissionMeta = null;
   }
 }
 
 // Daily challenge
 function updateDailyInfo() {
-  const seed = getDailySeed();
-  const dailySet = pickDailySet(sets);
-  if (dailySet) {
-    dailySetName.textContent = dailySet.name;
-    dailyControls.dataset.setCode = dailySet.code;
-  }
-  dailySeed.textContent = seed;
+  dailySetName.textContent = 'daily challenge';
+  dailySeed.textContent = 'loading';
 }
 
 // Generate pool
@@ -207,43 +228,170 @@ async function handleGenerate() {
 async function handleDailyGenerate() {
   loadingEl.classList.remove('hidden');
   poolSection.classList.add('hidden');
+  resultsSection.classList.add('hidden');
+  resetSubmissionState();
 
   try {
-    // Try to load pre-generated daily pool
     const today = new Date().toISOString().split('T')[0];
     const res = await fetch('daily.json?v=' + today);
-    if (res.ok) {
-      const daily = await res.json();
-      if (daily.date === today) {
-        currentPool = daily.pool;
-        basicLandCards = daily.basicLands || {};
-
-        // Update header info from cached data
-        dailySetName.textContent = daily.set.name;
-        dailySeed.textContent = daily.seed;
-
-        loadedDailyDate = today;
-        deck = [];
-        basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-        renderPool();
-        renderDeck();
-        poolSection.classList.remove('hidden');
-        loadingEl.classList.add('hidden');
-        checkSubmissionStatus();
-        return;
-      }
+    if (!res.ok) {
+      throw new Error(`daily.json returned ${res.status}`);
     }
+
+    const daily = await res.json();
+    if (daily.date !== today || daily.mode !== 'expert-ghost') {
+      throw new Error('expert ghost daily is not ready for today');
+    }
+
+    currentDaily = daily;
+    currentPool = daily.pool;
+    basicLandCards = daily.basicLands || {};
+
+    dailySetName.textContent = daily.set?.name || 'daily challenge';
+    dailySeed.textContent = daily.source?.label || daily.seed || 'expert ghost';
+
+    loadedDailyDate = today;
+    deck = [];
+    basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    renderPool();
+    renderDeck();
+    updateSubmitButtonVisibility();
+    poolSection.classList.remove('hidden');
+    loadingEl.classList.add('hidden');
+    if (shouldPreviewGhost()) {
+      showLocalGhostPreview();
+    } else {
+      checkSubmissionStatus();
+    }
+    return;
   } catch (e) {
-    // Fall through to live generation
+    showDailyUnavailable(e);
+  }
+}
+
+function resetSubmissionState() {
+  mySubmission = null;
+  allSubmissions = null;
+  submissionMeta = null;
+  dailyReference = null;
+  submissionTeaser.classList.add('hidden');
+  if (resultsReference) resultsReference.innerHTML = '';
+}
+
+function showDailyUnavailable(error) {
+  console.error('Daily expert ghost unavailable:', error);
+  loadingEl.classList.add('hidden');
+  poolSection.classList.add('hidden');
+  currentDaily = null;
+  currentPool = [];
+  loadedDailyDate = null;
+  deck = [];
+  basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+  dailySetName.textContent = 'daily unavailable';
+  dailySeed.textContent = 'reference not seeded';
+  updateSubmitButtonVisibility();
+}
+
+function shouldPreviewGhost() {
+  const params = new URLSearchParams(window.location.search);
+  return isLocalDev() && params.get('preview') === 'ghost';
+}
+
+async function showLocalGhostPreview() {
+  try {
+    const res = await fetch('data/17lands-sos-candidates.json');
+    if (!res.ok) throw new Error(`candidate queue returned ${res.status}`);
+    const queue = await res.json();
+    const candidate = queue.candidates.find(item => item.sourceId === currentDaily?.source?.sourceId);
+    if (!candidate) throw new Error(`missing candidate ${currentDaily?.source?.sourceId}`);
+
+    dailyReference = {
+      id: 'expert-ghost',
+      kind: 'reference',
+      name: 'Expert Ghost',
+      sourceId: candidate.sourceId,
+      cardIds: expandCountObject(candidate.reference.deck),
+      basics: candidate.reference.basics,
+      colors: candidate.reference.colors || [],
+      mainColors: candidate.reference.mainColors || [],
+      splashColors: candidate.reference.splashColors || [],
+      stats: candidate.stats || {},
+      source: {
+        provider: queue.source.provider,
+        label: queue.source.label,
+        format: queue.source.format,
+        expansion: queue.source.expansion,
+      },
+    };
+
+    mySubmission = buildPreviewSubmission(candidate, dailyReference);
+    allSubmissions = [mySubmission];
+    submissionMeta = { count: 1, featured: [] };
+    showResults();
+  } catch (error) {
+    console.error('Failed to render ghost preview:', error);
+    showSubmissionMessage('could not load ghost preview');
+  }
+}
+
+function buildPreviewSubmission(candidate, reference) {
+  const ghostCounts = countIds(reference.cardIds);
+  const previewCounts = new Map(ghostCounts);
+  const poolCounts = countIds(expandCountObject(candidate.pool));
+  const swapOut = reference.cardIds.slice(0, 5);
+
+  swapOut.forEach(id => {
+    const count = previewCounts.get(id) || 0;
+    if (count <= 1) previewCounts.delete(id);
+    else previewCounts.set(id, count - 1);
+  });
+
+  const added = [];
+  for (const card of currentPool) {
+    if (added.length >= swapOut.length) break;
+    if (previewCounts.has(card.id)) continue;
+    const used = previewCounts.get(card.id) || 0;
+    const available = poolCounts.get(card.id) || 0;
+    if (used < available) {
+      previewCounts.set(card.id, used + 1);
+      added.push(card.id);
+    }
   }
 
-  // Fallback: generate live from Scryfall
-  const setCode = dailyControls.dataset.setCode;
-  if (!setCode) { loadingEl.classList.add('hidden'); return; }
-  const seed = getDailySeed();
-  await generatePool(setCode, seed);
-  loadedDailyDate = new Date().toISOString().split('T')[0];
-  checkSubmissionStatus();
+  const basicsPreview = { ...reference.basics };
+  if ((basicsPreview.W || 0) > 0) {
+    basicsPreview.W = Math.max(0, basicsPreview.W - 1);
+    basicsPreview.U = (basicsPreview.U || 0) + 1;
+  } else if ((basicsPreview.G || 0) > 0) {
+    basicsPreview.G = Math.max(0, basicsPreview.G - 1);
+    basicsPreview.R = (basicsPreview.R || 0) + 1;
+  }
+
+  return {
+    id: 'preview-you',
+    name: 'you',
+    fingerprint: 'preview',
+    submittedAt: new Date().toISOString(),
+    cardIds: expandMapCounts(previewCounts),
+    basics: basicsPreview,
+    colors: inferLane({ cardIds: expandMapCounts(previewCounts), basics: basicsPreview }).colors,
+  };
+}
+
+function expandCountObject(counts = {}) {
+  const ids = [];
+  Object.entries(counts).forEach(([id, count]) => {
+    for (let i = 0; i < count; i++) ids.push(id);
+  });
+  return ids;
+}
+
+function expandMapCounts(counts) {
+  const ids = [];
+  counts.forEach((count, id) => {
+    for (let i = 0; i < count; i++) ids.push(id);
+  });
+  return ids;
 }
 
 async function generatePool(setCode, seed = null) {
@@ -1018,10 +1166,10 @@ function updateSubmitButtonVisibility() {
     viewResultsBtn.classList.add('hidden');
     if (totalCards >= 40) {
       submitBtn.disabled = false;
-      submitBtn.textContent = '[submit deck]';
+      submitBtn.textContent = 'submit deck';
     } else {
       submitBtn.disabled = true;
-      submitBtn.textContent = '[submit deck — ' + (40 - totalCards) + ' more cards needed]';
+      submitBtn.textContent = 'submit deck - ' + (40 - totalCards) + ' more cards needed';
     }
   }
 }
@@ -1035,18 +1183,23 @@ async function checkSubmissionStatus() {
       const data = await res.json();
       allSubmissions = data.submissions;
       submissionMeta = data.meta;
+      dailyReference = data.reference || null;
       mySubmission = allSubmissions.find(s => s.fingerprint === fp);
       updateSubmitButtonVisibility();
     } else if (res.status === 403) {
       const data = await res.json();
       if (data.count > 0) {
-        submissionTeaser.textContent = data.count + ' builders today';
-        submissionTeaser.classList.remove('hidden');
+        showSubmissionMessage(data.count + ' builders today');
       }
+      updateSubmitButtonVisibility();
+    } else if (res.status === 503) {
+      showSubmissionMessage('daily reference unavailable');
       updateSubmitButtonVisibility();
     }
   } catch {
-    // silently degrade
+    if (isLocalDev()) {
+      showSubmissionMessage('could not reach API at ' + API_URL);
+    }
   }
 }
 
@@ -1078,6 +1231,7 @@ async function submitDeck() {
       const data = await res.json();
       allSubmissions = data.submissions;
       submissionMeta = data.meta;
+      dailyReference = data.reference || null;
       mySubmission = allSubmissions.find(s => s.fingerprint === getFingerprint()) ||
                      allSubmissions.find(s => s.id === data.id);
       localStorage.setItem('pb-submitted-date', loadedDailyDate);
@@ -1087,9 +1241,11 @@ async function submitDeck() {
       showResults();
     } else {
       const err = await res.json().catch(() => ({}));
+      showSubmissionMessage(err.error || 'submission failed');
       alert(err.error || 'submission failed');
     }
   } catch {
+    showSubmissionMessage('could not reach API at ' + API_URL);
     alert('could not reach server');
   }
 }
@@ -1097,6 +1253,7 @@ async function submitDeck() {
 function showResults() {
   poolSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
+  renderReferenceComparison();
   renderOverview();
   renderTheField();
   renderSubmissionsList();
@@ -1106,6 +1263,252 @@ function hideResults() {
   resultsSection.classList.add('hidden');
   poolSection.classList.remove('hidden');
   document.getElementById('results-comparison').classList.add('hidden');
+}
+
+function renderReferenceComparison() {
+  if (!resultsReference) return;
+  if (!mySubmission) {
+    resultsReference.innerHTML = '';
+    return;
+  }
+
+  if (!dailyReference) {
+    resultsReference.innerHTML = '<section class="reference-panel"><h3 class="results-section-title">expert ghost</h3><p class="reference-muted">reference unavailable</p></section>';
+    return;
+  }
+
+  const analysis = analyzeReferenceComparison(mySubmission, dailyReference);
+  const ghostDots = renderColorDots(dailyReference.colors || analysis.ghostLane.colors);
+  const laneSummary = sameColors(analysis.userLane.mainColors, analysis.ghostLane.mainColors) ? 'same lane' : 'different lane';
+  const splashSummary = sameColors(analysis.userLane.splashColors, analysis.ghostLane.splashColors) ? 'same splash' : 'different splash';
+
+  let html = '<section class="reference-panel">';
+  html += '<div class="reference-header">';
+  html += '<div><span class="results-section-title">expert ghost</span><h3>' + escapeHtml(dailyReference.name || 'Expert Ghost') + ' ' + ghostDots + '</h3></div>';
+  html += '<button type="button" id="view-reference-deck" class="text-btn">view ghost deck</button>';
+  html += '</div>';
+
+  html += '<div class="reference-metrics">';
+  html += referenceMetric('color lane', laneSummary, laneLine('you', analysis.userLane.mainColors) + laneLine('ghost', analysis.ghostLane.mainColors));
+  html += referenceMetric('splash', splashSummary, laneLine('you', analysis.userLane.splashColors) + laneLine('ghost', analysis.ghostLane.splashColors));
+  html += referenceMetric('nonbasic overlap', analysis.sharedNonbasics + '/' + analysis.ghostNonbasics, analysis.onlyMineCount + ' yours, ' + analysis.onlyGhostCount + ' ghost flex');
+  html += referenceMetric('mana', basicsSummary(mySubmission.basics), basicsSummary(dailyReference.basics));
+  html += '</div>';
+
+  html += '<div class="reference-flex-grid">';
+  html += renderFlexList('your flex', analysis.onlyMine);
+  html += renderFlexList('ghost flex', analysis.onlyGhost);
+  html += '</div>';
+  html += '</section>';
+
+  resultsReference.innerHTML = html;
+
+  const viewDeck = document.getElementById('view-reference-deck');
+  if (viewDeck) {
+    viewDeck.addEventListener('click', () => showComparison(dailyReference));
+  }
+
+  resultsReference.querySelectorAll('.reference-card-row').forEach(row => {
+    row.addEventListener('mouseenter', showCardPreview);
+    row.addEventListener('mouseleave', hideCardPreview);
+  });
+}
+
+function analyzeReferenceComparison(submission, reference) {
+  const myCounts = countIds(submission.cardIds || []);
+  const ghostCounts = countIds(reference.cardIds || []);
+  const allIds = new Set([...myCounts.keys(), ...ghostCounts.keys()]);
+  const onlyMineCounts = new Map();
+  const onlyGhostCounts = new Map();
+  let sharedNonbasics = 0;
+  let onlyMineCount = 0;
+  let onlyGhostCount = 0;
+
+  allIds.forEach(id => {
+    const mine = myCounts.get(id) || 0;
+    const ghost = ghostCounts.get(id) || 0;
+    const shared = Math.min(mine, ghost);
+    const mineOnly = Math.max(0, mine - ghost);
+    const ghostOnly = Math.max(0, ghost - mine);
+    sharedNonbasics += shared;
+    onlyMineCount += mineOnly;
+    onlyGhostCount += ghostOnly;
+    if (mineOnly) onlyMineCounts.set(id, mineOnly);
+    if (ghostOnly) onlyGhostCounts.set(id, ghostOnly);
+  });
+
+  const userLane = inferLane(submission);
+  const ghostLane = {
+    mainColors: reference.mainColors?.length ? reference.mainColors : inferLane(reference).mainColors,
+    splashColors: reference.splashColors || [],
+  };
+  ghostLane.colors = mergeColorArrays(ghostLane.mainColors, ghostLane.splashColors);
+
+  return {
+    userLane,
+    ghostLane,
+    sharedNonbasics,
+    ghostNonbasics: (reference.cardIds || []).length,
+    onlyMineCount,
+    onlyGhostCount,
+    onlyMine: cardListFromCounts(onlyMineCounts),
+    onlyGhost: cardListFromCounts(onlyGhostCounts),
+  };
+}
+
+function inferLane(submission) {
+  const basicsCounts = submission.basics || {};
+  const cardColorCounts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+  const activeColors = new Set();
+
+  (submission.cardIds || []).forEach(id => {
+    const card = findCardInPool(id);
+    getCardColors(card).forEach(color => {
+      if (cardColorCounts[color] != null) {
+        cardColorCounts[color]++;
+        activeColors.add(color);
+      }
+    });
+  });
+
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    if ((basicsCounts[color] || 0) > 0) activeColors.add(color);
+  });
+
+  const scored = ['W', 'U', 'B', 'R', 'G']
+    .filter(color => activeColors.has(color))
+    .map(color => ({
+      color,
+      score: (basicsCounts[color] || 0) * 2 + cardColorCounts[color],
+      basics: basicsCounts[color] || 0,
+      cards: cardColorCounts[color],
+    }))
+    .sort((a, b) => b.score - a.score || b.basics - a.basics);
+
+  let mainColors = scored
+    .filter(item => item.basics >= 4 || item.cards >= 5)
+    .map(item => item.color);
+
+  if (!mainColors.length) {
+    mainColors = scored.slice(0, 2).map(item => item.color);
+  }
+  if (mainColors.length > 3) {
+    mainColors = mainColors.slice(0, 3);
+  }
+
+  const mainSet = new Set(mainColors);
+  const splashColors = scored
+    .map(item => item.color)
+    .filter(color => !mainSet.has(color));
+
+  return {
+    mainColors: sortColors(mainColors),
+    splashColors: sortColors(splashColors),
+    colors: sortColors([...activeColors]),
+  };
+}
+
+function getCardColors(card) {
+  if (!card) return [];
+  if (card.colors?.length) return card.colors;
+  if (card.card_faces?.length) {
+    return [...new Set(card.card_faces.flatMap(face => face.colors || []))];
+  }
+  return [];
+}
+
+function cardListFromCounts(counts) {
+  const items = [...counts.entries()].map(([id, count]) => ({ card: findCardInPool(id), id, count }));
+  return items.sort((a, b) => {
+    const cardA = a.card || {};
+    const cardB = b.card || {};
+    if ((cardA.cmc || 0) !== (cardB.cmc || 0)) return (cardA.cmc || 0) - (cardB.cmc || 0);
+    return (cardA.name || a.id).localeCompare(cardB.name || b.id);
+  });
+}
+
+function renderFlexList(title, items) {
+  let html = '<div class="reference-flex"><span class="results-section-title">' + escapeHtml(title) + '</span>';
+  if (!items.length) {
+    html += '<p class="reference-muted">none</p></div>';
+    return html;
+  }
+
+  html += '<div class="reference-card-list">';
+  items.slice(0, 12).forEach(({ card, id, count }) => {
+    const name = card?.name || id;
+    const normalUrl = card?.image_uris?.normal || card?.card_faces?.[0]?.image_uris?.normal || '';
+    html += '<div class="reference-card-row" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+      '<span class="field-name">' + escapeHtml(name) + '</span>' +
+      '<span class="reference-card-count">' + (count > 1 ? 'x' + count : '') + '</span>' +
+      '</div>';
+  });
+  if (items.length > 12) {
+    html += '<p class="reference-muted">+' + (items.length - 12) + ' more</p>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+function referenceMetric(label, value, detail) {
+  return '<div class="reference-metric">' +
+    '<span>' + escapeHtml(label) + '</span>' +
+    '<strong>' + value + '</strong>' +
+    '<small>' + detail + '</small>' +
+    '</div>';
+}
+
+function laneLine(label, colors) {
+  return '<span class="lane-line">' + escapeHtml(label) + ' ' + renderColorDots(colors) + colorText(colors) + '</span>';
+}
+
+function basicsSummary(basics = {}) {
+  const parts = ['W', 'U', 'B', 'R', 'G']
+    .filter(color => (basics[color] || 0) > 0)
+    .map(color => BASIC_LAND_NAMES[color].toLowerCase() + ' ' + basics[color]);
+  return escapeHtml(parts.length ? parts.join(' / ') : 'no basics');
+}
+
+function renderColorDots(colors = []) {
+  const sorted = sortColors(colors);
+  if (!sorted.length) return '<span class="color-dot color-C"></span>';
+  return sorted.map(color => '<span class="color-dot color-' + color + '"></span>').join('');
+}
+
+function colorText(colors = []) {
+  const sorted = sortColors(colors);
+  return sorted.length ? ' ' + sorted.join('') : ' colorless';
+}
+
+function sameColors(a = [], b = []) {
+  return sortColors(a).join('') === sortColors(b).join('');
+}
+
+function sortColors(colors = []) {
+  const order = { W: 0, U: 1, B: 2, R: 3, G: 4 };
+  return [...new Set(colors)].filter(color => order[color] != null).sort((a, b) => order[a] - order[b]);
+}
+
+function mergeColorArrays(...groups) {
+  return sortColors(groups.flat());
+}
+
+function findCardInPool(id) {
+  return currentPool.find(card => card.id === id);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[ch]));
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
 function renderOverview() {
@@ -1258,6 +1661,7 @@ function showComparison(otherSub) {
   // Resolve card IDs to card objects from pool
   const theirDeck = otherSub.cardIds.map(id => currentPool.find(c => c.id === id)).filter(Boolean);
   const theirBasics = otherSub.basics || {};
+  const diffTracker = mySubmission ? createDiffTracker(mySubmission.cardIds, otherSub.cardIds) : null;
 
   // Build header
   const dots = (otherSub.colors || []).map(c => '<span class="color-dot color-' + c + '"></span>').join('');
@@ -1277,7 +1681,7 @@ function showComparison(otherSub) {
     cards.forEach((card, idx) => {
       const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
       const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-      const diffClass = mySubmission ? (mySubmission.cardIds.includes(card.id) ? 'shared' : 'only-theirs') : '';
+      const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
       html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + normalUrl + '">' +
         '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
     });
@@ -1293,7 +1697,7 @@ function showComparison(otherSub) {
   nonBasicLands.forEach(card => {
     const smallUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || '';
     const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-    const diffClass = mySubmission ? (mySubmission.cardIds.includes(card.id) ? 'shared' : 'only-theirs') : '';
+    const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
     html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + normalUrl + '">' +
       '<img src="' + smallUrl + '" alt="' + card.name + '" loading="lazy"></div>';
   });
@@ -1346,6 +1750,22 @@ function countIds(ids) {
   const map = new Map();
   ids.forEach(id => map.set(id, (map.get(id) || 0) + 1));
   return map;
+}
+
+function createDiffTracker(myIds = [], theirIds = []) {
+  const mine = countIds(myIds);
+  const theirs = countIds(theirIds);
+  const shared = new Map();
+  theirs.forEach((theirCount, id) => {
+    shared.set(id, Math.min(mine.get(id) || 0, theirCount));
+  });
+  return { shared, seen: new Map() };
+}
+
+function consumeDiffClass(tracker, id) {
+  const seen = (tracker.seen.get(id) || 0) + 1;
+  tracker.seen.set(id, seen);
+  return seen <= (tracker.shared.get(id) || 0) ? 'shared' : 'only-theirs';
 }
 
 // Start

@@ -1,4 +1,9 @@
-const ALLOWED_ORIGINS = ['https://bensonperry.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+const ALLOWED_ORIGINS = [
+  'https://bensonperry.com',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:4189',
+];
 
 function corsHeaders(request) {
   const origin = request?.headers?.get('Origin') || '';
@@ -63,6 +68,11 @@ export default {
       return handleFeature(request, env);
     }
 
+    // POST /admin/daily
+    if (request.method === 'POST' && path === '/admin/daily') {
+      return handleAdminDaily(request, env);
+    }
+
     return new Response('not found', { status: 404 });
   },
 };
@@ -85,6 +95,11 @@ async function handleSubmit(request, env) {
     return json({ error: 'submissions only accepted for today' }, 400, request);
   }
 
+  const daily = await getDaily(date, env);
+  if (!daily?.reference) {
+    return json({ error: 'daily reference unavailable' }, 503, request);
+  }
+
   const subsKey = `subs:${date}`;
   const metaKey = `meta:${date}`;
   let submissions = await env.SUBS.get(subsKey, 'json') || [];
@@ -92,7 +107,7 @@ async function handleSubmit(request, env) {
 
   const existing = submissions.find(s => s.fingerprint === fingerprint);
   if (existing) {
-    return json({ id: existing.id, submissions, meta }, 409, request);
+    return json({ id: existing.id, submissions, meta, reference: daily.reference }, 409, request);
   }
 
   const basicsTotal = Object.values(basics).reduce((a, b) => a + b, 0);
@@ -118,7 +133,7 @@ async function handleSubmit(request, env) {
   await env.SUBS.put(subsKey, JSON.stringify(submissions));
   await env.SUBS.put(metaKey, JSON.stringify(meta));
 
-  return json({ id: submission.id, submissions, meta }, 200, request);
+  return json({ id: submission.id, submissions, meta, reference: daily.reference }, 200, request);
 }
 
 async function handleGetSubmissions(date, url, env, request) {
@@ -134,10 +149,82 @@ async function handleGetSubmissions(date, url, env, request) {
   const meta = await env.SUBS.get(metaKey, 'json') || { count: 0, featured: [] };
 
   if (fingerprint && submissions.some(s => s.fingerprint === fingerprint)) {
-    return json({ submissions, meta }, 200, request, 30);
+    const daily = await getDaily(date, env);
+    if (!daily?.reference) {
+      return json({ error: 'daily reference unavailable' }, 503, request);
+    }
+    return json({ submissions, meta, reference: daily.reference }, 200, request, 30);
   }
 
   return json({ count: meta.count || submissions.length }, 403, request, 30);
+}
+
+async function handleAdminDaily(request, env) {
+  const auth = request.headers.get('Authorization');
+  if (!auth || auth !== `Bearer ${env.ADMIN_SECRET}`) {
+    return json({ error: 'unauthorized' }, 401, request);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'invalid json' }, 400, request);
+  }
+
+  const { date, sourceId, reference } = body;
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return json({ error: 'invalid date' }, 400, request);
+  }
+  if (!sourceId || !reference || !Array.isArray(reference.cardIds) || !reference.basics) {
+    return json({ error: 'missing daily reference fields' }, 400, request);
+  }
+
+  const daily = {
+    date,
+    sourceId,
+    reference: {
+      id: reference.id || 'expert-ghost',
+      kind: 'reference',
+      name: (reference.name || 'Expert Ghost').slice(0, 40),
+      sourceId,
+      cardIds: reference.cardIds,
+      basics: normalizeBasics(reference.basics),
+      colors: cleanColors(reference.colors),
+      mainColors: cleanColors(reference.mainColors),
+      splashColors: cleanColors(reference.splashColors),
+      stats: reference.stats || {},
+      source: reference.source || {},
+    },
+    seededAt: new Date().toISOString(),
+  };
+
+  await env.SUBS.put(`daily:${date}`, JSON.stringify(daily));
+  return json({ daily }, 200, request);
+}
+
+async function getDaily(date, env) {
+  return env.SUBS.get(`daily:${date}`, 'json');
+}
+
+function normalizeBasics(basics = {}) {
+  return {
+    W: toInt(basics.W),
+    U: toInt(basics.U),
+    B: toInt(basics.B),
+    R: toInt(basics.R),
+    G: toInt(basics.G),
+  };
+}
+
+function cleanColors(colors = []) {
+  const allowed = new Set(['W', 'U', 'B', 'R', 'G']);
+  return [...new Set((colors || []).filter(color => allowed.has(color)))];
+}
+
+function toInt(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
 }
 
 async function handleFeature(request, env) {

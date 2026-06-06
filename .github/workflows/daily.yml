@@ -26,14 +26,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Download shared modules
-        run: curl -s https://bensonperry.com/shared/mtg.js -o scripts/mtg.js
-
       - name: Run tests
-        run: node scripts/test-daily.js
+        run: node scripts/test-17lands.js && node scripts/test-daily.js && node scripts/test-worker.js
 
-      - name: Generate daily pool
-        run: node scripts/generate-daily.js
+      - name: Import 17Lands candidate queue
+        run: node scripts/import-17lands.js --expansion SOS --output data/17lands-sos-candidates.json
+
+      - name: Generate daily expert ghost
+        env:
+          POOLBUILDER_ADMIN_SECRET: ${{ secrets.POOLBUILDER_ADMIN_SECRET }}
+          POOLBUILDER_API_URL: https://poolbuilder-api.brostar.workers.dev
+        run: node scripts/generate-daily.js --require-worker
 
       - name: Commit and push
         run: |
