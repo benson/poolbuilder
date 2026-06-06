@@ -5,7 +5,7 @@ import {
   fetchWithRetry,
   generateSealedPoolFromMtgjson,
 } from 'https://bensonperry.com/shared/mtg.js';
-import { modal } from './vendor/benson-ui/modal.js';
+import { modal } from './vendor/vellum-ui/modal.js';
 
 // ============ Theme Toggle ============
 function applyTheme(theme) {
