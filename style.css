@@ -545,7 +545,7 @@ h1 {
 .builder-layout {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
   min-height: 0;
 }
 
@@ -579,9 +579,9 @@ h1 {
   bottom: 0;
   left: 0;
   z-index: 4;
-  height: 62px;
+  height: 10px;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--bg) 76%, var(--bg));
+  background: linear-gradient(to bottom, transparent, var(--bg));
 }
 
 /* Card Grid */
