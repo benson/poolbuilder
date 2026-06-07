@@ -42,6 +42,7 @@ let basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
 let basicLandCards = {};
 let currentSort = 'color';
 let currentDeckSort = 'cmc';
+let hiddenPoolColumns = { color: new Set(), rarity: new Set(), cmc: new Set() };
 let currentMode = 'daily';
 let selectedSet = null;
 let autocomplete = null;
@@ -139,6 +140,7 @@ const poolArea = document.getElementById('pool-area');
 const builderDivider = document.getElementById('builder-divider');
 const deckSizeInput = document.getElementById('deck-card-size');
 const poolSizeInput = document.getElementById('pool-card-size');
+const poolHiddenColumnsEl = document.getElementById('pool-hidden-columns');
 const dailyWelcomeModalEl = document.getElementById('daily-welcome-modal');
 
 // Initialize
@@ -466,6 +468,7 @@ async function handleDailyGenerate() {
     currentDaily = daily;
     currentPool = preparePoolCopies(daily.pool);
     basicLandCards = daily.basicLands || {};
+    resetPoolColumnVisibility();
 
     dailySetName.textContent = daily.set?.name || 'daily challenge';
     dailySeed.textContent = daily.source?.label || daily.seed || 'expert ghost';
@@ -649,6 +652,7 @@ async function generatePool(setCode, seed = null) {
     // Reset deck
     deck = [];
     basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    resetPoolColumnVisibility();
 
     renderPool();
     renderDeck();
@@ -771,10 +775,148 @@ function getColorCategory(card) {
   return colors[0];
 }
 
+function getPoolColumnSet(sort = currentSort) {
+  if (!hiddenPoolColumns[sort]) hiddenPoolColumns[sort] = new Set();
+  return hiddenPoolColumns[sort];
+}
+
+function resetPoolColumnVisibility() {
+  hiddenPoolColumns = { color: new Set(), rarity: new Set(), cmc: new Set() };
+  renderPoolHiddenColumns();
+}
+
+function isPoolColumnHidden(key, sort = currentSort) {
+  return getPoolColumnSet(sort).has(key);
+}
+
+function hidePoolColumn(key) {
+  getPoolColumnSet().add(key);
+  renderPool();
+  updateAllPoolCardClasses();
+}
+
+function showPoolColumn(sort, key) {
+  getPoolColumnSet(sort).delete(key);
+  renderPool();
+  updateAllPoolCardClasses();
+}
+
+function showAllPoolColumns(sort = currentSort) {
+  getPoolColumnSet(sort).clear();
+  renderPool();
+  updateAllPoolCardClasses();
+}
+
+function getPoolColumnLabels(sort = currentSort) {
+  if (sort === 'color') {
+    return {
+      W: 'white',
+      U: 'blue',
+      B: 'black',
+      R: 'red',
+      G: 'green',
+      multi: 'multi',
+      colorless: 'colorless',
+      land: 'land',
+    };
+  }
+  if (sort === 'rarity') {
+    return {
+      'mythic+rare': 'rare/mythic',
+      uncommon: 'uncommon',
+      common: 'common',
+      land: 'land',
+    };
+  }
+  return {
+    '0-1': '0-1',
+    '2': '2',
+    '3': '3',
+    '4': '4',
+    '5': '5',
+    '6+': '6+',
+    land: 'land',
+  };
+}
+
+function renderPoolHiddenColumns() {
+  if (!poolHiddenColumnsEl) return;
+  const hidden = [...getPoolColumnSet()];
+  if (!hidden.length) {
+    poolHiddenColumnsEl.classList.add('hidden');
+    poolHiddenColumnsEl.innerHTML = '';
+    return;
+  }
+
+  const labels = getPoolColumnLabels();
+  poolHiddenColumnsEl.classList.remove('hidden');
+  poolHiddenColumnsEl.innerHTML = '<span class="hidden-columns-label">hidden</span>';
+
+  hidden.forEach(key => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'hidden-column-chip';
+    button.textContent = labels[key] || key;
+    button.setAttribute('aria-label', 'show ' + (labels[key] || key) + ' column');
+    button.addEventListener('click', () => showPoolColumn(currentSort, key));
+    poolHiddenColumnsEl.appendChild(button);
+  });
+
+  const restore = document.createElement('button');
+  restore.type = 'button';
+  restore.className = 'hidden-columns-restore';
+  restore.textContent = 'restore all';
+  restore.addEventListener('click', () => showAllPoolColumns());
+  poolHiddenColumnsEl.appendChild(restore);
+}
+
+function createPoolColumnHeader(label, count, key) {
+  const header = document.createElement('div');
+  header.className = 'column-header pool-column-header';
+
+  const title = document.createElement('span');
+  title.className = 'column-title';
+  title.textContent = label + (count > 0 ? ' (' + count + ')' : '');
+  header.appendChild(title);
+
+  const hideButton = document.createElement('button');
+  hideButton.type = 'button';
+  hideButton.className = 'column-hide-btn';
+  hideButton.textContent = 'hide';
+  hideButton.setAttribute('aria-label', 'hide ' + label + ' column');
+  hideButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    hidePoolColumn(key);
+  });
+  header.appendChild(hideButton);
+
+  return header;
+}
+
+function appendPoolCardColumn(label, key, cards, countOverride = cards.length) {
+  if (isPoolColumnHidden(key)) return;
+
+  const groupEl = document.createElement('div');
+  groupEl.className = 'card-column';
+  groupEl.appendChild(createPoolColumnHeader(label, countOverride, key));
+
+  const stackEl = document.createElement('div');
+  stackEl.className = 'card-stack';
+  cards.forEach((card, idx) => {
+    const cardEl = createCardElement(card, 'pool');
+    cardEl.style.setProperty('--stack-index', idx);
+    stackEl.appendChild(cardEl);
+  });
+
+  groupEl.appendChild(stackEl);
+  poolGrid.appendChild(groupEl);
+}
+
 // Render pool
 function renderPool() {
   const sorted = sortCards(currentPool);
   poolCount.textContent = '(' + currentPool.length + ' cards)';
+  renderPoolHiddenColumns();
 
   if (currentSort === 'color') {
     renderPoolByColor(sorted);
@@ -825,31 +967,18 @@ function renderPoolByColor(cards) {
       return a.name.localeCompare(b.name);
     });
 
-    const groupEl = document.createElement('div');
-    groupEl.className = 'card-column';
-    groupEl.innerHTML = '<div class="column-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
-
-    const stackEl = document.createElement('div');
-    stackEl.className = 'card-stack';
-    groupCards.forEach((card, idx) => {
-      const cardEl = createCardElement(card, 'pool');
-      cardEl.style.setProperty('--stack-index', idx);
-      stackEl.appendChild(cardEl);
-    });
-
-    groupEl.appendChild(stackEl);
-    poolGrid.appendChild(groupEl);
+    appendPoolCardColumn(groupNames[key], key, groupCards);
   });
 }
 
 function renderLandColumn(nonBasicLands) {
-  const groupEl = document.createElement('div');
-  groupEl.className = 'card-column';
-
   // Count: non-basics + 5 basics
   const totalCount = nonBasicLands.length + 5;
-  groupEl.innerHTML = '<div class="column-header">land (' + totalCount + ')</div>';
+  if (isPoolColumnHidden('land')) return;
 
+  const groupEl = document.createElement('div');
+  groupEl.className = 'card-column';
+  groupEl.appendChild(createPoolColumnHeader('land', totalCount, 'land'));
   const stackEl = document.createElement('div');
   stackEl.className = 'card-stack';
 
@@ -911,21 +1040,7 @@ function renderPoolByRarity(cards) {
   rarityOrder.forEach(key => {
     const groupCards = groups[key];
     if (groupCards.length === 0) return;
-
-    const groupEl = document.createElement('div');
-    groupEl.className = 'card-column';
-    groupEl.innerHTML = '<div class="column-header">' + groupNames[key] + ' (' + groupCards.length + ')</div>';
-
-    const stackEl = document.createElement('div');
-    stackEl.className = 'card-stack';
-    groupCards.forEach((card, idx) => {
-      const cardEl = createCardElement(card, 'pool');
-      cardEl.style.setProperty('--stack-index', idx);
-      stackEl.appendChild(cardEl);
-    });
-
-    groupEl.appendChild(stackEl);
-    poolGrid.appendChild(groupEl);
+    appendPoolCardColumn(groupNames[key], key, groupCards);
   });
 
   // Add land column with basics
@@ -969,21 +1084,7 @@ function renderPoolByCmc(cards) {
   cmcOrder.forEach(key => {
     const groupCards = groups[key];
     if (groupCards.length === 0) return;
-
-    const groupEl = document.createElement('div');
-    groupEl.className = 'card-column';
-    groupEl.innerHTML = '<div class="column-header">' + key + ' (' + groupCards.length + ')</div>';
-
-    const stackEl = document.createElement('div');
-    stackEl.className = 'card-stack';
-    groupCards.forEach((card, idx) => {
-      const cardEl = createCardElement(card, 'pool');
-      cardEl.style.setProperty('--stack-index', idx);
-      stackEl.appendChild(cardEl);
-    });
-
-    groupEl.appendChild(stackEl);
-    poolGrid.appendChild(groupEl);
+    appendPoolCardColumn(key, key, groupCards);
   });
 
   // Add land column with basics

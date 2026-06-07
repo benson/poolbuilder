@@ -524,6 +524,53 @@ h1 {
   gap: 0;
 }
 
+.pool-hidden-columns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: -6px 0 12px;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.hidden-columns-label {
+  color: var(--text-faint);
+}
+
+.hidden-column-chip,
+.hidden-columns-restore,
+.column-hide-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  text-transform: lowercase;
+}
+
+.hidden-column-chip {
+  padding: 2px 6px;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  background: var(--bg-raised);
+  color: var(--text-muted);
+}
+
+.hidden-columns-restore {
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.hidden-column-chip:hover,
+.hidden-columns-restore:hover,
+.column-hide-btn:hover {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
 .section-controls {
   display: flex;
   align-items: center;
@@ -654,6 +701,25 @@ h1 {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border-faint);
   white-space: nowrap;
+}
+
+.pool-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.column-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.column-hide-btn {
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 0.68rem;
 }
 
 /* Stacked Cards */
