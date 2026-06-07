@@ -1,47 +1,92 @@
-import { buttonHtml, el, fieldRowHtml, modal } from '../../index.js';
+import { buttonHtml, el, fieldRowHtml, makeModalInteractive, modal } from '../../index.js';
 
 const mount = document.getElementById('modalLabMount');
+
+const CLOSE_DEFAULTS = {
+  close: 'quiet',
+  closeBg: 'var(--vui-color-surface-raised)',
+  closeHoverBg: '#ac4133',
+  closeColor: 'var(--vui-color-text-muted)',
+  closeHoverColor: 'var(--vui-color-neutral-white)',
+  closeSize: 28,
+  closeInset: 6,
+  closeRadius: 4,
+  closeBorder: 3,
+};
+
+const DESIGN_SYSTEM_COLOR_CHOICES = [
+  ['line', 'var(--vui-color-line)'],
+  ['line strong', 'var(--vui-color-line-strong)'],
+  ['text', 'var(--vui-color-text-strong)'],
+  ['muted', 'var(--vui-color-text-muted)'],
+  ['inverse', 'var(--vui-color-text-inverse)'],
+  ['surface', 'var(--vui-color-surface)'],
+  ['raised', 'var(--vui-color-surface-raised)'],
+  ['sunken', 'var(--vui-color-surface-sunken)'],
+  ['warm', 'var(--vui-color-neutral-surface-warm)'],
+  ['white', 'var(--vui-color-neutral-white)'],
+  ['accent', 'var(--vui-color-accent)'],
+  ['accent soft', 'var(--vui-color-accent-soft)'],
+  ['accent strong', 'var(--vui-color-accent-strong)'],
+  ['warn', 'var(--vui-color-warn)'],
+  ['danger', 'var(--vui-color-danger)'],
+  ['danger hover', 'var(--vui-color-danger-hover)'],
+  ['info', 'var(--vui-color-info)'],
+  ['success', 'var(--vui-color-success)'],
+  ['shadow', 'var(--vui-color-shadow)'],
+].map(([label, value]) => ({ label, value }));
 
 const PRESETS = {
   current: {
     label: 'current',
-    surface: '#e7e2ee',
+    ...CLOSE_DEFAULTS,
+    surface: 'var(--vui-color-surface)',
     backdrop: 0.4,
     border: 3,
+    borderColor: 'var(--vui-color-line)',
     radius: 0,
     shadow: 8,
     padding: 14,
-    close: 'rune',
   },
   softer: {
     label: 'softer',
-    surface: '#faf8fd',
+    ...CLOSE_DEFAULTS,
+    surface: 'var(--vui-color-surface-raised)',
     backdrop: 0.28,
     border: 2,
+    borderColor: 'var(--vui-color-line)',
     radius: 8,
     shadow: 4,
     padding: 18,
-    close: 'quiet',
+    closeBg: 'var(--vui-color-neutral-white)',
+    closeHoverBg: 'var(--vui-color-accent-soft)',
   },
   paper: {
     label: 'paper',
-    surface: '#fffefb',
+    ...CLOSE_DEFAULTS,
+    surface: 'var(--vui-color-neutral-surface-warm)',
     backdrop: 0.22,
     border: 2,
+    borderColor: 'var(--vui-color-line)',
     radius: 3,
     shadow: 0,
     padding: 20,
     close: 'tab',
+    closeBg: 'var(--vui-color-neutral-surface-warm)',
+    closeHoverBg: 'var(--vui-color-warn)',
   },
   compact: {
     label: 'compact',
-    surface: '#e7e2ee',
+    ...CLOSE_DEFAULTS,
+    surface: 'var(--vui-color-surface)',
     backdrop: 0.32,
     border: 3,
+    borderColor: 'var(--vui-color-line)',
     radius: 0,
     shadow: 5,
     padding: 10,
-    close: 'rune',
+    closeSize: 26,
+    closeInset: 6,
   },
 };
 
@@ -55,7 +100,8 @@ renderModalLab(mount);
 function renderModalLab(target) {
   if (!target) return;
   target.append(header(), shell());
-  liveApi = modal(document.getElementById('modalLabLive'));
+  target.querySelectorAll('.modal-lab-preview .ui-modal-card').forEach((card) => makeModalInteractive(card, { centeredX: false, centeredY: false }));
+  liveApi = modal(document.getElementById('modalLabLive'), { interactive: true });
   applyState();
 }
 
@@ -69,7 +115,7 @@ function header() {
       el('h1', { className: 'lab-title', text: 'Modal Lab' }),
       el('p', {
         className: 'lab-sub',
-        text: 'A Vellum UI workbench for testing modal weight, paper feel, backdrop, spacing, and close-button treatment.',
+        text: 'A Vellum UI workbench for testing modal weight, paper feel, backdrop, spacing, drag behavior, resize affordances, and close-button treatment.',
       }),
     ),
     el(
@@ -91,6 +137,7 @@ function shell() {
       { className: 'lab-controls' },
       panel('Presets', presetButtons()),
       panel('Knobs', knobControls()),
+      panel('Close Button', closeControls()),
       panel(
         'Token output',
         el('div', { className: 'lab-control-list' }, output, el('button', { className: 'btn btn-secondary', type: 'button', text: 'copy', onClick: copyOutput })),
@@ -142,29 +189,117 @@ function presetButtons() {
 
 function knobControls() {
   const wrap = el('div', { className: 'lab-control-list' });
-  controls.surface = colorControl('surface', 'surface', state.surface);
-  controls.backdrop = rangeControl('backdrop', 'backdrop', state.backdrop, 0, 0.75, 0.01);
-  controls.border = rangeControl('border', 'border', state.border, 0, 6, 1);
-  controls.radius = rangeControl('radius', 'radius', state.radius, 0, 16, 1);
-  controls.shadow = rangeControl('shadow', 'shadow', state.shadow, 0, 14, 1);
-  controls.padding = rangeControl('padding', 'padding', state.padding, 8, 26, 1);
+  const coreControls = [
+    (controls.surface = colorTokenControl('surface', 'surface', state.surface)),
+    (controls.backdrop = rangeControl('backdrop', 'backdrop', state.backdrop, 0, 0.75, 0.01)),
+    (controls.border = rangeControl('border', 'border', state.border, 0, 6, 1)),
+    (controls.borderColor = colorTokenControl('border color', 'borderColor', state.borderColor)),
+    (controls.radius = rangeControl('radius', 'radius', state.radius, 0, 16, 1)),
+    (controls.shadow = rangeControl('shadow', 'shadow', state.shadow, 0, 14, 1)),
+    (controls.padding = rangeControl('padding', 'padding', state.padding, 8, 26, 1)),
+  ];
+
+  coreControls.forEach((control) => wrap.append(control.row));
+  return wrap;
+}
+
+function closeControls() {
+  const wrap = el('div', { className: 'lab-control-list' });
   controls.close = selectControl('close button', 'close', state.close, [
     ['rune', 'rune'],
     ['quiet', 'quiet'],
     ['tab', 'tab'],
   ]);
+  controls.closeBg = colorTokenControl('bg', 'closeBg', state.closeBg);
+  controls.closeHoverBg = colorTokenControl('hover bg', 'closeHoverBg', state.closeHoverBg);
+  controls.closeColor = colorTokenControl('text', 'closeColor', state.closeColor);
+  controls.closeHoverColor = colorTokenControl('hover text', 'closeHoverColor', state.closeHoverColor);
+  controls.closeSize = rangeControl('size', 'closeSize', state.closeSize, 22, 38, 1);
+  controls.closeInset = rangeControl('inset', 'closeInset', state.closeInset, -18, 18, 1);
+  controls.closeRadius = rangeControl('radius', 'closeRadius', state.closeRadius, 0, 18, 1);
+  controls.closeBorder = rangeControl('border', 'closeBorder', state.closeBorder, 0, 3, 1);
 
-  for (const control of Object.values(controls)) wrap.append(control.row);
+  [
+    controls.close,
+    controls.closeBg,
+    controls.closeHoverBg,
+    controls.closeColor,
+    controls.closeHoverColor,
+    controls.closeSize,
+    controls.closeInset,
+    controls.closeRadius,
+    controls.closeBorder,
+  ].forEach((control) => wrap.append(control.row));
   return wrap;
 }
 
-function colorControl(label, key, value) {
-  const input = el('input', { type: 'color', value });
-  input.addEventListener('input', () => {
-    state[key] = input.value;
+function colorTokenControl(label, key, value, options = DESIGN_SYSTEM_COLOR_CHOICES) {
+  const buttons = [];
+  const grid = el('div', { className: 'lab-swatch-grid', role: 'group', ariaLabel: label });
+  const readout = el('output', { text: swatchLabel(value, options) });
+  const customInput = el('input', { className: 'lab-swatch-custom-input', type: 'color', value: customColorValue(value), hidden: isTokenColor(value, options) });
+  const customButton = el('button', {
+    className: isTokenColor(value, options) ? 'lab-swatch lab-swatch-custom' : 'lab-swatch lab-swatch-custom active',
+    type: 'button',
+    title: 'new variant',
+    ariaLabel: 'new variant',
+    text: '+',
+    onClick: () => {
+      setValue(customInput.value);
+      customInput.hidden = false;
+      customInput.focus();
+      applyState();
+    },
+  });
+  customButton.setAttribute('aria-label', 'new variant');
+
+  customInput.addEventListener('input', () => {
+    setValue(customInput.value);
     applyState();
   });
-  return { row: el('label', { className: 'lab-control' }, el('span', { text: label }), input), input };
+
+  function setValue(nextValue) {
+    state[key] = nextValue;
+    readout.textContent = swatchLabel(nextValue, options);
+    const custom = !isTokenColor(nextValue, options);
+    customInput.hidden = !custom;
+    if (customColorValue(nextValue) === nextValue) customInput.value = nextValue;
+    customButton.classList.toggle('active', custom);
+    customButton.setAttribute('aria-pressed', String(custom));
+    buttons.forEach((button) => {
+      const active = button.dataset.value === nextValue;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  options.forEach((option) => {
+    const button = el('button', {
+      className: option.value === value ? 'lab-swatch active' : 'lab-swatch',
+      type: 'button',
+      title: option.label,
+      ariaLabel: option.label,
+      ariaPressed: option.value === value ? 'true' : 'false',
+      dataset: { value: option.value },
+      onClick: () => {
+        setValue(option.value);
+        applyState();
+      },
+    });
+    button.setAttribute('aria-label', option.label);
+    button.setAttribute('aria-pressed', String(option.value === value));
+    button.style.setProperty('--lab-swatch-color', option.value);
+    buttons.push(button);
+    grid.append(button);
+  });
+  customButton.setAttribute('aria-pressed', String(!isTokenColor(value, options)));
+  grid.append(customButton);
+
+  return {
+    row: el('div', { className: 'lab-control lab-swatch-control' }, el('span', { text: label }), readout, grid, customInput),
+    setValue,
+    readout,
+  };
 }
 
 function rangeControl(label, key, value, min, max, step) {
@@ -190,7 +325,11 @@ function selectControl(label, key, value, options) {
 
 function syncControls() {
   for (const [key, control] of Object.entries(controls)) {
-    control.input.value = state[key];
+    if (control.setValue) {
+      control.setValue(state[key]);
+      continue;
+    }
+    if (control.input) control.input.value = state[key];
     if (control.readout) control.readout.textContent = formatRange(key, state[key]);
   }
 }
@@ -206,7 +345,8 @@ function applyState() {
 }
 
 function tokenValues() {
-  const borderColor = state.border === 0 ? 'transparent' : 'var(--vui-color-line)';
+  const borderColor = state.border === 0 ? 'transparent' : state.borderColor || 'var(--vui-color-line)';
+  const closeBorder = state.closeBorder === 0 ? '0 solid transparent' : `${state.closeBorder}px solid var(--vui-color-line)`;
   return {
     '--vui-modal-backdrop': `rgba(0, 0, 0, ${state.backdrop.toFixed(2)})`,
     '--vui-modal-card-bg': state.surface,
@@ -216,12 +356,34 @@ function tokenValues() {
     '--vui-modal-head-padding': `${state.padding}px ${state.padding + 2}px`,
     '--vui-modal-body-padding': `${state.padding}px ${state.padding + 2}px`,
     '--vui-modal-actions-padding': `${Math.max(8, state.padding - 2)}px ${state.padding + 2}px`,
+    '--vui-modal-close-size': `${state.closeSize}px`,
+    '--vui-modal-close-offset': `${state.closeInset}px`,
+    '--vui-modal-close-radius': `${state.closeRadius}px`,
+    '--vui-modal-close-border': closeBorder,
+    '--vui-modal-close-bg': state.closeBg,
+    '--vui-modal-close-color': state.closeColor,
+    '--vui-modal-close-hover-bg': state.closeHoverBg,
+    '--vui-modal-close-hover-color': state.closeHoverColor,
+    '--vui-modal-close-shadow': 'none',
+    '--vui-modal-close-hover-shadow': 'none',
   };
 }
 
 function formatRange(key, value) {
   if (key === 'backdrop') return value.toFixed(2);
   return `${value}px`;
+}
+
+function swatchLabel(value, options) {
+  return options.find((option) => option.value === value)?.label || 'new variant';
+}
+
+function isTokenColor(value, options) {
+  return options.some((option) => option.value === value);
+}
+
+function customColorValue(value) {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : '#ac4133';
 }
 
 async function copyOutput(event) {
@@ -270,7 +432,7 @@ function longModal() {
       el('p', { text: 'The reference build is Temur splash-white, prioritizing Lessons and fixing over raw curve density.' }),
       el('p', { text: 'Main differences: it keeps both Pest Mascots, cuts the second Noxious Newt, and treats Prismari Charm as a splash card rather than a lane signal.' }),
       el('p', { text: 'This body intentionally runs long enough to test scrolling, padding, and the visual relationship between the header and action row.' }),
-      el('p', { text: 'The lab should make cramped, heavy, or overly theatrical treatments obvious before they land in app code.' }),
+      el('p', { text: 'The lab should make cramped, heavy, overly theatrical, or awkwardly resizable treatments obvious before they land in app code.' }),
     ),
     [button('close', 'secondary'), button('view list')],
   );
@@ -290,7 +452,7 @@ function liveModal() {
     { id: 'modalLabLive', className: 'ui-modal modal-lab-live', hidden: true, ariaHidden: 'true' },
     modalCard(
       'live modal',
-      el('p', { text: 'This uses the real Vellum modal helper, so escape and close-button behavior are part of the playground.' }),
+      el('p', { text: 'This uses the real Vellum modal helper, so escape, close, drag, and resize behavior are part of the playground.' }),
       [el('button', { className: 'btn btn-secondary', type: 'button', text: 'close', dataset: { modalClose: '' } }), button('commit direction')],
     ),
   );

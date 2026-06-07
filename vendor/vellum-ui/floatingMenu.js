@@ -3,15 +3,16 @@ export function floatingMenu(triggerEl, menuEl, options = {}) {
 
   function position() {
     if (!triggerEl || !menuEl) return;
+    const win = menuEl.ownerDocument?.defaultView || globalThis;
     const trigger = triggerEl.getBoundingClientRect();
     const menu = menuEl.getBoundingClientRect();
-    const left = Math.max(edgeBuffer, Math.min(trigger.left, window.innerWidth - menu.width - edgeBuffer));
+    const left = Math.max(edgeBuffer, Math.min(trigger.left, win.innerWidth - menu.width - edgeBuffer));
     const top = Math.max(
       edgeBuffer,
-      Math.min(trigger.bottom + gap, window.innerHeight - menu.height - edgeBuffer),
+      Math.min(trigger.bottom + gap, win.innerHeight - menu.height - edgeBuffer),
     );
-    menuEl.style.left = `${Math.round(left + window.scrollX)}px`;
-    menuEl.style.top = `${Math.round(top + window.scrollY)}px`;
+    menuEl.style.left = `${Math.round(left + win.scrollX)}px`;
+    menuEl.style.top = `${Math.round(top + win.scrollY)}px`;
   }
 
   function open() {

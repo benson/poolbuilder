@@ -12,14 +12,15 @@ export function popover(triggerEl, panelEl, options = {}) {
 
   function position() {
     if (!triggerEl || !panelEl) return;
+    const win = panelEl.ownerDocument?.defaultView || globalThis;
     const trigger = triggerEl.getBoundingClientRect();
     const panel = panelEl.getBoundingClientRect();
     let left = placement.endsWith('end') ? trigger.right - panel.width : trigger.left;
     let top = placement.startsWith('top') ? trigger.top - panel.height - gap : trigger.bottom + gap;
-    left = Math.max(edgeMargin, Math.min(left, window.innerWidth - panel.width - edgeMargin));
-    top = Math.max(edgeMargin, Math.min(top, window.innerHeight - panel.height - edgeMargin));
-    panelEl.style.left = `${Math.round(left + window.scrollX)}px`;
-    panelEl.style.top = `${Math.round(top + window.scrollY)}px`;
+    left = Math.max(edgeMargin, Math.min(left, win.innerWidth - panel.width - edgeMargin));
+    top = Math.max(edgeMargin, Math.min(top, win.innerHeight - panel.height - edgeMargin));
+    panelEl.style.left = `${Math.round(left + win.scrollX)}px`;
+    panelEl.style.top = `${Math.round(top + win.scrollY)}px`;
   }
 
   function open() {

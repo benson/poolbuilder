@@ -82,10 +82,31 @@
   --vui-modal-card-radius: var(--vui-radius-square);
   --vui-modal-card-shadow: var(--vui-shadow-overlay);
   --vui-modal-card-max-height: calc(100vh - 32px);
+  --vui-modal-card-min-width: 220px;
+  --vui-modal-card-min-height: 140px;
+  --vui-modal-head-bg: var(--vui-color-surface-raised);
+  --vui-modal-head-texture:
+    radial-gradient(rgba(21, 16, 13, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(255, 245, 210, 0.08), rgba(0, 0, 0, 0.04));
+  --vui-modal-head-texture-size:
+    6px 6px,
+    auto;
   --vui-modal-head-padding: 14px 16px;
   --vui-modal-body-padding: 14px 16px;
   --vui-modal-actions-padding: 12px 16px;
   --vui-modal-actions-gap: 8px;
+  --vui-modal-close-size: 28px;
+  --vui-modal-close-offset: 6px;
+  --vui-modal-close-radius: var(--vui-radius-sharp);
+  --vui-modal-close-border: 3px solid var(--vui-color-line);
+  --vui-modal-close-bg: var(--vui-color-surface-raised);
+  --vui-modal-close-color: var(--vui-color-text-muted);
+  --vui-modal-close-hover-bg: #ac4133;
+  --vui-modal-close-hover-color: #ffffff;
+  --vui-modal-close-shadow: none;
+  --vui-modal-close-hover-shadow: none;
+  --vui-modal-resize-edge-size: 8px;
+  --vui-modal-resize-corner-size: 18px;
   --vui-color-success-bg: #effaef;
   --vui-color-success-border: #c4e5c4;
   --vui-color-success-text: #2c6b2c;
@@ -98,6 +119,18 @@
   --vui-color-status-neutral-bg: #f4f4f4;
   --vui-color-status-neutral-border: #ddd;
   --vui-color-status-neutral-text: #777;
+  --vui-status-success-bg: var(--vui-color-success-bg);
+  --vui-status-success-border: var(--vui-color-success-border);
+  --vui-status-success-text: var(--vui-color-success-text);
+  --vui-status-warn-bg: var(--vui-color-warn-bg);
+  --vui-status-warn-border: var(--vui-color-warn-border);
+  --vui-status-warn-text: var(--vui-color-warn-text);
+  --vui-status-danger-bg: var(--vui-color-danger-bg);
+  --vui-status-danger-border: var(--vui-color-danger-border);
+  --vui-status-danger-text: var(--vui-color-danger-text);
+  --vui-status-neutral-bg: var(--vui-color-status-neutral-bg);
+  --vui-status-neutral-border: var(--vui-color-status-neutral-border);
+  --vui-status-neutral-text: var(--vui-color-status-neutral-text);
   --vui-color-neutral-black: #000;
   --vui-color-neutral-white: #fff;
   --vui-color-neutral-900: #111;
@@ -139,7 +172,6 @@
 
   /* Vellum convenience aliases */
   --vui-control-height: 34px;
-  --vui-radius-round: var(--vui-radius-pill);
   --vui-space-6: 24px;
   --vui-shadow-hard-sm: var(--vui-shadow-hard-small);
   --vui-z-toast: 160;
@@ -226,10 +258,27 @@
   --modal-card-radius: var(--vui-modal-card-radius);
   --modal-card-shadow: var(--vui-modal-card-shadow);
   --modal-card-max-height: var(--vui-modal-card-max-height);
+  --modal-card-min-width: var(--vui-modal-card-min-width);
+  --modal-card-min-height: var(--vui-modal-card-min-height);
+  --modal-head-bg: var(--vui-modal-head-bg);
+  --modal-head-texture: var(--vui-modal-head-texture);
+  --modal-head-texture-size: var(--vui-modal-head-texture-size);
   --modal-head-padding: var(--vui-modal-head-padding);
   --modal-body-padding: var(--vui-modal-body-padding);
   --modal-actions-padding: var(--vui-modal-actions-padding);
   --modal-actions-gap: var(--vui-modal-actions-gap);
+  --modal-close-size: var(--vui-modal-close-size);
+  --modal-close-offset: var(--vui-modal-close-offset);
+  --modal-close-radius: var(--vui-modal-close-radius);
+  --modal-close-border: var(--vui-modal-close-border);
+  --modal-close-bg: var(--vui-modal-close-bg);
+  --modal-close-color: var(--vui-modal-close-color);
+  --modal-close-hover-bg: var(--vui-modal-close-hover-bg);
+  --modal-close-hover-color: var(--vui-modal-close-hover-color);
+  --modal-close-shadow: var(--vui-modal-close-shadow);
+  --modal-close-hover-shadow: var(--vui-modal-close-hover-shadow);
+  --modal-resize-edge-size: var(--vui-modal-resize-edge-size);
+  --modal-resize-corner-size: var(--vui-modal-resize-corner-size);
   --color-success-bg: var(--vui-color-success-bg);
   --color-success-border: var(--vui-color-success-border);
   --color-success-text: var(--vui-color-success-text);
@@ -242,6 +291,18 @@
   --color-status-neutral-bg: var(--vui-color-status-neutral-bg);
   --color-status-neutral-border: var(--vui-color-status-neutral-border);
   --color-status-neutral-text: var(--vui-color-status-neutral-text);
+  --status-success-bg: var(--vui-status-success-bg);
+  --status-success-border: var(--vui-status-success-border);
+  --status-success-text: var(--vui-status-success-text);
+  --status-warn-bg: var(--vui-status-warn-bg);
+  --status-warn-border: var(--vui-status-warn-border);
+  --status-warn-text: var(--vui-status-warn-text);
+  --status-danger-bg: var(--vui-status-danger-bg);
+  --status-danger-border: var(--vui-status-danger-border);
+  --status-danger-text: var(--vui-status-danger-text);
+  --status-neutral-bg: var(--vui-status-neutral-bg);
+  --status-neutral-border: var(--vui-status-neutral-border);
+  --status-neutral-text: var(--vui-status-neutral-text);
   --color-neutral-black: var(--vui-color-neutral-black);
   --color-neutral-white: var(--vui-color-neutral-white);
   --color-neutral-900: var(--vui-color-neutral-900);
@@ -363,10 +424,27 @@
   --bui-modal-card-radius: var(--vui-modal-card-radius);
   --bui-modal-card-shadow: var(--vui-modal-card-shadow);
   --bui-modal-card-max-height: var(--vui-modal-card-max-height);
+  --bui-modal-card-min-width: var(--vui-modal-card-min-width);
+  --bui-modal-card-min-height: var(--vui-modal-card-min-height);
+  --bui-modal-head-bg: var(--vui-modal-head-bg);
+  --bui-modal-head-texture: var(--vui-modal-head-texture);
+  --bui-modal-head-texture-size: var(--vui-modal-head-texture-size);
   --bui-modal-head-padding: var(--vui-modal-head-padding);
   --bui-modal-body-padding: var(--vui-modal-body-padding);
   --bui-modal-actions-padding: var(--vui-modal-actions-padding);
   --bui-modal-actions-gap: var(--vui-modal-actions-gap);
+  --bui-modal-close-size: var(--vui-modal-close-size);
+  --bui-modal-close-offset: var(--vui-modal-close-offset);
+  --bui-modal-close-radius: var(--vui-modal-close-radius);
+  --bui-modal-close-border: var(--vui-modal-close-border);
+  --bui-modal-close-bg: var(--vui-modal-close-bg);
+  --bui-modal-close-color: var(--vui-modal-close-color);
+  --bui-modal-close-hover-bg: var(--vui-modal-close-hover-bg);
+  --bui-modal-close-hover-color: var(--vui-modal-close-hover-color);
+  --bui-modal-close-shadow: var(--vui-modal-close-shadow);
+  --bui-modal-close-hover-shadow: var(--vui-modal-close-hover-shadow);
+  --bui-modal-resize-edge-size: var(--vui-modal-resize-edge-size);
+  --bui-modal-resize-corner-size: var(--vui-modal-resize-corner-size);
   --bui-color-success-bg: var(--vui-color-success-bg);
   --bui-color-success-border: var(--vui-color-success-border);
   --bui-color-success-text: var(--vui-color-success-text);
@@ -379,6 +457,18 @@
   --bui-color-status-neutral-bg: var(--vui-color-status-neutral-bg);
   --bui-color-status-neutral-border: var(--vui-color-status-neutral-border);
   --bui-color-status-neutral-text: var(--vui-color-status-neutral-text);
+  --bui-status-success-bg: var(--vui-status-success-bg);
+  --bui-status-success-border: var(--vui-status-success-border);
+  --bui-status-success-text: var(--vui-status-success-text);
+  --bui-status-warn-bg: var(--vui-status-warn-bg);
+  --bui-status-warn-border: var(--vui-status-warn-border);
+  --bui-status-warn-text: var(--vui-status-warn-text);
+  --bui-status-danger-bg: var(--vui-status-danger-bg);
+  --bui-status-danger-border: var(--vui-status-danger-border);
+  --bui-status-danger-text: var(--vui-status-danger-text);
+  --bui-status-neutral-bg: var(--vui-status-neutral-bg);
+  --bui-status-neutral-border: var(--vui-status-neutral-border);
+  --bui-status-neutral-text: var(--vui-status-neutral-text);
   --bui-color-neutral-black: var(--vui-color-neutral-black);
   --bui-color-neutral-white: var(--vui-color-neutral-white);
   --bui-color-neutral-900: var(--vui-color-neutral-900);
@@ -399,15 +489,15 @@
   --bui-radius-pill: var(--vui-radius-pill);
   --bui-radius-card: var(--vui-radius-card);
   --bui-radius-tight: var(--vui-radius-tight);
-  --bui-radius-round: var(--vui-radius-round);
+  --bui-radius-round: var(--vui-radius-pill);
   --bui-border-width: var(--vui-border-width);
   --bui-shadow-subtle: var(--vui-shadow-subtle);
-  --bui-shadow-soft: var(--vui-shadow-soft);
+  --bui-shadow-soft: var(--vui-shadow-overlay);
   --bui-shadow-firm: var(--vui-shadow-firm);
   --bui-shadow-lift: var(--vui-shadow-lift);
   --bui-shadow-popover: var(--vui-shadow-popover);
   --bui-shadow-overlay: var(--vui-shadow-overlay);
-  --bui-shadow-hard: var(--vui-shadow-hard);
+  --bui-shadow-hard: var(--vui-shadow-firm);
   --bui-shadow-hard-small: var(--vui-shadow-hard-small);
   --bui-motion-fast: var(--vui-motion-fast);
   --bui-motion-base: var(--vui-motion-base);
@@ -418,11 +508,8 @@
   --bui-space-4: var(--vui-space-4);
   --bui-space-5: var(--vui-space-5);
   --bui-control-height: var(--vui-control-height);
-  --bui-radius-round: var(--vui-radius-round);
   --bui-space-6: var(--vui-space-6);
-  --bui-shadow-hard: var(--vui-shadow-firm);
   --bui-shadow-hard-sm: var(--vui-shadow-hard-sm);
-  --bui-shadow-soft: var(--vui-shadow-overlay);
   --bui-z-toast: var(--vui-z-toast);
 }
 
@@ -649,6 +736,9 @@ body.vui-app {
   appearance: none;
   position: relative;
   z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: var(--border-width) solid var(--color-line-strong);
   border-radius: var(--radius-sharp);
   background: var(--color-surface-raised);
@@ -658,7 +748,9 @@ body.vui-app {
   font-weight: var(--font-weight-title);
   font-size: var(--font-size-sm);
   line-height: 1;
+  min-height: 30px;
   padding: 7px 12px;
+  text-decoration: none;
   text-transform: lowercase;
   box-shadow:
     var(--shadow-firm),
@@ -831,18 +923,42 @@ textarea {
   display: flex;
   flex-direction: column;
   max-height: var(--modal-card-max-height);
+  min-height: var(--modal-card-min-height);
+  min-width: var(--modal-card-min-width);
   position: relative;
   overflow: visible;
+  transform: translate(var(--vui-modal-x, 0), var(--vui-modal-y, 0));
+  will-change: transform, width, height;
+}
+
+.ui-modal-card[data-vui-modal-interactive='true'] .ui-modal-head {
+  cursor: grab;
+  touch-action: none;
+}
+
+.ui-modal-card.is-vui-modal-dragging,
+.ui-modal-card.is-vui-modal-resizing {
+  user-select: none;
+  z-index: 2;
+}
+
+.ui-modal-card.is-vui-modal-dragging .ui-modal-head {
+  cursor: grabbing;
 }
 
 .ui-modal-body {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: var(--modal-body-padding);
 }
 
 .ui-modal-head {
+  background-color: var(--modal-head-bg);
+  background-image: var(--modal-head-texture);
+  background-size: var(--modal-head-texture-size);
   border-bottom: var(--border-width) solid var(--color-line);
+  flex: 0 0 auto;
   padding: var(--modal-head-padding);
 }
 
@@ -852,34 +968,81 @@ textarea {
 }
 
 .ui-modal-actions {
+  align-items: center;
   border-top: var(--border-width) solid var(--color-line);
   display: flex;
+  flex: 0 0 auto;
   gap: var(--modal-actions-gap);
   justify-content: flex-end;
   padding: var(--modal-actions-padding);
 }
 
+.vui-modal-resize-handle {
+  position: absolute;
+  z-index: 4;
+  touch-action: none;
+}
+
+.vui-modal-resize-left {
+  bottom: var(--modal-resize-corner-size);
+  cursor: ew-resize;
+  left: calc(-1 * var(--modal-resize-edge-size) / 2);
+  top: 0;
+  width: var(--modal-resize-edge-size);
+}
+
+.vui-modal-resize-bottom {
+  bottom: calc(-1 * var(--modal-resize-edge-size) / 2);
+  cursor: ns-resize;
+  height: var(--modal-resize-edge-size);
+  left: var(--modal-resize-corner-size);
+  right: 0;
+}
+
+.vui-modal-resize-bottom-left {
+  bottom: calc(-1 * var(--modal-resize-edge-size) / 2);
+  cursor: nesw-resize;
+  height: var(--modal-resize-corner-size);
+  left: calc(-1 * var(--modal-resize-edge-size) / 2);
+  width: var(--modal-resize-corner-size);
+}
+
+.vui-modal-resize-bottom-left::after {
+  background: repeating-linear-gradient(45deg, var(--color-line-strong) 0 1px, transparent 1px 4px);
+  bottom: 4px;
+  content: '';
+  height: 11px;
+  left: 4px;
+  opacity: 0.45;
+  pointer-events: none;
+  position: absolute;
+  width: 11px;
+}
+
+.vui-modal-resize-handle:hover::after,
+.ui-modal-card.is-vui-modal-resizing .vui-modal-resize-bottom-left::after {
+  opacity: 0.7;
+}
+
 .rune-close {
   appearance: none;
   position: absolute;
-  top: -15px;
-  right: -15px;
+  top: var(--modal-close-offset);
+  right: var(--modal-close-offset);
   z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
+  width: var(--modal-close-size);
+  height: var(--modal-close-size);
   padding: 1px 0 0;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: 50%;
-  background:
-    radial-gradient(rgba(242, 196, 82, 0.18) 0 22%, transparent 23%),
-    var(--color-rune-close-bg);
-  color: var(--color-warn);
-  box-shadow: var(--shadow-hard-small);
+  border: var(--modal-close-border);
+  border-radius: var(--modal-close-radius);
+  background: var(--modal-close-bg);
+  color: var(--modal-close-color);
+  box-shadow: var(--modal-close-shadow);
   font-family: var(--font-mono);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-title);
@@ -888,25 +1051,24 @@ textarea {
   transition:
     transform var(--motion-fast) steps(2, end),
     box-shadow var(--motion-fast) steps(2, end),
-    background-color var(--motion-fast);
+    background-color var(--motion-fast),
+    color var(--motion-fast);
 }
 
 .rune-close:hover {
-  transform: translate(1px, 1px) rotate(8deg);
-  box-shadow: 2px 2px 0 var(--color-text-strong);
-  background:
-    radial-gradient(rgba(242, 196, 82, 0.28) 0 24%, transparent 25%),
-    var(--color-accent);
+  transform: none;
+  box-shadow: var(--modal-close-hover-shadow);
+  background: var(--modal-close-hover-bg);
+  color: var(--modal-close-hover-color);
 }
 
 .rune-close:active {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--color-text-strong);
+  filter: brightness(0.96);
 }
 
 .rune-close:focus-visible {
-  outline: var(--border-width) solid var(--color-warn);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .ui-popover {
@@ -958,7 +1120,7 @@ textarea {
   gap: var(--vui-space-1);
   min-height: 22px;
   border: 1px solid var(--vui-color-line);
-  border-radius: var(--vui-radius-round);
+  border-radius: var(--vui-radius-pill);
   background: var(--vui-color-surface-raised);
   color: var(--vui-color-text);
   font-size: var(--vui-font-size-xs);
@@ -985,7 +1147,7 @@ textarea {
   gap: var(--vui-space-1);
   min-height: 22px;
   border: 1px solid var(--vui-status-neutral-border);
-  border-radius: var(--vui-radius-round);
+  border-radius: var(--vui-radius-pill);
   background: var(--vui-status-neutral-bg);
   color: var(--vui-status-neutral-text);
   font-size: var(--vui-font-size-xs);
@@ -1018,6 +1180,50 @@ textarea {
   border-color: var(--vui-status-danger-border);
   background: var(--vui-status-danger-bg);
   color: var(--vui-status-danger-text);
+}
+
+.status-state-empty,
+.status-state-loading,
+.status-state-compact {
+  border-color: var(--vui-status-neutral-border);
+  background: var(--vui-status-neutral-bg);
+  color: var(--vui-status-neutral-text);
+}
+
+.status-state-inline-error,
+.status-state-blocking-error,
+.status-state-retryable-error {
+  border-color: var(--vui-status-danger-border);
+  background: var(--vui-status-danger-bg);
+  color: var(--vui-status-danger-text);
+}
+
+.status-state-message,
+.status-state-detail {
+  min-width: 0;
+}
+
+.status-state-detail {
+  color: var(--vui-color-text-muted);
+}
+
+.status-state-retry {
+  margin-left: var(--vui-space-1);
+}
+
+.loading-spinner {
+  width: 0.8em;
+  height: 0.8em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--vui-radius-pill);
+  animation: vui-spin var(--vui-motion-slow) linear infinite;
+}
+
+@keyframes vui-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .banner {
@@ -1650,6 +1856,67 @@ body.vui-lab-page {
   width: 100%;
 }
 
+.lab-swatch-control {
+  align-items: start;
+}
+
+.lab-swatch-control output {
+  max-width: 130px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lab-swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1 / -1;
+}
+
+.lab-swatch {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-sharp);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.12)),
+    var(--lab-swatch-color);
+  box-shadow: none;
+  color: var(--color-text-strong);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-title);
+  line-height: 1;
+  padding: 0;
+}
+
+.lab-swatch:hover,
+.lab-swatch.active,
+.lab-swatch[aria-pressed='true'] {
+  border-color: var(--color-text-strong);
+  box-shadow: 2px 2px 0 var(--color-shadow);
+}
+
+.lab-swatch:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.lab-swatch-custom {
+  background:
+    radial-gradient(rgba(21, 16, 13, 0.1) 1px, transparent 1px),
+    var(--color-surface-raised);
+  background-size: 5px 5px, auto;
+}
+
+.lab-swatch-custom-input {
+  grid-column: 1 / -1;
+}
+
 .lab-stage {
   display: flex;
   flex-direction: column;
@@ -1711,23 +1978,54 @@ body.vui-lab-page {
 
 .modal-lab-page[data-close-style='quiet'] .modal-lab-preview .rune-close,
 .modal-lab-page[data-close-style='quiet'] .modal-lab-live .rune-close {
-  top: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: var(--radius-sharp);
-  background: transparent;
-  box-shadow: none;
-  color: var(--color-text-muted);
+  top: var(--modal-close-offset);
+  right: var(--modal-close-offset);
+  width: var(--modal-close-size);
+  height: var(--modal-close-size);
+  border: var(--modal-close-border);
+  border-radius: var(--modal-close-radius);
+  background: var(--modal-close-bg);
+  box-shadow: var(--modal-close-shadow);
+  color: var(--modal-close-color);
 }
 
 .modal-lab-page[data-close-style='quiet'] .modal-lab-preview .rune-close:hover,
 .modal-lab-page[data-close-style='quiet'] .modal-lab-live .rune-close:hover {
   transform: none;
-  background: var(--color-surface-hover);
-  box-shadow: none;
-  color: var(--color-text-strong);
+  background: var(--modal-close-hover-bg);
+  box-shadow: var(--modal-close-hover-shadow);
+  color: var(--modal-close-hover-color);
+}
+
+.modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close,
+.modal-lab-page[data-close-style='rune'] .modal-lab-live .rune-close {
+  top: -15px;
+  right: -15px;
+  width: 30px;
+  height: 30px;
+  border: var(--border-width) solid var(--color-text-strong);
+  border-radius: 50%;
+  background:
+    radial-gradient(rgba(242, 196, 82, 0.18) 0 22%, transparent 23%),
+    var(--color-rune-close-bg);
+  box-shadow: var(--shadow-hard-small);
+  color: var(--color-warn);
+}
+
+.modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close:hover,
+.modal-lab-page[data-close-style='rune'] .modal-lab-live .rune-close:hover {
+  transform: translate(1px, 1px) rotate(8deg);
+  background:
+    radial-gradient(rgba(242, 196, 82, 0.28) 0 24%, transparent 25%),
+    var(--color-accent);
+  box-shadow: 2px 2px 0 var(--color-text-strong);
+  color: var(--color-warn);
+}
+
+.modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close:active,
+.modal-lab-page[data-close-style='rune'] .modal-lab-live .rune-close:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--color-text-strong);
 }
 
 .modal-lab-page[data-close-style='tab'] .modal-lab-preview .rune-close,
