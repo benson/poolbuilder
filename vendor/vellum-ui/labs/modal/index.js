@@ -9,8 +9,8 @@ const CLOSE_DEFAULTS = {
   closeColor: 'var(--vui-color-text-muted)',
   closeHoverColor: 'var(--vui-color-neutral-white)',
   closeSize: 28,
-  closeInset: 6,
-  closeRadius: 4,
+  closeInset: 11,
+  closeRadius: 0,
   closeBorder: 3,
 };
 
@@ -43,9 +43,9 @@ const PRESETS = {
     surface: 'var(--vui-color-surface)',
     backdrop: 0.4,
     border: 3,
-    borderColor: 'var(--vui-color-line)',
-    radius: 0,
-    shadow: 8,
+    borderColor: 'var(--vui-color-text-strong)',
+    radius: 6,
+    shadow: 7,
     padding: 14,
   },
   softer: {
@@ -90,6 +90,9 @@ const PRESETS = {
   },
 };
 
+const DEFAULT_STATE = PRESETS.current;
+const KNOB_KEYS = ['surface', 'backdrop', 'border', 'borderColor', 'radius', 'shadow', 'padding'];
+const CLOSE_KEYS = ['close', 'closeBg', 'closeHoverBg', 'closeColor', 'closeHoverColor', 'closeSize', 'closeInset', 'closeRadius', 'closeBorder'];
 const state = { ...PRESETS.current };
 const controls = {};
 let output;
@@ -136,8 +139,8 @@ function shell() {
       'aside',
       { className: 'lab-controls' },
       panel('Presets', presetButtons()),
-      panel('Knobs', knobControls()),
-      panel('Close Button', closeControls()),
+      panel('Knobs', knobControls(), resetButton('reset knobs', KNOB_KEYS)),
+      panel('Close Button', closeControls(), resetButton('reset close', CLOSE_KEYS)),
       panel(
         'Token output',
         el('div', { className: 'lab-control-list' }, output, el('button', { className: 'btn btn-secondary', type: 'button', text: 'copy', onClick: copyOutput })),
@@ -159,8 +162,27 @@ function shell() {
   );
 }
 
-function panel(title, body) {
-  return el('section', { className: 'lab-panel' }, el('h2', { className: 'lab-panel-title', text: title }), body);
+function panel(title, body, action = null) {
+  return el('section', { className: 'lab-panel' }, el('div', { className: 'lab-panel-head' }, el('h2', { className: 'lab-panel-title', text: title }), action), body);
+}
+
+function resetButton(label, keys) {
+  const button = el('button', {
+    className: 'lab-reset-btn',
+    type: 'button',
+    text: 'reset',
+    onClick: () => resetKeys(keys),
+  });
+  button.setAttribute('aria-label', label);
+  return button;
+}
+
+function resetKeys(keys) {
+  keys.forEach((key) => {
+    state[key] = DEFAULT_STATE[key];
+  });
+  syncControls();
+  applyState();
 }
 
 function presetButtons() {
@@ -237,11 +259,17 @@ function colorTokenControl(label, key, value, options = DESIGN_SYSTEM_COLOR_CHOI
   const buttons = [];
   const grid = el('div', { className: 'lab-swatch-grid', role: 'group', ariaLabel: label });
   const readout = el('output', { text: swatchLabel(value, options) });
+  const defaultValue = DEFAULT_STATE[key];
   const customInput = el('input', { className: 'lab-swatch-custom-input', type: 'color', value: customColorValue(value), hidden: isTokenColor(value, options) });
+  const customDefault = !isTokenColor(defaultValue, options);
   const customButton = el('button', {
-    className: isTokenColor(value, options) ? 'lab-swatch lab-swatch-custom' : 'lab-swatch lab-swatch-custom active',
+    className: swatchClass({
+      active: !isTokenColor(value, options),
+      custom: true,
+      defaulted: customDefault,
+    }),
     type: 'button',
-    title: 'new variant',
+    title: customDefault ? 'new variant (default)' : 'new variant',
     ariaLabel: 'new variant',
     text: '+',
     onClick: () => {
@@ -252,6 +280,7 @@ function colorTokenControl(label, key, value, options = DESIGN_SYSTEM_COLOR_CHOI
     },
   });
   customButton.setAttribute('aria-label', 'new variant');
+  if (customDefault) customButton.dataset.default = 'true';
 
   customInput.addEventListener('input', () => {
     setValue(customInput.value);
@@ -274,10 +303,14 @@ function colorTokenControl(label, key, value, options = DESIGN_SYSTEM_COLOR_CHOI
   }
 
   options.forEach((option) => {
+    const defaulted = option.value === defaultValue;
     const button = el('button', {
-      className: option.value === value ? 'lab-swatch active' : 'lab-swatch',
+      className: swatchClass({
+        active: option.value === value,
+        defaulted,
+      }),
       type: 'button',
-      title: option.label,
+      title: defaulted ? `${option.label} (default)` : option.label,
       ariaLabel: option.label,
       ariaPressed: option.value === value ? 'true' : 'false',
       dataset: { value: option.value },
@@ -288,6 +321,7 @@ function colorTokenControl(label, key, value, options = DESIGN_SYSTEM_COLOR_CHOI
     });
     button.setAttribute('aria-label', option.label);
     button.setAttribute('aria-pressed', String(option.value === value));
+    if (defaulted) button.dataset.default = 'true';
     button.style.setProperty('--lab-swatch-color', option.value);
     buttons.push(button);
     grid.append(button);
@@ -384,6 +418,10 @@ function isTokenColor(value, options) {
 
 function customColorValue(value) {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : '#ac4133';
+}
+
+function swatchClass({ active = false, custom = false, defaulted = false }) {
+  return ['lab-swatch', custom && 'lab-swatch-custom', active && 'active', defaulted && 'is-default'].filter(Boolean).join(' ');
 }
 
 async function copyOutput(event) {

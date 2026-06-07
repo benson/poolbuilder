@@ -78,9 +78,9 @@
   --vui-color-overlay-soft: rgba(0, 0, 0, 0.4);
   --vui-modal-backdrop: var(--vui-color-overlay-soft);
   --vui-modal-card-bg: var(--vui-color-surface);
-  --vui-modal-card-border: var(--vui-border-width) solid var(--vui-color-line);
-  --vui-modal-card-radius: var(--vui-radius-square);
-  --vui-modal-card-shadow: var(--vui-shadow-overlay);
+  --vui-modal-card-border: 3px solid var(--vui-color-text-strong);
+  --vui-modal-card-radius: 6px;
+  --vui-modal-card-shadow: 7px 7px 0 var(--vui-color-shadow);
   --vui-modal-card-max-height: calc(100vh - 32px);
   --vui-modal-card-min-width: 220px;
   --vui-modal-card-min-height: 140px;
@@ -96,13 +96,13 @@
   --vui-modal-actions-padding: 12px 16px;
   --vui-modal-actions-gap: 8px;
   --vui-modal-close-size: 28px;
-  --vui-modal-close-offset: 6px;
-  --vui-modal-close-radius: var(--vui-radius-sharp);
+  --vui-modal-close-offset: 11px;
+  --vui-modal-close-radius: 0px;
   --vui-modal-close-border: 3px solid var(--vui-color-line);
   --vui-modal-close-bg: var(--vui-color-surface-raised);
   --vui-modal-close-color: var(--vui-color-text-muted);
   --vui-modal-close-hover-bg: #ac4133;
-  --vui-modal-close-hover-color: #ffffff;
+  --vui-modal-close-hover-color: var(--vui-color-neutral-white);
   --vui-modal-close-shadow: none;
   --vui-modal-close-hover-shadow: none;
   --vui-modal-resize-edge-size: 8px;
@@ -1800,13 +1800,47 @@ body.vui-lab-page {
   padding: 14px;
 }
 
-.lab-panel-title {
+.lab-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin: 0 0 10px;
+}
+
+.lab-panel-title {
+  margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-title);
   letter-spacing: var(--label-tracking);
   text-transform: uppercase;
+}
+
+.lab-reset-btn {
+  appearance: none;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sharp);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xxs);
+  line-height: 1;
+  padding: 4px 6px;
+  text-transform: lowercase;
+}
+
+.lab-reset-btn:hover,
+.lab-reset-btn:focus-visible {
+  border-color: var(--color-text-strong);
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.lab-reset-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .lab-control-list {
@@ -1877,6 +1911,7 @@ body.vui-lab-page {
 
 .lab-swatch {
   appearance: none;
+  position: relative;
   width: 24px;
   height: 24px;
   border: 2px solid var(--color-line);
@@ -1899,6 +1934,19 @@ body.vui-lab-page {
 .lab-swatch[aria-pressed='true'] {
   border-color: var(--color-text-strong);
   box-shadow: 2px 2px 0 var(--color-shadow);
+}
+
+.lab-swatch.is-default::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--color-surface-raised);
+  border-radius: 50%;
+  background: var(--color-text-strong);
+  box-shadow: 0 0 0 1px var(--color-line-strong);
 }
 
 .lab-swatch:focus-visible {
