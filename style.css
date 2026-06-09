@@ -184,7 +184,7 @@ h1 {
   letter-spacing: 0.03em;
 }
 
-/* Autocomplete */
+/* Set search (vellum combobox; list/option styles ship in vellum-ui.css) */
 .autocomplete-wrapper {
   position: relative;
 }
@@ -197,41 +197,6 @@ h1 {
 
 .autocomplete-wrapper input::placeholder {
   color: var(--text-faint);
-}
-
-.autocomplete-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-height: 300px;
-  overflow-y: auto;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-top: none;
-  z-index: 100;
-}
-
-.autocomplete-dropdown .option {
-  padding: 10px 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  border-bottom: 1px solid var(--border-faint);
-}
-
-.autocomplete-dropdown .option:last-child {
-  border-bottom: none;
-}
-
-.autocomplete-dropdown .option:hover,
-.autocomplete-dropdown .option.highlighted {
-  background: var(--bg-alt);
-}
-
-.autocomplete-dropdown .option .year {
-  color: var(--text-faint);
-  font-size: 0.8rem;
-  margin-left: 8px;
 }
 
 /* Buttons */

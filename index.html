@@ -10,8 +10,8 @@
   <meta property="og:url" content="https://bensonperry.com/poolbuilder">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="https://bensonperry.com/shared/common.css">
-  <link rel="stylesheet" href="vendor/vellum-ui/vellum-ui.css?v=2">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="vendor/vellum-ui/vellum-ui.css?v=3">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body class="vui-app">
   <button id="theme-toggle" class="theme-toggle" type="button"><span class="theme-icon">☽</span> dark</button>
@@ -30,10 +30,9 @@
         <span id="submission-teaser" class="submission-teaser hidden"></span>
       </div>
       <div id="generator-controls" class="header-controls hidden">
-        <div class="autocomplete-wrapper">
+        <div class="autocomplete-wrapper combobox">
           <input type="text" id="set-input" placeholder="search sets..." autocomplete="off">
           <input type="hidden" id="set-select" value="">
-          <div id="set-dropdown" class="autocomplete-dropdown hidden"></div>
         </div>
         <button type="button" id="generate-btn" class="btn primary-btn" disabled>generate pool</button>
       </div>
@@ -166,6 +165,6 @@
     <span>daily data by <a href="https://www.17lands.com/public_datasets">17Lands</a>; booster data by <a href="https://mtgjson.com">mtgjson</a>; card images by <a href="https://scryfall.com">scryfall</a></span>
   </footer>
 
-  <script type="module" src="app.js?v=17"></script>
+  <script type="module" src="app.js?v=18"></script>
 </body>
 </html>

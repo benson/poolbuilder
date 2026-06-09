@@ -1,11 +1,11 @@
 // Pool Builder - Sealed Pool Generator & Deckbuilder
 import {
   fetchSets,
-  createSetAutocomplete,
   fetchWithRetry,
   generateSealedPoolFromMtgjson,
 } from 'https://bensonperry.com/shared/mtg.js';
 import { modal } from './vendor/vellum-ui/modal.js';
+import { combobox } from './vendor/vellum-ui/combobox.js';
 
 // ============ Theme Toggle ============
 function applyTheme(theme) {
@@ -45,7 +45,6 @@ let currentDeckSort = 'cmc';
 let hiddenPoolColumns = { color: new Set(), rarity: new Set(), cmc: new Set() };
 let currentMode = 'daily';
 let selectedSet = null;
-let autocomplete = null;
 let dailyWelcomeModal = null;
 let dailyWelcomeShown = false;
 
@@ -118,7 +117,6 @@ function showSubmissionMessage(message) {
 // DOM elements
 const setInput = document.getElementById('set-input');
 const setSelect = document.getElementById('set-select');
-const setDropdown = document.getElementById('set-dropdown');
 const generateBtn = document.getElementById('generate-btn');
 const generatorControls = document.getElementById('generator-controls');
 const dailyControls = document.getElementById('daily-controls');
@@ -149,20 +147,12 @@ async function init() {
     const cutoff = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
     sets = (await fetchSets()).filter(s => s.released <= cutoff);
 
-    // Set up autocomplete using shared module
-    autocomplete = createSetAutocomplete({
-      inputEl: setInput,
-      dropdownEl: setDropdown,
-      hiddenEl: setSelect,
-      sets: sets,
-      onSelect: handleSetSelect
-    });
+    // Set search via vellum combobox
+    setupSetCombobox();
 
     // Pre-select first set
     if (sets.length > 0) {
-      autocomplete.setInitialSet(sets[0]);
-      selectedSet = sets[0];
-      generateBtn.disabled = false;
+      applySetSelection(sets[0]);
     }
 
     setInput.disabled = false;
@@ -183,6 +173,50 @@ async function init() {
 function handleSetSelect(set) {
   selectedSet = set;
   generateBtn.disabled = false;
+}
+
+function formatSetDisplay(set) {
+  return set.name.toLowerCase() + ' (' + set.released.slice(0, 4) + ')';
+}
+
+let selectedSetDisplay = '';
+
+function applySetSelection(set) {
+  selectedSetDisplay = formatSetDisplay(set);
+  setInput.value = selectedSetDisplay;
+  setSelect.value = set.code;
+  handleSetSelect(set);
+}
+
+function setupSetCombobox() {
+  // Stash the chosen set's display text and clear on focus so the list opens
+  // unfiltered. Registered before combobox() so its focus refresh sees the
+  // cleared value.
+  setInput.addEventListener('focus', () => {
+    if (setInput.value) selectedSetDisplay = setInput.value;
+    setInput.value = '';
+  });
+  setInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!setInput.value && selectedSetDisplay) setInput.value = selectedSetDisplay;
+    }, 150);
+  });
+  combobox(setInput, {
+    getItems: query => {
+      const filter = query.toLowerCase();
+      return sets.filter(
+        s => s.name.toLowerCase().includes(filter) || s.code.toLowerCase().includes(filter)
+      );
+    },
+    onSelect: set => {
+      applySetSelection(set);
+      setInput.blur();
+    },
+    toLabel: set => set.name.toLowerCase(),
+    toHint: set => '(' + set.released.slice(0, 4) + ')',
+    toDataset: set => ({ code: set.code }),
+    maxItems: 200,
+  });
 }
 
 // Setup event listeners (non-autocomplete)
