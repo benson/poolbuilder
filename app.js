@@ -855,7 +855,7 @@ function renderPoolHiddenColumns() {
   hidden.forEach(key => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'hidden-column-chip';
+    button.className = 'ui-chip ui-chip-filter hidden-column-chip';
     button.textContent = labels[key] || key;
     button.setAttribute('aria-label', 'show ' + (labels[key] || key) + ' column');
     button.addEventListener('click', () => showPoolColumn(currentSort, key));

@@ -41,21 +41,11 @@
   --footer-bg: rgba(248, 247, 244, 0.85);
 }
 
+/* Dark palette flows from vellum's [data-theme="dark"] token layer through the
+   --vui-* aliases above. Only values with no vellum counterpart live here. */
 [data-theme="dark"] {
-  --bg: #1a1a1a;
-  --bg-alt: #2a2a2a;
   --bg-mine: #232319;
-  --text: #e8e8e8;
-  --text-muted: #aaa;
-  --text-faint: #777;
-  --border: #e8e8e8;
-  --border-light: #555;
-  --border-faint: #333;
-  --btn-bg: #e8e8e8;
-  --btn-text: #1a1a1a;
-  --btn-bg-hover: #ccc;
-  --btn-bg-disabled: #444;
-  --footer-bg: rgba(26, 26, 26, 0.85);
+  --footer-bg: rgba(28, 23, 34, 0.85);
 }
 
 body {
@@ -392,7 +382,6 @@ h1 {
   color: var(--text-faint);
 }
 
-.hidden-column-chip,
 .hidden-columns-restore,
 .column-hide-btn {
   appearance: none;
@@ -405,12 +394,16 @@ h1 {
   text-transform: lowercase;
 }
 
+/* Vellum .ui-chip.ui-chip-filter base; only the app deltas live here. */
 .hidden-column-chip {
-  padding: 2px 6px;
-  border: 1px solid var(--border-light);
-  border-radius: 3px;
-  background: var(--bg-raised);
-  color: var(--text-muted);
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.hidden-column-chip:hover {
+  color: var(--text);
+  border-color: var(--border);
 }
 
 .hidden-columns-restore {
@@ -418,7 +411,6 @@ h1 {
   border-bottom: 1px solid var(--border-light);
 }
 
-.hidden-column-chip:hover,
 .hidden-columns-restore:hover,
 .column-hide-btn:hover {
   color: var(--text);
@@ -620,42 +612,7 @@ h1 {
   margin-top: 12px;
 }
 
-.tooltip-term {
-  position: relative;
-  color: var(--text);
-  border-bottom: 1px dotted var(--border-light);
-  cursor: help;
-}
-
-.tooltip-term::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 8px);
-  z-index: 240;
-  width: min(260px, calc(100vw - 48px));
-  padding: 8px 10px;
-  border: var(--pb-border-width) solid var(--border);
-  border-radius: 4px;
-  background: var(--bg-raised);
-  box-shadow: var(--pb-shadow-firm);
-  color: var(--text);
-  font-size: 0.72rem;
-  line-height: 1.35;
-  opacity: 0;
-  pointer-events: none;
-  text-align: left;
-  text-transform: none;
-  transform: translate(-50%, -4px);
-  transition: opacity 120ms ease, transform 120ms ease;
-}
-
-.tooltip-term:hover::after,
-.tooltip-term:focus-visible::after {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
+/* Tooltip comes from vellum (.tooltip-host + data-tooltip). */
 .tooltip-term:focus-visible {
   outline: 1px solid var(--accent);
   outline-offset: 2px;
