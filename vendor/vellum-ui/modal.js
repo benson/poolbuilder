@@ -414,7 +414,8 @@ function applyModalLayout(card, layout, { size }) {
 function interactionConstraints(card, options) {
   const computed = card.ownerDocument?.defaultView?.getComputedStyle?.(card);
   const viewport = modalViewport(card.ownerDocument);
-  const handleMargin = cssPixel(computed?.getPropertyValue?.('--modal-resize-corner-size'), 18) + 6;
+  const handleMargin =
+    cssPixel(computed?.getPropertyValue?.('--vui-modal-resize-corner-size'), 18) + 6;
   const margin = finite(options.margin, Math.max(18, handleMargin));
   return {
     margin,

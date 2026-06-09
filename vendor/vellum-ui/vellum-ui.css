@@ -482,9 +482,9 @@ body.vui-app {
 /* primitives.css */
 .btn {
   align-items: center;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-sharp);
-  box-shadow: var(--shadow-firm);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-sharp);
+  box-shadow: var(--vui-shadow-firm);
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px 6px;
@@ -492,62 +492,62 @@ body.vui-app {
   align-content: center;
   text-align: center;
   text-wrap: balance;
-  min-height: var(--control-height-compact);
-  padding: var(--control-pad-y) var(--control-pad-x);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-title);
+  min-height: var(--vui-control-height-compact);
+  padding: var(--vui-control-pad-y) var(--vui-control-pad-x);
+  font-size: var(--vui-font-size-sm);
+  font-family: var(--vui-font-mono);
+  font-weight: var(--vui-font-weight-title);
   letter-spacing: 0.04em;
   cursor: pointer;
   transition:
-    transform var(--motion-fast) steps(2, end),
-    box-shadow var(--motion-fast) steps(2, end),
-    background-color var(--motion-fast),
-    filter var(--motion-fast);
+    transform var(--vui-motion-fast) steps(2, end),
+    box-shadow var(--vui-motion-fast) steps(2, end),
+    background-color var(--vui-motion-fast),
+    filter var(--vui-motion-fast);
   text-transform: lowercase;
-  background-color: var(--color-warn);
+  background-color: var(--vui-color-warn);
   background-image:
     radial-gradient(rgba(21, 16, 13, 0.1) 1px, transparent 1px),
     linear-gradient(rgba(255, 245, 210, 0.08), rgba(0, 0, 0, 0.05));
   background-size:
     6px 6px,
     auto;
-  color: var(--color-text-strong);
+  color: var(--vui-color-text-strong);
 }
 
 .btn:hover:not(:disabled),
 .ds-force-hover .btn:not(:disabled) {
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: 2px 2px 0 var(--vui-color-shadow);
   filter: brightness(1.05);
 }
 
 .btn:active:not(:disabled),
 .ds-force-active .btn:not(:disabled) {
   transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--color-shadow);
+  box-shadow: 0 0 0 var(--vui-color-shadow);
   filter: brightness(0.94);
 }
 
 .btn:focus-visible,
 .ds-force-focus .btn {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 .btn:disabled {
-  background-color: var(--color-line);
-  border-color: var(--color-line-strong);
+  background-color: var(--vui-color-line);
+  border-color: var(--vui-color-line-strong);
   box-shadow: none;
-  color: var(--color-text-muted);
+  color: var(--vui-color-text-muted);
   cursor: default;
   filter: grayscale(0.25);
 }
 
 .btn-secondary {
-  background-color: var(--color-info);
-  color: var(--color-text-strong);
-  border-color: var(--color-text-strong);
+  background-color: var(--vui-color-info);
+  color: var(--vui-color-text-strong);
+  border-color: var(--vui-color-text-strong);
 }
 
 .btn-secondary:hover:not(:disabled),
@@ -556,19 +556,19 @@ body.vui-app {
 }
 
 .btn-danger {
-  background-color: var(--color-danger);
-  color: var(--color-text-inverse);
-  border-color: var(--color-text-strong);
+  background-color: var(--vui-color-danger);
+  color: var(--vui-color-text-inverse);
+  border-color: var(--vui-color-text-strong);
 }
 
 .btn-danger:hover:not(:disabled),
 .ds-force-hover .btn-danger:not(:disabled) {
-  color: var(--color-text-inverse);
+  color: var(--vui-color-text-inverse);
 }
 
 .btn-ink {
-  background-color: var(--color-text-strong);
-  color: var(--color-text-inverse);
+  background-color: var(--vui-color-text-strong);
+  color: var(--vui-color-text-inverse);
 }
 
 .btn-ink:hover:not(:disabled),
@@ -582,9 +582,9 @@ body.vui-app {
 .btn-secondary:disabled:hover,
 .btn-ink:disabled,
 .btn-ink:disabled:hover {
-  background-color: var(--color-line);
-  color: var(--color-text-muted);
-  border-color: var(--color-line-strong);
+  background-color: var(--vui-color-line);
+  color: var(--vui-color-text-muted);
+  border-color: var(--vui-color-line-strong);
   box-shadow: none;
   cursor: default;
 }
@@ -596,28 +596,28 @@ body.vui-app {
   border: none;
   padding: 0;
   font: inherit;
-  font-size: var(--font-size-xs);
+  font-size: var(--vui-font-size-xs);
   text-transform: lowercase;
   text-decoration: underline;
-  color: var(--color-text-muted);
+  color: var(--vui-color-text-muted);
   cursor: pointer;
 }
 
 .btn-link:hover,
 .btn-link:focus-visible {
-  color: var(--color-text-strong);
+  color: var(--vui-color-text-strong);
   outline: none;
 }
 
 .btn-link-danger:hover,
 .btn-link-danger:focus-visible {
-  color: var(--color-danger);
+  color: var(--vui-color-danger);
   outline: none;
 }
 
 .btn-link:disabled,
 .btn-link-danger:disabled {
-  color: var(--color-line-strong);
+  color: var(--vui-color-line-strong);
   cursor: default;
   text-decoration: none;
 }
@@ -634,30 +634,30 @@ body.vui-app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface-raised);
-  color: var(--color-text-strong);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text-strong);
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-title);
-  font-size: var(--font-size-sm);
+  font-family: var(--vui-font-mono);
+  font-weight: var(--vui-font-weight-title);
+  font-size: var(--vui-font-size-sm);
   line-height: 1;
   min-height: 30px;
   padding: 7px 12px;
   text-decoration: none;
   text-transform: lowercase;
   box-shadow:
-    var(--shadow-firm),
-    0 4px 0 var(--color-shadow);
+    var(--vui-shadow-firm),
+    0 4px 0 var(--vui-color-shadow);
   transition:
-    transform var(--motion-fast) steps(2, end),
-    box-shadow var(--motion-fast) steps(2, end),
-    background-color var(--motion-fast);
+    transform var(--vui-motion-fast) steps(2, end),
+    box-shadow var(--vui-motion-fast) steps(2, end),
+    background-color var(--vui-motion-fast);
 }
 
 .segment-btn + .segment-btn {
-  margin-left: calc(-1 * var(--border-width));
+  margin-left: calc(-1 * var(--vui-border-width));
 }
 
 .segment-btn:not(:first-child) {
@@ -673,24 +673,24 @@ body.vui-app {
 .segment-btn:hover:not(.active),
 .ds-force-hover .segment-btn:not(.active) {
   transform: translate(2px, 2px);
-  background: var(--color-accent-soft);
+  background: var(--vui-color-accent-soft);
   box-shadow:
-    2px 2px 0 var(--color-shadow),
-    0 2px 0 var(--color-shadow);
+    2px 2px 0 var(--vui-color-shadow),
+    0 2px 0 var(--vui-color-shadow);
 }
 
 .segment-btn:active:not(.active) {
   transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--color-shadow);
+  box-shadow: 0 0 0 var(--vui-color-shadow);
   filter: brightness(0.94);
 }
 
 .segment-btn.active,
 .segment-btn[aria-pressed='true'] {
-  background: var(--color-accent);
-  color: var(--color-text-inverse);
+  background: var(--vui-color-accent);
+  color: var(--vui-color-text-inverse);
   transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--color-shadow);
+  box-shadow: 0 0 0 var(--vui-color-shadow);
   filter: brightness(0.94);
   z-index: 1;
 }
@@ -698,12 +698,12 @@ body.vui-app {
 .segment-btn.active:hover,
 .segment-btn[aria-pressed='true']:hover,
 .ds-force-hover .segment-btn.active {
-  background: var(--color-accent);
+  background: var(--vui-color-accent);
   filter: brightness(0.92);
 }
 
 .segment-btn:focus-visible {
-  outline: 2px solid var(--color-text-strong);
+  outline: 2px solid var(--vui-color-text-strong);
   outline-offset: 2px;
   z-index: 3;
 }
@@ -716,7 +716,7 @@ body.vui-app {
   height: 28px;
   border: none;
   background: transparent;
-  color: var(--color-neutral-350);
+  color: var(--vui-color-neutral-350);
   cursor: pointer;
   font: inherit;
   font-size: 1.2rem;
@@ -724,7 +724,7 @@ body.vui-app {
 }
 
 .icon-btn:hover {
-  color: var(--color-neutral-black);
+  color: var(--vui-color-neutral-black);
 }
 
 input[type='text'],
@@ -737,12 +737,12 @@ input[type='password'],
 input:not([type]),
 textarea,
 select {
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface-raised);
-  color: var(--color-text-strong);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text-strong);
   padding: 8px 14px 8px 10px;
-  font-family: var(--font-mono);
+  font-family: var(--vui-font-mono);
   box-shadow:
     inset 3px 3px 0 rgba(0, 0, 0, 0.18),
     inset -2px -2px 0 rgba(255, 255, 255, 0.32);
@@ -759,7 +759,7 @@ input:not([type]):focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--color-line-focus);
+  border-color: var(--vui-color-line-focus);
 }
 
 textarea {
@@ -773,35 +773,35 @@ input[type='radio'] {
   height: 18px;
   flex: none;
   margin: 0;
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-tight);
-  background: var(--color-surface-raised);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-surface-raised);
   cursor: pointer;
   vertical-align: middle;
 }
 
 input[type='radio'] {
-  border-radius: var(--radius-pill);
+  border-radius: var(--vui-radius-pill);
 }
 
 input[type='checkbox']:not(.switch-input):checked,
 input[type='radio']:checked {
-  background: var(--color-accent);
-  box-shadow: inset 0 0 0 3px var(--color-surface-raised);
+  background: var(--vui-color-accent);
+  box-shadow: inset 0 0 0 3px var(--vui-color-surface-raised);
 }
 
 input[type='checkbox']:not(.switch-input):focus-visible,
 input[type='radio']:focus-visible,
 .switch-input:focus-visible + .switch-track {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 /* Switch: <label class="switch"><input type="checkbox" class="switch-input" /><span class="switch-track"></span>label</label> */
 .switch {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--vui-space-2);
   cursor: pointer;
 }
 
@@ -816,10 +816,10 @@ input[type='radio']:focus-visible,
   width: 40px;
   height: 22px;
   flex: none;
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-sunken);
-  transition: background var(--motion-fast);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-pill);
+  background: var(--vui-color-surface-sunken);
+  transition: background var(--vui-motion-fast);
 }
 
 .switch-track::before {
@@ -829,18 +829,18 @@ input[type='radio']:focus-visible,
   left: 3px;
   width: 10px;
   height: 10px;
-  border-radius: var(--radius-pill);
-  background: var(--color-text-strong);
+  border-radius: var(--vui-radius-pill);
+  background: var(--vui-color-text-strong);
   transform: translateY(-50%);
-  transition: transform var(--motion-fast);
+  transition: transform var(--vui-motion-fast);
 }
 
 .switch-input:checked + .switch-track {
-  background: var(--color-accent);
+  background: var(--vui-color-accent);
 }
 
 .switch-input:checked + .switch-track::before {
-  background: var(--color-text-inverse);
+  background: var(--vui-color-text-inverse);
   transform: translate(18px, -50%);
 }
 
@@ -855,14 +855,14 @@ input[type='range'] {
 
 input[type='range']::-webkit-slider-runnable-track {
   height: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--color-line);
+  border-radius: var(--vui-radius-pill);
+  background: var(--vui-color-line);
 }
 
 input[type='range']::-moz-range-track {
   height: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--color-line);
+  border-radius: var(--vui-radius-pill);
+  background: var(--vui-color-line);
 }
 
 input[type='range']::-webkit-slider-thumb {
@@ -870,40 +870,40 @@ input[type='range']::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   margin-top: -6px;
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-tight);
-  background: var(--color-accent);
-  box-shadow: var(--shadow-hard-small);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-accent);
+  box-shadow: var(--vui-shadow-hard-small);
 }
 
 input[type='range']::-moz-range-thumb {
   width: 10px;
   height: 10px;
-  border: var(--border-width) solid var(--color-line-strong);
-  border-radius: var(--radius-tight);
-  background: var(--color-accent);
-  box-shadow: var(--shadow-hard-small);
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-accent);
+  box-shadow: var(--vui-shadow-hard-small);
 }
 
 input[type='range']:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 .field-row {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-  letter-spacing: var(--label-tracking);
+  color: var(--vui-color-text-muted);
+  font-size: var(--vui-font-size-xs);
+  letter-spacing: var(--vui-label-tracking);
   text-transform: uppercase;
 }
 
 .field-row > input,
 .field-row > textarea,
 .field-row > select {
-  letter-spacing: var(--letter-spacing-ui);
+  letter-spacing: var(--vui-letter-spacing-ui);
   text-transform: none;
 }
 
@@ -911,7 +911,7 @@ input[type='range']:focus-visible {
 /* overlays.css */
 .ui-modal {
   align-items: center;
-  background: var(--modal-backdrop);
+  background: var(--vui-modal-backdrop);
   display: none;
   inset: 0;
   justify-content: center;
@@ -926,24 +926,24 @@ input[type='range']:focus-visible {
 
 .ui-modal-backdrop {
   align-items: center;
-  background: var(--modal-backdrop);
+  background: var(--vui-modal-backdrop);
   display: flex;
   inset: 0;
   justify-content: center;
   position: fixed;
-  z-index: var(--z-modal);
+  z-index: var(--vui-z-modal);
 }
 
 .ui-modal-card {
-  background: var(--modal-card-bg);
-  border: var(--modal-card-border);
-  border-radius: var(--modal-card-radius);
-  box-shadow: var(--modal-card-shadow);
+  background: var(--vui-modal-card-bg);
+  border: var(--vui-modal-card-border);
+  border-radius: var(--vui-modal-card-radius);
+  box-shadow: var(--vui-modal-card-shadow);
   display: flex;
   flex-direction: column;
-  max-height: var(--modal-card-max-height);
-  min-height: var(--modal-card-min-height);
-  min-width: var(--modal-card-min-width);
+  max-height: var(--vui-modal-card-max-height);
+  min-height: var(--vui-modal-card-min-height);
+  min-width: var(--vui-modal-card-min-width);
   position: relative;
   overflow: visible;
   transform: translate(var(--vui-modal-x, 0), var(--vui-modal-y, 0));
@@ -968,31 +968,31 @@ input[type='range']:focus-visible {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--modal-body-padding);
+  padding: var(--vui-modal-body-padding);
 }
 
 .ui-modal-head {
-  background-color: var(--modal-head-bg);
-  background-image: var(--modal-head-texture);
-  background-size: var(--modal-head-texture-size);
-  border-bottom: var(--border-width) solid var(--color-line);
+  background-color: var(--vui-modal-head-bg);
+  background-image: var(--vui-modal-head-texture);
+  background-size: var(--vui-modal-head-texture-size);
+  border-bottom: var(--vui-border-width) solid var(--vui-color-line);
   flex: 0 0 auto;
-  padding: var(--modal-head-padding);
+  padding: var(--vui-modal-head-padding);
 }
 
 .ui-modal-title {
-  font-size: var(--font-size-lg);
+  font-size: var(--vui-font-size-lg);
   margin: 0;
 }
 
 .ui-modal-actions {
   align-items: center;
-  border-top: var(--border-width) solid var(--color-line);
+  border-top: var(--vui-border-width) solid var(--vui-color-line);
   display: flex;
   flex: 0 0 auto;
-  gap: var(--modal-actions-gap);
+  gap: var(--vui-modal-actions-gap);
   justify-content: flex-end;
-  padding: var(--modal-actions-padding);
+  padding: var(--vui-modal-actions-padding);
 }
 
 .vui-modal-resize-handle {
@@ -1002,27 +1002,27 @@ input[type='range']:focus-visible {
 }
 
 .vui-modal-resize-left {
-  bottom: var(--modal-resize-corner-size);
+  bottom: var(--vui-modal-resize-corner-size);
   cursor: ew-resize;
-  left: calc(-1 * var(--modal-resize-edge-size) / 2);
+  left: calc(-1 * var(--vui-modal-resize-edge-size) / 2);
   top: 0;
-  width: var(--modal-resize-edge-size);
+  width: var(--vui-modal-resize-edge-size);
 }
 
 .vui-modal-resize-bottom {
-  bottom: calc(-1 * var(--modal-resize-edge-size) / 2);
+  bottom: calc(-1 * var(--vui-modal-resize-edge-size) / 2);
   cursor: ns-resize;
-  height: var(--modal-resize-edge-size);
-  left: var(--modal-resize-corner-size);
+  height: var(--vui-modal-resize-edge-size);
+  left: var(--vui-modal-resize-corner-size);
   right: 0;
 }
 
 .vui-modal-resize-bottom-left {
-  bottom: calc(-1 * var(--modal-resize-edge-size) / 2);
+  bottom: calc(-1 * var(--vui-modal-resize-edge-size) / 2);
   cursor: nesw-resize;
-  height: var(--modal-resize-corner-size);
-  left: calc(-1 * var(--modal-resize-edge-size) / 2);
-  width: var(--modal-resize-corner-size);
+  height: var(--vui-modal-resize-corner-size);
+  left: calc(-1 * var(--vui-modal-resize-edge-size) / 2);
+  width: var(--vui-modal-resize-corner-size);
 }
 
 .vui-modal-resize-bottom-left::before,
@@ -1034,7 +1034,7 @@ input[type='range']:focus-visible {
 }
 
 .vui-modal-resize-bottom-left::before {
-  background: var(--color-line-strong);
+  background: var(--vui-color-line-strong);
   height: 2px;
   left: 4px;
   top: 4px;
@@ -1044,8 +1044,8 @@ input[type='range']:focus-visible {
 }
 
 .vui-modal-resize-bottom-left::after {
-  border-bottom: 2px solid var(--color-line-strong);
-  border-left: 2px solid var(--color-line-strong);
+  border-bottom: 2px solid var(--vui-color-line-strong);
+  border-left: 2px solid var(--vui-color-line-strong);
   bottom: 4px;
   height: 20px;
   left: 4px;
@@ -1062,39 +1062,39 @@ input[type='range']:focus-visible {
 .rune-close {
   appearance: none;
   position: absolute;
-  top: var(--modal-close-offset);
-  right: var(--modal-close-offset);
+  top: var(--vui-modal-close-offset);
+  right: var(--vui-modal-close-offset);
   z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   flex: 0 0 auto;
-  width: var(--modal-close-size);
-  height: var(--modal-close-size);
+  width: var(--vui-modal-close-size);
+  height: var(--vui-modal-close-size);
   padding: 1px 0 0;
-  border: var(--modal-close-border);
-  border-radius: var(--modal-close-radius);
-  background: var(--modal-close-bg);
-  color: var(--modal-close-color);
-  box-shadow: var(--modal-close-shadow);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-title);
+  border: var(--vui-modal-close-border);
+  border-radius: var(--vui-modal-close-radius);
+  background: var(--vui-modal-close-bg);
+  color: var(--vui-modal-close-color);
+  box-shadow: var(--vui-modal-close-shadow);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-lg);
+  font-weight: var(--vui-font-weight-title);
   line-height: 1;
   cursor: pointer;
   transition:
-    transform var(--motion-fast) steps(2, end),
-    box-shadow var(--motion-fast) steps(2, end),
-    background-color var(--motion-fast),
-    color var(--motion-fast);
+    transform var(--vui-motion-fast) steps(2, end),
+    box-shadow var(--vui-motion-fast) steps(2, end),
+    background-color var(--vui-motion-fast),
+    color var(--vui-motion-fast);
 }
 
 .rune-close:hover {
   transform: none;
-  box-shadow: var(--modal-close-hover-shadow);
-  background: var(--modal-close-hover-bg);
-  color: var(--modal-close-hover-color);
+  box-shadow: var(--vui-modal-close-hover-shadow);
+  background: var(--vui-modal-close-hover-bg);
+  color: var(--vui-modal-close-hover-color);
 }
 
 .rune-close:active {
@@ -1102,20 +1102,20 @@ input[type='range']:focus-visible {
 }
 
 .rune-close:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 .ui-popover {
   position: absolute;
-  z-index: var(--z-flyout);
+  z-index: var(--vui-z-flyout);
   min-width: 180px;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  box-shadow: var(--shadow-popover);
-  padding: var(--space-2);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text);
+  box-shadow: var(--vui-shadow-popover);
+  padding: var(--vui-space-2);
 }
 
 .ui-popover[hidden] {
@@ -1125,26 +1125,26 @@ input[type='range']:focus-visible {
 .floating-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--vui-space-1);
   min-width: 180px;
 }
 
 .floating-menu-item {
   appearance: none;
   border: 0;
-  border-radius: var(--radius-sharp);
+  border-radius: var(--vui-radius-sharp);
   background: transparent;
-  color: var(--color-text);
+  color: var(--vui-color-text);
   cursor: pointer;
   font: inherit;
-  padding: var(--space-2);
+  padding: var(--vui-space-2);
   text-align: left;
 }
 
 .floating-menu-item:hover,
 .floating-menu-item.is-active,
 .floating-menu-item[aria-selected='true'] {
-  background: var(--color-accent-soft);
+  background: var(--vui-color-accent-soft);
 }
 
 .combobox {
@@ -1159,15 +1159,15 @@ input[type='range']:focus-visible {
   min-width: 100%;
   max-height: 260px;
   overflow-y: auto;
-  z-index: var(--z-flyout);
+  z-index: var(--vui-z-flyout);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface-raised);
-  box-shadow: var(--shadow-popover);
+  gap: var(--vui-space-1);
+  padding: var(--vui-space-1);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface-raised);
+  box-shadow: var(--vui-shadow-popover);
 }
 
 .combobox-list[hidden] {
@@ -1179,28 +1179,28 @@ input[type='range']:focus-visible {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--vui-space-3);
   border: 0;
-  border-radius: var(--radius-tight);
+  border-radius: var(--vui-radius-tight);
   background: transparent;
-  color: var(--color-text);
+  color: var(--vui-color-text);
   cursor: pointer;
   font: inherit;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-2);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-sm);
+  padding: var(--vui-space-1) var(--vui-space-2);
   text-align: left;
   white-space: nowrap;
 }
 
 .combobox-option:hover,
 .combobox-option.is-active {
-  background: var(--color-accent-soft);
+  background: var(--vui-color-accent-soft);
 }
 
 .combobox-option-hint {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
+  color: var(--vui-color-text-muted);
+  font-size: var(--vui-font-size-xs);
 }
 
 
@@ -1365,27 +1365,27 @@ input[type='range']:focus-visible {
 
 .banner {
   align-items: center;
-  background: var(--color-surface-sunken);
-  border-bottom: var(--border-width) solid var(--color-text-strong);
-  color: var(--color-text-strong);
+  background: var(--vui-color-surface-sunken);
+  border-bottom: var(--vui-border-width) solid var(--vui-color-text-strong);
+  color: var(--vui-color-text-strong);
   display: flex;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-sm);
+  gap: var(--vui-space-3);
+  padding: var(--vui-space-2) var(--vui-space-4);
   position: relative;
   width: 100%;
   z-index: var(--vui-z-toast);
 }
 
 .banner-message {
-  color: var(--color-text-strong);
+  color: var(--vui-color-text-strong);
 }
 
 .banner-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--vui-space-1);
 }
 
 .banner-dismiss {
@@ -1650,7 +1650,7 @@ input[type='range']:focus-visible {
 body.design-system-page,
 body.vui-design-system-page {
   overflow: auto;
-  background: var(--color-bg);
+  background: var(--vui-color-bg);
 }
 
 .vui-design-system,
@@ -1669,24 +1669,24 @@ body.vui-design-system-page {
   flex-direction: column;
   gap: 8px;
   padding: 22px 24px;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-soft);
-  background-image: linear-gradient(var(--color-surface-sunken), var(--color-surface-sunken));
-  box-shadow: var(--shadow-hard);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-soft);
+  background-image: linear-gradient(var(--vui-color-surface-sunken), var(--vui-color-surface-sunken));
+  box-shadow: var(--vui-shadow-hard);
 }
 
 .ds-page-title {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--font-size-jumbo);
-  font-weight: var(--font-weight-title);
+  font-family: var(--vui-font-display);
+  font-size: var(--vui-font-size-jumbo);
+  font-weight: var(--vui-font-weight-title);
   letter-spacing: -0.02em;
 }
 
 .ds-page-sub {
   margin: 0;
-  font-size: var(--font-size-md);
-  color: var(--color-text-muted);
+  font-size: var(--vui-font-size-md);
+  color: var(--vui-color-text-muted);
 }
 
 .ds-page-actions {
@@ -1700,23 +1700,23 @@ body.vui-design-system-page {
 }
 
 .ds-page-back {
-  font-family: var(--font-mono);
-  font-weight: var(--font-weight-title);
-  font-size: var(--font-size-sm);
+  font-family: var(--vui-font-mono);
+  font-weight: var(--vui-font-weight-title);
+  font-size: var(--vui-font-size-sm);
   text-transform: uppercase;
-  letter-spacing: var(--label-tracking);
-  color: var(--color-text-strong);
+  letter-spacing: var(--vui-label-tracking);
+  color: var(--vui-color-text-strong);
   text-decoration: none;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-soft);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-soft);
   padding: 6px 10px;
-  background: var(--color-surface-raised);
-  box-shadow: var(--shadow-hard-small);
+  background: var(--vui-color-surface-raised);
+  box-shadow: var(--vui-shadow-hard-small);
 }
 
 .ds-page-back:hover {
   transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 var(--color-text-strong);
+  box-shadow: 2px 2px 0 var(--vui-color-text-strong);
 }
 
 .ds-page-layout {
@@ -1739,33 +1739,33 @@ body.vui-design-system-page {
 }
 
 .ds-toc-title {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
   text-transform: uppercase;
-  letter-spacing: var(--label-tracking);
-  color: var(--color-text-muted);
+  letter-spacing: var(--vui-label-tracking);
+  color: var(--vui-color-text-muted);
   margin: 10px 0 4px;
 }
 
 .ds-toc-link {
   text-decoration: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--vui-color-text-muted);
+  font-size: var(--vui-font-size-sm);
   text-transform: lowercase;
   padding: 4px 8px;
-  border-radius: var(--radius-sharp);
+  border-radius: var(--vui-radius-sharp);
   border-left: 2px solid transparent;
 }
 
 .ds-toc-link:hover {
-  color: var(--color-text-strong);
-  background: var(--color-surface-hover);
+  color: var(--vui-color-text-strong);
+  background: var(--vui-color-surface-hover);
 }
 
 .ds-toc-link.active {
-  color: var(--color-accent);
-  border-left-color: var(--color-accent);
-  background: var(--color-surface-hover);
+  color: var(--vui-color-accent);
+  border-left-color: var(--vui-color-accent);
+  background: var(--vui-color-surface-hover);
 }
 
 .ds-toc-states {
@@ -1773,7 +1773,7 @@ body.vui-design-system-page {
   flex-direction: column;
   gap: 4px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--vui-color-line);
 }
 
 .ds-toc-state-row {
@@ -1783,26 +1783,26 @@ body.vui-design-system-page {
 
 .ds-toc-state-btn {
   flex: 1;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
   text-transform: lowercase;
   padding: 4px 0;
-  border: 1px solid var(--color-line-strong);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
+  border: 1px solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface);
+  color: var(--vui-color-text-muted);
   cursor: pointer;
 }
 
 .ds-toc-state-btn:hover {
-  border-color: var(--color-text-strong);
-  color: var(--color-text-strong);
+  border-color: var(--vui-color-text-strong);
+  color: var(--vui-color-text-strong);
 }
 
 .ds-toc-state-btn.active {
-  background: var(--color-accent);
-  color: var(--color-text-inverse);
-  border-color: var(--color-accent);
+  background: var(--vui-color-accent);
+  color: var(--vui-color-text-inverse);
+  border-color: var(--vui-color-accent);
 }
 
 .ds-page-body {
@@ -1821,12 +1821,12 @@ body.vui-design-system-page {
 .ds-group-title {
   margin: 0;
   padding-bottom: 6px;
-  border-bottom: var(--border-width) solid var(--color-text-strong);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-title);
+  border-bottom: var(--vui-border-width) solid var(--vui-color-text-strong);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-md);
+  font-weight: var(--vui-font-weight-title);
   text-transform: uppercase;
-  letter-spacing: var(--label-tracking);
+  letter-spacing: var(--vui-label-tracking);
 }
 
 .ds-entry {
@@ -1835,9 +1835,9 @@ body.vui-design-system-page {
   gap: 18px;
   align-items: start;
   padding: 12px;
-  border: var(--border-width) solid var(--color-line);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
+  border: var(--vui-border-width) solid var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
 }
 
 .ds-entry-head {
@@ -1848,9 +1848,9 @@ body.vui-design-system-page {
 
 .ds-entry-name {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-title);
+  font-family: var(--vui-font-body);
+  font-size: var(--vui-font-size-xl);
+  font-weight: var(--vui-font-weight-title);
 }
 
 .ds-entry-selectors {
@@ -1860,19 +1860,19 @@ body.vui-design-system-page {
 }
 
 .ds-entry-selectors code {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
   padding: 2px 5px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-tight);
-  background: var(--color-surface);
+  border: 1px solid var(--vui-color-line);
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-surface);
 }
 
 .ds-entry-desc {
   grid-column: 1 / 2;
   margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-size: var(--vui-font-size-sm);
+  color: var(--vui-color-text-muted);
   line-height: 1.45;
 }
 
@@ -1880,9 +1880,9 @@ body.vui-design-system-page {
   grid-column: 2 / 3;
   grid-row: 1 / 3;
   padding: 14px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface);
+  border: 1px solid var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1897,21 +1897,21 @@ body.vui-design-system-page {
 
 .ds-zoom-btn {
   appearance: none;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-tight);
-  background: var(--color-surface-raised);
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
+  border: 1px solid var(--vui-color-line);
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text-muted);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
   line-height: 1;
   padding: 3px 7px;
   cursor: pointer;
 }
 
 .ds-zoom-btn.active {
-  background: var(--color-text-strong);
-  color: var(--color-text-inverse);
-  border-color: var(--color-text-strong);
+  background: var(--vui-color-text-strong);
+  color: var(--vui-color-text-inverse);
+  border-color: var(--vui-color-text-strong);
 }
 
 .ds-zoom-stage {
@@ -1932,9 +1932,9 @@ body.vui-design-system-page {
 }
 
 .ds-theme-toggle {
-  font-size: var(--font-size-xs);
+  font-size: var(--vui-font-size-xs);
   text-transform: lowercase;
-  color: var(--color-text-muted);
+  color: var(--vui-color-text-muted);
   margin-bottom: 6px;
 }
 
@@ -1942,7 +1942,7 @@ body.vui-design-system-page {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--font-size-sm);
+  font-size: var(--vui-font-size-sm);
   cursor: pointer;
 }
 
@@ -1951,9 +1951,9 @@ body.vui-design-system-page {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   padding: 14px;
-  border: var(--border-width) solid var(--color-line);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
+  border: var(--vui-border-width) solid var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
 }
 
 .ds-playground-col {
@@ -1963,14 +1963,14 @@ body.vui-design-system-page {
 }
 
 .ds-playground-col-label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-title);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
+  font-weight: var(--vui-font-weight-title);
   text-transform: lowercase;
   letter-spacing: 0.04em;
-  color: var(--color-text-muted);
+  color: var(--vui-color-text-muted);
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--vui-color-line);
 }
 
 .ds-playground-row {
@@ -1981,9 +1981,9 @@ body.vui-design-system-page {
 }
 
 .ds-playground-token {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
-  color: var(--color-text-strong);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
+  color: var(--vui-color-text-strong);
 }
 
 .ds-playground-row input[type='color'] {
@@ -1991,8 +1991,8 @@ body.vui-design-system-page {
   height: 24px;
   flex: none;
   padding: 0;
-  border: 2px solid var(--color-line-strong);
-  border-radius: var(--radius-sharp);
+  border: 2px solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
   background: none;
   cursor: pointer;
   box-shadow: none;
@@ -2001,16 +2001,16 @@ body.vui-design-system-page {
 .ds-playground-text {
   flex: 1;
   min-width: 0;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
   padding: 3px 6px;
 }
 
 .ds-static-popover {
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
-  box-shadow: var(--shadow-overlay);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
+  box-shadow: var(--vui-shadow-overlay);
   overflow: hidden;
   width: 280px;
 }
@@ -2024,13 +2024,13 @@ body.vui-design-system-page {
 
 .ds-token-output {
   min-height: 120px;
-  border: var(--border-width) solid var(--color-line);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
+  border: var(--vui-border-width) solid var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
   padding: 10px;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
-  color: var(--color-text-muted);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
+  color: var(--vui-color-text-muted);
   white-space: pre-wrap;
 }
 
@@ -2073,7 +2073,7 @@ body.vui-design-system-page {
 /* labs.css */
 body.vui-lab-page {
   overflow: auto;
-  background: var(--color-bg);
+  background: var(--vui-color-bg);
 }
 
 .vui-lab-wrap {
@@ -2088,24 +2088,24 @@ body.vui-lab-page {
   gap: 16px;
   align-items: start;
   padding: 18px 20px;
-  border: var(--border-width) solid var(--color-text-strong);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-sunken);
-  box-shadow: var(--shadow-hard);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-sunken);
+  box-shadow: var(--vui-shadow-hard);
 }
 
 .lab-title {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--font-size-jumbo);
-  font-weight: var(--font-weight-title);
+  font-family: var(--vui-font-display);
+  font-size: var(--vui-font-size-jumbo);
+  font-weight: var(--vui-font-weight-title);
   letter-spacing: 0;
 }
 
 .lab-sub {
   margin: 6px 0 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
+  color: var(--vui-color-text-muted);
+  font-size: var(--vui-font-size-md);
   max-width: 680px;
 }
 
@@ -2135,9 +2135,9 @@ body.vui-lab-page {
 }
 
 .lab-panel {
-  border: var(--border-width) solid var(--color-line);
-  border-radius: var(--radius-soft);
-  background: var(--color-surface-raised);
+  border: var(--vui-border-width) solid var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  background: var(--vui-color-surface-raised);
   padding: 14px;
 }
 
@@ -2151,22 +2151,22 @@ body.vui-lab-page {
 
 .lab-panel-title {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-title);
-  letter-spacing: var(--label-tracking);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-md);
+  font-weight: var(--vui-font-weight-title);
+  letter-spacing: var(--vui-label-tracking);
   text-transform: uppercase;
 }
 
 .lab-reset-btn {
   appearance: none;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
+  border: 1px solid var(--vui-color-line);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface);
+  color: var(--vui-color-text-muted);
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
   line-height: 1;
   padding: 4px 6px;
   text-transform: lowercase;
@@ -2174,14 +2174,14 @@ body.vui-lab-page {
 
 .lab-reset-btn:hover,
 .lab-reset-btn:focus-visible {
-  border-color: var(--color-text-strong);
-  background: var(--color-surface-hover);
-  color: var(--color-text-strong);
+  border-color: var(--vui-color-text-strong);
+  background: var(--vui-color-surface-hover);
+  color: var(--vui-color-text-strong);
 }
 
 .lab-reset-btn:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 .lab-control-list {
@@ -2198,31 +2198,31 @@ body.vui-lab-page {
 }
 
 .lab-control span {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-  letter-spacing: var(--label-tracking);
+  color: var(--vui-color-text-muted);
+  font-size: var(--vui-font-size-xs);
+  letter-spacing: var(--vui-label-tracking);
   text-transform: uppercase;
 }
 
 .lab-control output {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xxs);
-  color: var(--color-text-muted);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xxs);
+  color: var(--vui-color-text-muted);
 }
 
 .lab-control input[type='range'] {
   grid-column: 1 / -1;
   width: 100%;
-  accent-color: var(--color-accent);
+  accent-color: var(--vui-color-accent);
 }
 
 .lab-control input[type='color'] {
   width: 42px;
   height: 28px;
   padding: 0;
-  border: 2px solid var(--color-line-strong);
-  border-radius: var(--radius-sharp);
-  background: var(--color-surface-raised);
+  border: 2px solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface-raised);
   box-shadow: none;
 }
 
@@ -2255,17 +2255,17 @@ body.vui-lab-page {
   position: relative;
   width: 24px;
   height: 24px;
-  border: 2px solid var(--color-line);
-  border-radius: var(--radius-sharp);
+  border: 2px solid var(--vui-color-line);
+  border-radius: var(--vui-radius-sharp);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.12)),
     var(--lab-swatch-color);
   box-shadow: none;
-  color: var(--color-text-strong);
+  color: var(--vui-color-text-strong);
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-title);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-sm);
+  font-weight: var(--vui-font-weight-title);
   line-height: 1;
   padding: 0;
 }
@@ -2273,8 +2273,8 @@ body.vui-lab-page {
 .lab-swatch:hover,
 .lab-swatch.active,
 .lab-swatch[aria-pressed='true'] {
-  border-color: var(--color-text-strong);
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  border-color: var(--vui-color-text-strong);
+  box-shadow: 2px 2px 0 var(--vui-color-shadow);
 }
 
 .lab-swatch.is-default::after {
@@ -2284,21 +2284,21 @@ body.vui-lab-page {
   bottom: 2px;
   width: 6px;
   height: 6px;
-  border: 1px solid var(--color-surface-raised);
+  border: 1px solid var(--vui-color-surface-raised);
   border-radius: 50%;
-  background: var(--color-text-strong);
-  box-shadow: 0 0 0 1px var(--color-line-strong);
+  background: var(--vui-color-text-strong);
+  box-shadow: 0 0 0 1px var(--vui-color-line-strong);
 }
 
 .lab-swatch:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
+  outline: var(--vui-focus-ring);
+  outline-offset: var(--vui-focus-ring-offset);
 }
 
 .lab-swatch-custom {
   background:
     radial-gradient(rgba(21, 16, 13, 0.1) 1px, transparent 1px),
-    var(--color-surface-raised);
+    var(--vui-color-surface-raised);
   background-size: 5px 5px, auto;
 }
 
@@ -2326,12 +2326,12 @@ body.vui-lab-page {
 }
 
 .modal-lab-preview-label {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-title);
-  letter-spacing: var(--label-tracking);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
+  font-weight: var(--vui-font-weight-title);
+  letter-spacing: var(--vui-label-tracking);
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--vui-color-text-muted);
 }
 
 .modal-lab-preview .ui-modal-card {
@@ -2342,8 +2342,8 @@ body.vui-lab-page {
   width: 100%;
   min-height: 180px;
   resize: vertical;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
   line-height: 1.45;
 }
 
@@ -2367,23 +2367,23 @@ body.vui-lab-page {
 
 .modal-lab-page[data-close-style='quiet'] .modal-lab-preview .rune-close,
 .modal-lab-page[data-close-style='quiet'] .modal-lab-live .rune-close {
-  top: var(--modal-close-offset);
-  right: var(--modal-close-offset);
-  width: var(--modal-close-size);
-  height: var(--modal-close-size);
-  border: var(--modal-close-border);
-  border-radius: var(--modal-close-radius);
-  background: var(--modal-close-bg);
-  box-shadow: var(--modal-close-shadow);
-  color: var(--modal-close-color);
+  top: var(--vui-modal-close-offset);
+  right: var(--vui-modal-close-offset);
+  width: var(--vui-modal-close-size);
+  height: var(--vui-modal-close-size);
+  border: var(--vui-modal-close-border);
+  border-radius: var(--vui-modal-close-radius);
+  background: var(--vui-modal-close-bg);
+  box-shadow: var(--vui-modal-close-shadow);
+  color: var(--vui-modal-close-color);
 }
 
 .modal-lab-page[data-close-style='quiet'] .modal-lab-preview .rune-close:hover,
 .modal-lab-page[data-close-style='quiet'] .modal-lab-live .rune-close:hover {
   transform: none;
-  background: var(--modal-close-hover-bg);
-  box-shadow: var(--modal-close-hover-shadow);
-  color: var(--modal-close-hover-color);
+  background: var(--vui-modal-close-hover-bg);
+  box-shadow: var(--vui-modal-close-hover-shadow);
+  color: var(--vui-modal-close-hover-color);
 }
 
 .modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close,
@@ -2392,13 +2392,13 @@ body.vui-lab-page {
   right: -15px;
   width: 30px;
   height: 30px;
-  border: var(--border-width) solid var(--color-text-strong);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
   border-radius: 50%;
   background:
     radial-gradient(rgba(242, 196, 82, 0.18) 0 22%, transparent 23%),
-    var(--color-rune-close-bg);
-  box-shadow: var(--shadow-hard-small);
-  color: var(--color-warn);
+    var(--vui-color-rune-close-bg);
+  box-shadow: var(--vui-shadow-hard-small);
+  color: var(--vui-color-warn);
 }
 
 .modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close:hover,
@@ -2406,15 +2406,15 @@ body.vui-lab-page {
   transform: translate(1px, 1px) rotate(8deg);
   background:
     radial-gradient(rgba(242, 196, 82, 0.28) 0 24%, transparent 25%),
-    var(--color-accent);
-  box-shadow: 2px 2px 0 var(--color-text-strong);
-  color: var(--color-warn);
+    var(--vui-color-accent);
+  box-shadow: 2px 2px 0 var(--vui-color-text-strong);
+  color: var(--vui-color-warn);
 }
 
 .modal-lab-page[data-close-style='rune'] .modal-lab-preview .rune-close:active,
 .modal-lab-page[data-close-style='rune'] .modal-lab-live .rune-close:active {
   transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--color-text-strong);
+  box-shadow: 0 0 0 var(--vui-color-text-strong);
 }
 
 .modal-lab-page[data-close-style='tab'] .modal-lab-preview .rune-close,
@@ -2424,16 +2424,16 @@ body.vui-lab-page {
   width: 34px;
   height: 30px;
   border-radius: 0;
-  background: var(--color-surface-raised);
-  color: var(--color-text-strong);
-  box-shadow: 3px 3px 0 var(--color-shadow);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text-strong);
+  box-shadow: 3px 3px 0 var(--vui-color-shadow);
 }
 
 .modal-lab-page[data-close-style='tab'] .modal-lab-preview .rune-close:hover,
 .modal-lab-page[data-close-style='tab'] .modal-lab-live .rune-close:hover {
   transform: translate(1px, 1px);
-  background: var(--color-warn);
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  background: var(--vui-color-warn);
+  box-shadow: 2px 2px 0 var(--vui-color-shadow);
 }
 
 @media (max-width: 860px) {
