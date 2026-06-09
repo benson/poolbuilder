@@ -10,6 +10,29 @@ export { toast } from './toast.js';
 export { combobox } from './combobox.js';
 export { renderStatusState, statusStateHtml } from './statusState.js';
 export {
+  FEEDBACK_CAPTURE_KIND,
+  FEEDBACK_CAPTURE_VERSION,
+  FEEDBACK_CAPTURE_SHORTCUT,
+  FEEDBACK_OWNER_KEY_HEADER,
+  FEEDBACK_OWNER_KEY_PARAM,
+  FEEDBACK_OWNER_KEY_STORAGE,
+  adoptFeedbackOwnerKeyFromUrl,
+  bindFeedbackCapture,
+  buildFeedbackBundle,
+  calculateFeedbackResize,
+  captureScreenDataUrl,
+  clampFeedbackPosition,
+  clampFeedbackSize,
+  feedbackOwnerKey,
+  isFeedbackShortcut,
+  mountFeedbackCapture,
+  mountFeedbackCaptureDom,
+  normalizeReporterFlow,
+  prepareFeedbackSubmission,
+  reporterFlowLabel,
+  submitFeedbackBundle,
+} from './feedbackCapture.js';
+export {
   applyCardPreviewDataset,
   buildCardPreviewDataset,
   cardPreviewDatasetAttrs,
