@@ -6,6 +6,7 @@ export function combobox(input, options = {}) {
     onSelect,
     toLabel = (item) => String(item?.label ?? item ?? ''),
     toHint = (item) => String(item?.hint ?? ''),
+    toDataset = null,
     maxItems = 8,
     minLength = 0,
     openOnFocus = true,
@@ -58,6 +59,12 @@ export function combobox(input, options = {}) {
       option.className = 'combobox-option';
       option.setAttribute('role', 'option');
       option.dataset.index = String(index);
+      const dataset = toDataset?.(item);
+      if (dataset) {
+        for (const [key, value] of Object.entries(dataset)) {
+          if (value != null) option.dataset[key] = String(value);
+        }
+      }
       const label = doc.createElement('span');
       label.className = 'combobox-option-label';
       label.textContent = toLabel(item);
