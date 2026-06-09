@@ -6,6 +6,8 @@ export { popover } from './popover.js';
 export { floatingMenu, moveFloatingMenuFocus } from './floatingMenu.js';
 export { makeModalInteractive, modal } from './modal.js';
 export { chipHtml, chipNode } from './chip.js';
+export { toast } from './toast.js';
+export { combobox } from './combobox.js';
 export { renderStatusState, statusStateHtml } from './statusState.js';
 export {
   applyCardPreviewDataset,

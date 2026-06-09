@@ -1,4 +1,6 @@
 const RESIZE_EDGES = ['bottom', 'left', 'bottom-left'];
+const MODAL_STACK_BASE = 100;
+const MODAL_STACK_KEY = '__vuiModalStackIndex';
 const DRAG_HANDLE_SELECTOR = '.ui-modal-head';
 const DRAG_BLOCK_SELECTOR = [
   'a',
@@ -60,6 +62,7 @@ export function modal(modalEl, options = {}) {
     modalEl.hidden = false;
     applyOpenState(true);
     interaction?.refresh();
+    interaction?.raise();
     if (typeof onOpen === 'function') onOpen({ reason, event });
     try {
       target?.focus?.();
@@ -126,7 +129,7 @@ export function modal(modalEl, options = {}) {
 
 export function makeModalInteractive(target, options = {}) {
   const card = resolveModalCard(target, options.cardSelector);
-  if (!card) return { destroy() {}, refresh() {}, reset() {}, getLayout: () => null };
+  if (!card) return { destroy() {}, refresh() {}, reset() {}, raise() {}, getLayout: () => null };
 
   const doc = card.ownerDocument;
   const win = doc?.defaultView || globalThis;
@@ -168,6 +171,7 @@ export function makeModalInteractive(target, options = {}) {
       startY: event.clientY,
       layout,
     };
+    raise();
     card.classList.add('is-vui-modal-dragging');
     card.setPointerCapture?.(event.pointerId);
     doc.addEventListener('pointermove', onDragMove);
@@ -214,6 +218,7 @@ export function makeModalInteractive(target, options = {}) {
       startY: event.clientY,
       layout,
     };
+    raise();
     card.classList.add('is-vui-modal-resizing');
     event.currentTarget.setPointerCapture?.(event.pointerId);
     doc.addEventListener('pointermove', onResizeMove);
@@ -262,6 +267,10 @@ export function makeModalInteractive(target, options = {}) {
     card.style.removeProperty('height');
   }
 
+  function raise() {
+    return raiseModalStack(card);
+  }
+
   function destroy() {
     if (destroyed) return;
     destroyed = true;
@@ -273,7 +282,7 @@ export function makeModalInteractive(target, options = {}) {
     delete card.dataset.vuiModalInteractive;
   }
 
-  return { destroy, refresh, reset, getLayout: () => currentLayout(card, options) };
+  return { destroy, refresh, reset, raise, getLayout: () => currentLayout(card, options) };
 }
 
 export function calculateModalResizeLayout({ edge, layout, delta, viewport, constraints = {} }) {
@@ -295,6 +304,15 @@ export function calculateModalResizeLayout({ edge, layout, delta, viewport, cons
   }
 
   return clampModalInteractionLayout({ ...layout, x, y, width, height }, viewport, constraints);
+}
+
+export function calculateNextModalStackIndex({ current = 0, host = 0, card = 0, base = MODAL_STACK_BASE } = {}) {
+  return Math.max(
+    finite(Number(current), MODAL_STACK_BASE),
+    finite(Number(host), 0),
+    finite(Number(card), 0),
+    finite(Number(base), MODAL_STACK_BASE),
+  ) + 1;
 }
 
 export function clampModalInteractionLayout(layout, viewport, constraints = {}) {
@@ -328,6 +346,32 @@ function resolveModalCard(target, cardSelector = '.ui-modal-card') {
   if (!target) return null;
   if (target.matches?.(cardSelector)) return target;
   return target.querySelector?.(cardSelector) || null;
+}
+
+function raiseModalStack(card) {
+  const host = modalStackHost(card);
+  const win = card.ownerDocument?.defaultView || globalThis;
+  const hostIndex = cssZIndex(host);
+  const cardIndex = cssZIndex(card);
+  const next = calculateNextModalStackIndex({
+    current: win?.[MODAL_STACK_KEY],
+    host: hostIndex,
+    card: cardIndex,
+    base: hostIndex || cardIndex || MODAL_STACK_BASE,
+  });
+
+  if (win) win[MODAL_STACK_KEY] = next;
+  if (host && host !== card) {
+    host.style.zIndex = String(next);
+    host.dataset.vuiModalStack = String(next);
+  }
+  card.style.zIndex = String(next);
+  card.dataset.vuiModalStack = String(next);
+  return next;
+}
+
+function modalStackHost(card) {
+  return card.closest?.('.ui-modal, .ui-modal-backdrop') || card;
 }
 
 function ensureResizeHandle(card, edge) {
@@ -415,6 +459,11 @@ function cssNumber(node, property, fallback) {
 
 function cssPixel(value, fallback) {
   return finite(Number.parseFloat(value), fallback);
+}
+
+function cssZIndex(node) {
+  const computed = node?.ownerDocument?.defaultView?.getComputedStyle?.(node)?.zIndex;
+  return finite(Number.parseInt(computed, 10), 0);
 }
 
 function clampSize(value, min, max) {
