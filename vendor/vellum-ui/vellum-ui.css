@@ -106,7 +106,7 @@
   --vui-modal-close-shadow: none;
   --vui-modal-close-hover-shadow: none;
   --vui-modal-resize-edge-size: 8px;
-  --vui-modal-resize-corner-size: 18px;
+  --vui-modal-resize-corner-size: 28px;
   --vui-color-success-bg: #effaef;
   --vui-color-success-border: #c4e5c4;
   --vui-color-success-text: #2c6b2c;
@@ -341,176 +341,71 @@
   --space-3: var(--vui-space-3);
   --space-4: var(--vui-space-4);
   --space-5: var(--vui-space-5);
+}
 
-  /* Temporary Benson UI compatibility aliases. Remove after consumers migrate. */
-  --bui-edge-margin: var(--vui-edge-margin);
-  --bui-z-flyout: var(--vui-z-flyout);
-  --bui-z-modal: var(--vui-z-modal);
-  --bui-control-height-compact: var(--vui-control-height-compact);
-  --bui-control-pad-y: var(--vui-control-pad-y);
-  --bui-control-pad-x: var(--vui-control-pad-x);
-  --bui-focus-ring: var(--vui-focus-ring);
-  --bui-focus-ring-offset: var(--vui-focus-ring-offset);
-  --bui-font-body: var(--vui-font-body);
-  --bui-font-heading: var(--vui-font-heading);
-  --bui-font-display: var(--vui-font-display);
-  --bui-font-mono: var(--vui-font-mono);
-  --bui-font-size-xxxs: var(--vui-font-size-xxxs);
-  --bui-font-size-xxs: var(--vui-font-size-xxs);
-  --bui-font-size-xs: var(--vui-font-size-xs);
-  --bui-font-size-sm: var(--vui-font-size-sm);
-  --bui-font-size-md: var(--vui-font-size-md);
-  --bui-font-size-base: var(--vui-font-size-base);
-  --bui-font-size-lg: var(--vui-font-size-lg);
-  --bui-font-size-xl: var(--vui-font-size-xl);
-  --bui-font-size-heading: var(--vui-font-size-heading);
-  --bui-font-size-display: var(--vui-font-size-display);
-  --bui-font-size-xs-plus: var(--vui-font-size-xs-plus);
-  --bui-font-size-sm-plus: var(--vui-font-size-sm-plus);
-  --bui-font-size-jumbo: var(--vui-font-size-jumbo);
-  --bui-font-weight-body: var(--vui-font-weight-body);
-  --bui-font-weight-title: var(--vui-font-weight-title);
-  --bui-line-height-body: var(--vui-line-height-body);
-  --bui-letter-spacing-ui: var(--vui-letter-spacing-ui);
-  --bui-text-case: var(--vui-text-case);
-  --bui-title-size: var(--vui-title-size);
-  --bui-title-tracking: var(--vui-title-tracking);
-  --bui-title-transform: var(--vui-title-transform);
-  --bui-title-shadow: var(--vui-title-shadow);
-  --bui-label-tracking: var(--vui-label-tracking);
-  --bui-label-transform: var(--vui-label-transform);
-  --bui-color-bg: var(--vui-color-bg);
-  --bui-color-surface: var(--vui-color-surface);
-  --bui-color-surface-sunken: var(--vui-color-surface-sunken);
-  --bui-color-surface-raised: var(--vui-color-surface-raised);
-  --bui-color-surface-hover: var(--vui-color-surface-hover);
-  --bui-color-surface-placeholder: var(--vui-color-surface-placeholder);
-  --bui-color-text: var(--vui-color-text);
-  --bui-color-text-muted: var(--vui-color-text-muted);
-  --bui-color-text-strong: var(--vui-color-text-strong);
-  --bui-color-text-inverse: var(--vui-color-text-inverse);
-  --bui-color-line: var(--vui-color-line);
-  --bui-color-line-strong: var(--vui-color-line-strong);
-  --bui-color-line-focus: var(--vui-color-line-focus);
-  --bui-color-line-faint: var(--vui-color-line-faint);
-  --bui-color-accent: var(--vui-color-accent);
-  --bui-color-accent-soft: var(--vui-color-accent-soft);
-  --bui-color-accent-strong: var(--vui-color-accent-strong);
-  --bui-color-rune-close-bg: var(--vui-color-rune-close-bg);
-  --bui-color-success: var(--vui-color-success);
-  --bui-color-warn: var(--vui-color-warn);
-  --bui-color-danger: var(--vui-color-danger);
-  --bui-color-danger-strong: var(--vui-color-danger-strong);
-  --bui-color-danger-hover: var(--vui-color-danger-hover);
-  --bui-color-info: var(--vui-color-info);
-  --bui-color-success-soft: var(--vui-color-success-soft);
-  --bui-color-warn-soft: var(--vui-color-warn-soft);
-  --bui-color-warn-soft-pale: var(--vui-color-warn-soft-pale);
-  --bui-color-danger-soft: var(--vui-color-danger-soft);
-  --bui-color-info-soft: var(--vui-color-info-soft);
-  --bui-color-success-line: var(--vui-color-success-line);
-  --bui-color-warn-line: var(--vui-color-warn-line);
-  --bui-color-danger-line: var(--vui-color-danger-line);
-  --bui-color-info-line: var(--vui-color-info-line);
-  --bui-color-btn-primary-hover: var(--vui-color-btn-primary-hover);
-  --bui-color-shadow: var(--vui-color-shadow);
-  --bui-color-input-bg: var(--vui-color-input-bg);
-  --bui-color-input-bg-focus: var(--vui-color-input-bg-focus);
-  --bui-color-overlay-strong: var(--vui-color-overlay-strong);
-  --bui-color-overlay-soft: var(--vui-color-overlay-soft);
-  --bui-modal-backdrop: var(--vui-modal-backdrop);
-  --bui-modal-card-bg: var(--vui-modal-card-bg);
-  --bui-modal-card-border: var(--vui-modal-card-border);
-  --bui-modal-card-radius: var(--vui-modal-card-radius);
-  --bui-modal-card-shadow: var(--vui-modal-card-shadow);
-  --bui-modal-card-max-height: var(--vui-modal-card-max-height);
-  --bui-modal-card-min-width: var(--vui-modal-card-min-width);
-  --bui-modal-card-min-height: var(--vui-modal-card-min-height);
-  --bui-modal-head-bg: var(--vui-modal-head-bg);
-  --bui-modal-head-texture: var(--vui-modal-head-texture);
-  --bui-modal-head-texture-size: var(--vui-modal-head-texture-size);
-  --bui-modal-head-padding: var(--vui-modal-head-padding);
-  --bui-modal-body-padding: var(--vui-modal-body-padding);
-  --bui-modal-actions-padding: var(--vui-modal-actions-padding);
-  --bui-modal-actions-gap: var(--vui-modal-actions-gap);
-  --bui-modal-close-size: var(--vui-modal-close-size);
-  --bui-modal-close-offset: var(--vui-modal-close-offset);
-  --bui-modal-close-radius: var(--vui-modal-close-radius);
-  --bui-modal-close-border: var(--vui-modal-close-border);
-  --bui-modal-close-bg: var(--vui-modal-close-bg);
-  --bui-modal-close-color: var(--vui-modal-close-color);
-  --bui-modal-close-hover-bg: var(--vui-modal-close-hover-bg);
-  --bui-modal-close-hover-color: var(--vui-modal-close-hover-color);
-  --bui-modal-close-shadow: var(--vui-modal-close-shadow);
-  --bui-modal-close-hover-shadow: var(--vui-modal-close-hover-shadow);
-  --bui-modal-resize-edge-size: var(--vui-modal-resize-edge-size);
-  --bui-modal-resize-corner-size: var(--vui-modal-resize-corner-size);
-  --bui-color-success-bg: var(--vui-color-success-bg);
-  --bui-color-success-border: var(--vui-color-success-border);
-  --bui-color-success-text: var(--vui-color-success-text);
-  --bui-color-warn-bg: var(--vui-color-warn-bg);
-  --bui-color-warn-border: var(--vui-color-warn-border);
-  --bui-color-warn-text: var(--vui-color-warn-text);
-  --bui-color-danger-bg: var(--vui-color-danger-bg);
-  --bui-color-danger-border: var(--vui-color-danger-border);
-  --bui-color-danger-text: var(--vui-color-danger-text);
-  --bui-color-status-neutral-bg: var(--vui-color-status-neutral-bg);
-  --bui-color-status-neutral-border: var(--vui-color-status-neutral-border);
-  --bui-color-status-neutral-text: var(--vui-color-status-neutral-text);
-  --bui-status-success-bg: var(--vui-status-success-bg);
-  --bui-status-success-border: var(--vui-status-success-border);
-  --bui-status-success-text: var(--vui-status-success-text);
-  --bui-status-warn-bg: var(--vui-status-warn-bg);
-  --bui-status-warn-border: var(--vui-status-warn-border);
-  --bui-status-warn-text: var(--vui-status-warn-text);
-  --bui-status-danger-bg: var(--vui-status-danger-bg);
-  --bui-status-danger-border: var(--vui-status-danger-border);
-  --bui-status-danger-text: var(--vui-status-danger-text);
-  --bui-status-neutral-bg: var(--vui-status-neutral-bg);
-  --bui-status-neutral-border: var(--vui-status-neutral-border);
-  --bui-status-neutral-text: var(--vui-status-neutral-text);
-  --bui-color-neutral-black: var(--vui-color-neutral-black);
-  --bui-color-neutral-white: var(--vui-color-neutral-white);
-  --bui-color-neutral-900: var(--vui-color-neutral-900);
-  --bui-color-neutral-700: var(--vui-color-neutral-700);
-  --bui-color-neutral-600: var(--vui-color-neutral-600);
-  --bui-color-neutral-550: var(--vui-color-neutral-550);
-  --bui-color-neutral-500: var(--vui-color-neutral-500);
-  --bui-color-neutral-400: var(--vui-color-neutral-400);
-  --bui-color-neutral-350: var(--vui-color-neutral-350);
-  --bui-color-neutral-250: var(--vui-color-neutral-250);
-  --bui-color-neutral-200: var(--vui-color-neutral-200);
-  --bui-color-neutral-surface-warm: var(--vui-color-neutral-surface-warm);
-  --bui-color-neutral-surface-faint: var(--vui-color-neutral-surface-faint);
-  --bui-color-neutral-border-warm: var(--vui-color-neutral-border-warm);
-  --bui-radius-sharp: var(--vui-radius-sharp);
-  --bui-radius-soft: var(--vui-radius-soft);
-  --bui-radius-square: var(--vui-radius-square);
-  --bui-radius-pill: var(--vui-radius-pill);
-  --bui-radius-card: var(--vui-radius-card);
-  --bui-radius-tight: var(--vui-radius-tight);
-  --bui-radius-round: var(--vui-radius-pill);
-  --bui-border-width: var(--vui-border-width);
-  --bui-shadow-subtle: var(--vui-shadow-subtle);
-  --bui-shadow-soft: var(--vui-shadow-overlay);
-  --bui-shadow-firm: var(--vui-shadow-firm);
-  --bui-shadow-lift: var(--vui-shadow-lift);
-  --bui-shadow-popover: var(--vui-shadow-popover);
-  --bui-shadow-overlay: var(--vui-shadow-overlay);
-  --bui-shadow-hard: var(--vui-shadow-firm);
-  --bui-shadow-hard-small: var(--vui-shadow-hard-small);
-  --bui-motion-fast: var(--vui-motion-fast);
-  --bui-motion-base: var(--vui-motion-base);
-  --bui-motion-slow: var(--vui-motion-slow);
-  --bui-space-1: var(--vui-space-1);
-  --bui-space-2: var(--vui-space-2);
-  --bui-space-3: var(--vui-space-3);
-  --bui-space-4: var(--vui-space-4);
-  --bui-space-5: var(--vui-space-5);
-  --bui-control-height: var(--vui-control-height);
-  --bui-space-6: var(--vui-space-6);
-  --bui-shadow-hard-sm: var(--vui-shadow-hard-sm);
-  --bui-z-toast: var(--vui-z-toast);
+/* Dark vellum. Set data-theme="dark" on <html> — the unprefixed aliases above
+   resolve against :root's --vui-* values, so the attribute must live there for
+   legacy alias consumers to follow the theme. Only color-family tokens flip;
+   shape, type, space, and motion are theme-invariant. */
+[data-theme='dark'] {
+  --vui-color-bg: #1c1722;
+  --vui-color-surface: #241e2c;
+  --vui-color-surface-sunken: #161219;
+  --vui-color-surface-raised: #2e2738;
+  --vui-color-surface-hover: #2a2333;
+  --vui-color-surface-placeholder: #4a3f28;
+  --vui-color-text: #e9e2f2;
+  --vui-color-text-muted: #b8a18d;
+  --vui-color-text-strong: #f3eefa;
+  --vui-color-text-inverse: #1c1722;
+  --vui-color-line: rgba(233, 226, 242, 0.35);
+  --vui-color-line-strong: #e9e2f2;
+  --vui-color-line-faint: #332c3d;
+  --vui-color-accent: #a878e0;
+  --vui-color-accent-soft: #3a2d52;
+  --vui-color-accent-strong: #d8c8f0;
+  --vui-color-success: #93ab72;
+  --vui-color-danger: #d05546;
+  --vui-color-danger-hover: #b03c2e;
+  --vui-color-info: #62b8d8;
+  --vui-color-success-soft: rgba(147, 171, 114, 0.22);
+  --vui-color-warn-soft: #5a4a20;
+  --vui-color-warn-soft-pale: #2e2614;
+  --vui-color-danger-soft: rgba(208, 85, 70, 0.2);
+  --vui-color-info-soft: #1e3640;
+  --vui-color-success-line: #93ab72;
+  --vui-color-warn-line: #d4a830;
+  --vui-color-danger-line: #d05546;
+  --vui-color-info-line: #62b8d8;
+  --vui-color-btn-primary-hover: #c4a484;
+  --vui-color-shadow: #0a0710;
+  --vui-color-input-bg: rgba(0, 0, 0, 0.25);
+  --vui-color-input-bg-focus: rgba(0, 0, 0, 0.4);
+  --vui-color-success-bg: #1e2a1e;
+  --vui-color-success-border: #3c5a3c;
+  --vui-color-success-text: #a8d8a8;
+  --vui-color-warn-bg: #2e2614;
+  --vui-color-warn-border: #6a5a28;
+  --vui-color-warn-text: #e8cc7a;
+  --vui-color-danger-bg: #2e1818;
+  --vui-color-danger-border: #6a3434;
+  --vui-color-danger-text: #e89898;
+  --vui-color-status-neutral-bg: #242028;
+  --vui-color-status-neutral-border: #46404f;
+  --vui-color-status-neutral-text: #a298ad;
+  --vui-color-neutral-black: #f3eefa;
+  --vui-color-neutral-900: #e9e2f2;
+  --vui-color-neutral-700: #cfc6da;
+  --vui-color-neutral-600: #b8aec5;
+  --vui-color-neutral-550: #a298ad;
+  --vui-color-neutral-500: #8d8398;
+  --vui-color-neutral-400: #776e82;
+  --vui-color-neutral-350: #8d8398;
+  --vui-color-neutral-250: #564e62;
+  --vui-color-neutral-200: #46404f;
+  --vui-color-neutral-surface-warm: #262030;
+  --vui-color-neutral-surface-faint: #211b29;
+  --vui-color-neutral-border-warm: #443a52;
 }
 
 
@@ -871,6 +766,130 @@ textarea {
   resize: vertical;
 }
 
+input[type='checkbox']:not(.switch-input),
+input[type='radio'] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin: 0;
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-tight);
+  background: var(--color-surface-raised);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+input[type='radio'] {
+  border-radius: var(--radius-pill);
+}
+
+input[type='checkbox']:not(.switch-input):checked,
+input[type='radio']:checked {
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 3px var(--color-surface-raised);
+}
+
+input[type='checkbox']:not(.switch-input):focus-visible,
+input[type='radio']:focus-visible,
+.switch-input:focus-visible + .switch-track {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Switch: <label class="switch"><input type="checkbox" class="switch-input" /><span class="switch-track"></span>label</label> */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.switch-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex: none;
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  transition: background var(--motion-fast);
+}
+
+.switch-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-text-strong);
+  transform: translateY(-50%);
+  transition: transform var(--motion-fast);
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--color-accent);
+}
+
+.switch-input:checked + .switch-track::before {
+  background: var(--color-text-inverse);
+  transform: translate(18px, -50%);
+}
+
+input[type='range'] {
+  appearance: none;
+  width: 160px;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-line);
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-line);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-tight);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-hard-small);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: var(--border-width) solid var(--color-line-strong);
+  border-radius: var(--radius-tight);
+  background: var(--color-accent);
+  box-shadow: var(--shadow-hard-small);
+}
+
+input[type='range']:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .field-row {
   display: flex;
   flex-direction: column;
@@ -939,7 +958,6 @@ textarea {
 .ui-modal-card.is-vui-modal-dragging,
 .ui-modal-card.is-vui-modal-resizing {
   user-select: none;
-  z-index: 2;
 }
 
 .ui-modal-card.is-vui-modal-dragging .ui-modal-head {
@@ -1007,21 +1025,38 @@ textarea {
   width: var(--modal-resize-corner-size);
 }
 
+.vui-modal-resize-bottom-left::before,
 .vui-modal-resize-bottom-left::after {
-  background: repeating-linear-gradient(45deg, var(--color-line-strong) 0 1px, transparent 1px 4px);
-  bottom: 4px;
   content: '';
-  height: 11px;
-  left: 4px;
-  opacity: 0.45;
+  opacity: 0.55;
   pointer-events: none;
   position: absolute;
-  width: 11px;
 }
 
+.vui-modal-resize-bottom-left::before {
+  background: var(--color-line-strong);
+  height: 2px;
+  left: 4px;
+  top: 4px;
+  transform: rotate(45deg);
+  transform-origin: left center;
+  width: 28px;
+}
+
+.vui-modal-resize-bottom-left::after {
+  border-bottom: 2px solid var(--color-line-strong);
+  border-left: 2px solid var(--color-line-strong);
+  bottom: 4px;
+  height: 20px;
+  left: 4px;
+  width: 20px;
+}
+
+.vui-modal-resize-handle:hover::before,
 .vui-modal-resize-handle:hover::after,
+.ui-modal-card.is-vui-modal-resizing .vui-modal-resize-bottom-left::before,
 .ui-modal-card.is-vui-modal-resizing .vui-modal-resize-bottom-left::after {
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .rune-close {
@@ -1112,33 +1147,135 @@ textarea {
   background: var(--color-accent-soft);
 }
 
-
-/* components.css */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--vui-space-1);
-  min-height: 22px;
-  border: 1px solid var(--vui-color-line);
-  border-radius: var(--vui-radius-pill);
-  background: var(--vui-color-surface-raised);
-  color: var(--vui-color-text);
-  font-size: var(--vui-font-size-xs);
-  font-family: var(--vui-font-mono);
-  font-weight: var(--vui-font-weight-title);
-  line-height: 1;
-  padding: 3px 8px;
+.combobox {
+  position: relative;
+  display: inline-block;
 }
 
-.chip-remove {
+.combobox-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: var(--z-flyout);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-text-strong);
+  border-radius: var(--radius-sharp);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-popover);
+}
+
+.combobox-list[hidden] {
+  display: none !important;
+}
+
+.combobox-option {
   appearance: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
   border: 0;
+  border-radius: var(--radius-tight);
   background: transparent;
-  color: inherit;
+  color: var(--color-text);
   cursor: pointer;
   font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.combobox-option:hover,
+.combobox-option.is-active {
+  background: var(--color-accent-soft);
+}
+
+.combobox-option-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+
+/* components.css */
+/* Shared chip primitive for tag/role/status/filter surfaces. Apps layer
+   domain variants (location pills, tag chips) on top of this base. */
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--vui-radius-round);
+  line-height: 1.4;
+  font-size: var(--vui-font-size-sm);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ui-chip-label {
+  text-transform: lowercase;
+}
+
+/* Emoji/icon prefix. A bare unicode emoji sits off the text baseline inside a
+   flex item; flex-center it on its own line box so it's optically centered
+   with the label, and never let it shrink. */
+.ui-chip-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   line-height: 1;
-  padding: 0;
+  font-size: calc(var(--vui-font-size-sm) - 1px);
+}
+
+/* Segmented delete affordance: a distinct full-height "x segment" inside the
+   pill, split from the label by a divider in the pill's own border color, with
+   its own padded hit area + hover highlight. The negative vertical margins
+   bleed the segment to the pill's top/bottom border (pills use 1px vertical
+   padding) so the divider reads as full-height. */
+.ui-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: -2px -5px -2px 1px;
+  padding: 0 4px;
+  min-width: 15px;
+  border: 0;
+  border-left: var(--vui-border-width) solid;
+  border-color: inherit;
+  border-top-right-radius: var(--vui-radius-sharp);
+  border-bottom-right-radius: var(--vui-radius-sharp);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--vui-font-size-md);
+  line-height: 1;
+  color: var(--vui-color-text-muted);
+}
+
+.ui-chip-remove:hover,
+.ui-chip-remove:focus-visible {
+  color: var(--vui-color-text-strong);
+  background: var(--vui-color-surface-hover);
+  outline: none;
+}
+
+.ui-chip-role,
+.ui-chip-status,
+.ui-chip-filter {
+  border: var(--vui-border-width) solid var(--vui-color-line);
+  background: var(--vui-color-surface-sunken);
+  color: var(--vui-color-text-muted);
+  padding: 1px 8px;
 }
 
 .status-state {
@@ -1297,6 +1434,195 @@ textarea {
 .fab-label {
   font-size: var(--vui-font-size-xs);
   text-transform: lowercase;
+}
+
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: var(--vui-space-4);
+  transform: translateX(-50%);
+  z-index: var(--vui-z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vui-space-2);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vui-space-3);
+  max-width: min(420px, calc(100vw - 2 * var(--vui-edge-margin)));
+  border: var(--vui-border-width) solid var(--vui-color-line-strong);
+  border-radius: var(--vui-radius-sharp);
+  background: var(--vui-color-surface-raised);
+  color: var(--vui-color-text);
+  box-shadow: var(--vui-shadow-firm);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-sm);
+  padding: var(--vui-space-2) var(--vui-space-3);
+  transition:
+    opacity var(--vui-motion-base),
+    transform var(--vui-motion-base);
+}
+
+.toast.is-leaving {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.toast-success {
+  border-color: var(--vui-color-success-line);
+}
+
+.toast-warn {
+  border-color: var(--vui-color-warn-line);
+}
+
+.toast-danger {
+  border-color: var(--vui-color-danger-line);
+}
+
+.toast-message {
+  min-width: 0;
+}
+
+.toast-dismiss {
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}
+
+/* CSS-first tooltip: put .tooltip-host + data-tooltip on any element.
+   .tooltip-term adds the dotted-underline inline-glossary treatment. */
+.tooltip-host {
+  position: relative;
+}
+
+.tooltip-host::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  background: var(--vui-color-text-strong);
+  color: var(--vui-color-text-inverse);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
+  font-weight: var(--vui-font-weight-body);
+  line-height: 1.35;
+  text-transform: lowercase;
+  padding: 4px 8px;
+  border-radius: var(--vui-radius-tight);
+  white-space: normal;
+  z-index: var(--vui-z-flyout);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--vui-motion-fast);
+}
+
+.tooltip-host:hover::after,
+.tooltip-host:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip-term {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
+.vui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--vui-font-size-sm);
+}
+
+.vui-table th {
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-xs);
+  font-weight: var(--vui-font-weight-title);
+  letter-spacing: var(--vui-label-tracking);
+  text-transform: lowercase;
+  text-align: left;
+  color: var(--vui-color-text-muted);
+  border-bottom: var(--vui-border-width) solid var(--vui-color-line-strong);
+  padding: var(--vui-space-2) var(--vui-space-3);
+}
+
+.vui-table td {
+  border-bottom: 1px solid var(--vui-color-line);
+  padding: var(--vui-space-2) var(--vui-space-3);
+  vertical-align: middle;
+}
+
+.vui-table tbody tr:hover {
+  background: var(--vui-color-surface-hover);
+}
+
+.vui-table-compact th,
+.vui-table-compact td {
+  padding: var(--vui-space-1) var(--vui-space-2);
+}
+
+/* Loading + empty vocabulary. */
+.skeleton {
+  display: block;
+  border-radius: var(--vui-radius-tight);
+  background: var(--vui-color-surface-sunken);
+  animation: vui-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 0.9em;
+  margin: 0.25em 0;
+}
+
+@keyframes vui-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vui-space-2);
+  padding: var(--vui-space-5) var(--vui-space-4);
+  border: var(--vui-border-width) dashed var(--vui-color-line);
+  border-radius: var(--vui-radius-soft);
+  color: var(--vui-color-text-muted);
+  font-family: var(--vui-font-mono);
+  font-size: var(--vui-font-size-sm);
+  text-align: center;
+}
+
+.empty-state-glyph {
+  font-size: var(--vui-font-size-jumbo);
+  line-height: 1;
+  opacity: 0.6;
 }
 
 .card-preview-anchor {
@@ -1603,6 +1929,21 @@ body.vui-design-system-page {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.ds-theme-toggle {
+  font-size: var(--font-size-xs);
+  text-transform: lowercase;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.ds-inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
 }
 
 .ds-playground {
