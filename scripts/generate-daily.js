@@ -133,9 +133,8 @@ export async function generateDaily({ date, queuePath = DEFAULT_QUEUE, outputPat
   const daily = buildDailyPayload(queue, candidate, selectedDate, index);
   const workerPayload = buildWorkerSeedPayload(queue, candidate, selectedDate);
 
-  await writeFile(outputPath, JSON.stringify(daily));
-  console.log(`wrote ${outputPath} for ${selectedDate} (${candidate.sourceId})`);
-
+  // Seed the worker reference BEFORE writing daily.json so a failed seed can
+  // never ship a pool whose expert ghost isn't live (BEN-585).
   if (seed) {
     await seedWorker(workerPayload, {
       apiUrl: process.env.POOLBUILDER_API_URL || DEFAULT_API_URL,
@@ -143,6 +142,9 @@ export async function generateDaily({ date, queuePath = DEFAULT_QUEUE, outputPat
       required: requireWorker,
     });
   }
+
+  await writeFile(outputPath, JSON.stringify(daily));
+  console.log(`wrote ${outputPath} for ${selectedDate} (${candidate.sourceId})`);
 
   return { daily, workerPayload, candidate, index };
 }

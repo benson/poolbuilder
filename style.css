@@ -250,6 +250,29 @@ h1 {
   color: var(--text-faint);
 }
 
+/* Daily unavailable empty state */
+.daily-empty {
+  padding: 96px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.daily-empty-sub {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+.daily-empty a {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.daily-empty a:hover {
+  color: var(--text);
+}
+
 /* Pool Section */
 .pool-header,
 .deck-header {

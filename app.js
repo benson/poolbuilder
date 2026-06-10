@@ -42,6 +42,7 @@ let mySubmission = null;
 let allSubmissions = null;
 let submissionMeta = null;
 let dailyReference = null;
+let referenceUnavailable = false;
 let currentDaily = null;
 let loadedDailyDate = null;
 const API_URL = getApiUrl();
@@ -117,6 +118,7 @@ const poolCount = document.getElementById('pool-count');
 const deckCount = document.getElementById('deck-count');
 const dailySetName = document.getElementById('daily-set-name');
 const dailySub = document.getElementById('daily-sub');
+const dailyEmptyEl = document.getElementById('daily-empty');
 const poolInfoDailySection = document.getElementById('pool-info-daily');
 const poolInfoDailyText = document.getElementById('pool-info-daily-text');
 const deckEmptyHint = document.getElementById('deck-empty-hint');
@@ -234,6 +236,12 @@ function setupEventListeners() {
 
   // Clear deck
   document.getElementById('clear-deck').addEventListener('click', clearDeck);
+
+  // Daily-unavailable escape hatch into the sealed generator
+  document.getElementById('daily-empty-generator-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    handleModeToggle('generator');
+  });
 
   // Submission buttons
   submitBtn.addEventListener('click', submitDeck);
@@ -441,6 +449,7 @@ function handleModeToggle(mode) {
   generatorControls.classList.toggle('hidden', mode !== 'generator');
   dailyControls.classList.toggle('hidden', mode !== 'daily');
   resultsSection.classList.add('hidden');
+  dailyEmptyEl.classList.add('hidden');
 
   if (mode === 'daily') {
     handleDailyGenerate();
@@ -500,6 +509,7 @@ async function handleDailyGenerate() {
   loadingEl.classList.remove('hidden');
   poolSection.classList.add('hidden');
   resultsSection.classList.add('hidden');
+  dailyEmptyEl.classList.add('hidden');
   resetSubmissionState();
   const shouldOpenResults = isResultsRoute();
 
@@ -559,6 +569,7 @@ function resetSubmissionState() {
   allSubmissions = null;
   submissionMeta = null;
   dailyReference = null;
+  referenceUnavailable = false;
   submissionTeaser.classList.add('hidden');
   if (resultsReference) resultsReference.innerHTML = '';
 }
@@ -567,6 +578,7 @@ function showDailyUnavailable(error) {
   console.error('Daily expert ghost unavailable:', error);
   loadingEl.classList.add('hidden');
   poolSection.classList.add('hidden');
+  dailyEmptyEl.classList.remove('hidden');
   currentDaily = null;
   currentPool = [];
   loadedDailyDate = null;
@@ -1654,6 +1666,11 @@ function updateSubmitButtonVisibility() {
   if (mySubmission) {
     submitBtn.classList.add('hidden');
     viewResultsBtn.classList.remove('hidden');
+  } else if (referenceUnavailable) {
+    submitBtn.classList.remove('hidden');
+    viewResultsBtn.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'submissions open after reveal';
   } else {
     submitBtn.classList.remove('hidden');
     viewResultsBtn.classList.add('hidden');
@@ -1695,7 +1712,10 @@ async function checkSubmissionStatus() {
       }
       updateSubmitButtonVisibility();
     } else if (res.status === 503) {
-      showSubmissionMessage('daily reference unavailable');
+      // The expert ghost isn't seeded yet — keep the pool playable and
+      // explain the comparison comes later (BEN-585).
+      referenceUnavailable = true;
+      showSubmissionMessage('expert ghost comparison available after reveal');
       updateSubmitButtonVisibility();
     }
   } catch {
@@ -1794,7 +1814,7 @@ function renderReferenceComparison() {
   }
 
   if (!dailyReference) {
-    resultsReference.innerHTML = '<section class="reference-panel"><h3 class="results-section-title">expert ghost</h3><p class="reference-muted">reference unavailable</p></section>';
+    resultsReference.innerHTML = '<section class="reference-panel"><h3 class="results-section-title">expert ghost</h3><p class="reference-muted">comparison available after reveal</p></section>';
     return;
   }
 
