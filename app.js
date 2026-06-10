@@ -6,6 +6,7 @@ import {
 } from 'https://bensonperry.com/shared/mtg.js';
 import { modal } from './vendor/vellum-ui/modal.js';
 import { combobox } from './vendor/vellum-ui/combobox.js';
+import { mountFeedbackCapture } from './vendor/vellum-ui/feedbackCapture.js';
 
 // ============ Theme Toggle ============
 function applyTheme(theme) {
@@ -33,6 +34,14 @@ function applyTheme(theme) {
     });
   }
 })();
+
+// Owner feedback: files to the poolbuilder Linear project via the biblioplex
+// worker. Only mounts on machines holding the owner key (?feedback-key=<key>).
+mountFeedbackCapture({
+  requireOwnerKey: true,
+  project: 'poolbuilder',
+  apiUrl: 'https://biblioplex-api.bensonperry.com',
+});
 
 // State
 let sets = [];
