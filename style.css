@@ -57,31 +57,19 @@ body {
   text-transform: lowercase;
 }
 
-/* theme toggle */
+/* theme toggle — a vellum .switch pinned to the page corner */
 .theme-toggle {
   position: fixed;
   top: 12px;
   right: 16px;
   z-index: 100;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-family: inherit;
   font-size: 0.75rem;
   color: var(--text-faint);
-  cursor: pointer;
   text-transform: lowercase;
-  transition: color 0.15s ease;
 }
 
 .theme-toggle:hover {
   color: var(--text-muted);
-}
-
-.theme-icon {
-  margin-right: 4px;
 }
 
 /* override shared footer for dark mode */
@@ -262,17 +250,12 @@ h1 {
   font-size: 0.9rem;
 }
 
+/* vellum .icon-btn sized down into the pool header, with its circled-? look */
 .info-toggle {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
   border: 1px solid var(--border-light);
   border-radius: 50%;
   color: var(--text-faint);
-  cursor: pointer;
-  font-family: inherit;
   font-size: 0.7rem;
-  line-height: 1;
   width: 16px;
   height: 16px;
   padding: 0;
@@ -347,16 +330,11 @@ h1 {
   color: var(--text-faint);
 }
 
+/* vellum .btn-link with the column header's muted tone */
 .hidden-columns-restore,
 .column-hide-btn {
-  appearance: none;
-  border: 0;
-  background: transparent;
   color: var(--text-faint);
-  cursor: pointer;
-  font-family: inherit;
   font-size: inherit;
-  text-transform: lowercase;
 }
 
 /* Vellum .ui-chip.ui-chip-filter base; only the app deltas live here. */
@@ -956,11 +934,19 @@ body.resizing-builder {
   border-radius: 50%;
 }
 
-.color-dot.color-W { background: #f0d668; }
-.color-dot.color-U { background: #0e68ab; }
-.color-dot.color-B { background: #2b2520; }
-.color-dot.color-R { background: #d3202a; }
-.color-dot.color-G { background: #00733e; }
+/* MTG identity colors — domain palette, lifted to one tunable place */
+.color-dot {
+  --mana-w: #f0d668;
+  --mana-u: #0e68ab;
+  --mana-b: #2b2520;
+  --mana-r: #d3202a;
+  --mana-g: #00733e;
+}
+.color-dot.color-W { background: var(--mana-w); }
+.color-dot.color-U { background: var(--mana-u); }
+.color-dot.color-B { background: var(--mana-b); }
+.color-dot.color-R { background: var(--mana-r); }
+.color-dot.color-G { background: var(--mana-g); }
 .color-dot.color-C { background: var(--border-light); }
 
 .sub-count {
@@ -984,7 +970,7 @@ body.resizing-builder {
 }
 
 .comparison-deck .card.only-theirs {
-  outline: 2px solid #c44;
+  outline: 2px solid var(--color-danger);
   border-radius: 6px;
 }
 
@@ -1001,8 +987,8 @@ body.resizing-builder {
   border-top: 1px solid var(--border-faint);
 }
 
-.only-mine-text { color: #2a7d2a; }
-.only-theirs-text { color: #b33; }
+.only-mine-text { color: var(--color-success); }
+.only-theirs-text { color: var(--color-danger); }
 
 /* Utilities */
 .hidden {

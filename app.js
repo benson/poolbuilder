@@ -7,33 +7,13 @@ import {
 import { modal } from './vendor/vellum-ui/modal.js';
 import { combobox } from './vendor/vellum-ui/combobox.js';
 import { mountFeedbackCapture } from './vendor/vellum-ui/feedbackCapture.js';
+import { initTheme, themeToggle } from './vendor/vellum-ui/themeToggle.js';
 
 // ============ Theme Toggle ============
-function applyTheme(theme) {
-  const toggle = document.getElementById('theme-toggle');
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if (toggle) toggle.innerHTML = '<span class="theme-icon">☀</span> light';
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    if (toggle) toggle.innerHTML = '<span class="theme-icon">☽</span> dark';
-  }
-}
-
-(function initTheme() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-  const toggle = document.getElementById('theme-toggle');
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      localStorage.setItem('theme', next);
-    });
-  }
-})();
+// Dark mode rides vellum's [data-theme] layer; the preference stays under the
+// legacy 'theme' storage key so existing machines keep their setting.
+initTheme({ storageKey: 'theme' });
+themeToggle(document.getElementById('theme-toggle-input'), { storageKey: 'theme' });
 
 // Owner feedback: files to the poolbuilder Linear project via the biblioplex
 // worker. Only mounts on machines holding the owner key (?feedback-key=<key>).
@@ -907,7 +887,7 @@ function renderPoolHiddenColumns() {
 
   const restore = document.createElement('button');
   restore.type = 'button';
-  restore.className = 'hidden-columns-restore';
+  restore.className = 'btn-link hidden-columns-restore';
   restore.textContent = 'restore all';
   restore.addEventListener('click', () => showAllPoolColumns());
   poolHiddenColumnsEl.appendChild(restore);
@@ -924,7 +904,7 @@ function createPoolColumnHeader(label, count, key) {
 
   const hideButton = document.createElement('button');
   hideButton.type = 'button';
-  hideButton.className = 'column-hide-btn';
+  hideButton.className = 'btn-link column-hide-btn';
   hideButton.textContent = 'hide';
   hideButton.setAttribute('aria-label', 'hide ' + label + ' column');
   hideButton.addEventListener('click', (event) => {

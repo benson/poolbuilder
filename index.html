@@ -11,10 +11,10 @@
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="https://bensonperry.com/shared/common.css">
   <link rel="stylesheet" href="vendor/vellum-ui/vellum-ui.css?v=fac3cdcb14a0">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body class="vui-app">
-  <button id="theme-toggle" class="theme-toggle" type="button"><span class="theme-icon">☽</span> dark</button>
+  <label class="switch theme-toggle"><input type="checkbox" class="switch-input" id="theme-toggle-input"><span class="switch-track"></span>dark</label>
   <div class="container">
     <header>
       <div class="header-left">
@@ -79,7 +79,7 @@
         <!-- Card Pool -->
         <div class="pool-area expanded" id="pool-area">
           <div class="pool-header">
-            <h3>your pool <span id="pool-count"></span> <button type="button" id="pool-info-toggle" class="info-toggle" aria-label="about pool generation" aria-expanded="false">?</button></h3>
+            <h3>your pool <span id="pool-count"></span> <button type="button" id="pool-info-toggle" class="icon-btn info-toggle" aria-label="about pool generation" aria-expanded="false">?</button></h3>
             <div class="section-controls">
               <label class="size-control" for="pool-card-size">
                 <span>size</span>
@@ -165,6 +165,6 @@
     <span>daily data by <a href="https://www.17lands.com/public_datasets">17Lands</a>; booster data by <a href="https://mtgjson.com">mtgjson</a>; card images by <a href="https://scryfall.com">scryfall</a></span>
   </footer>
 
-  <script type="module" src="app.js?v=19"></script>
+  <script type="module" src="app.js?v=20"></script>
 </body>
 </html>
