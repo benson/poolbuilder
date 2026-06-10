@@ -13,6 +13,6 @@
     "playwright": "^1.58.2"
   },
   "dependencies": {
-    "@benson/vellum-ui": "git+https://github.com/benson/vellum-ui.git#fac3cdcb14a073ad7b38cf9031e7870154cd5171"
+    "@benson/vellum-ui": "git+https://github.com/benson/vellum-ui.git#e8189bd98ec47b74c62bdab29db8d2e88cd91cf5"
   }
 }
