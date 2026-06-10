@@ -558,15 +558,21 @@ export function mountFeedbackCaptureDom(documentObj = globalThis.document, { fab
 
   const nodes = [canvas, widget];
   if (fab) {
-    const opener = el('button', {
-      className: 'feedback-capture-launcher',
-      type: 'button',
-      ariaLabel: 'capture feedback',
-      title: 'capture feedback (f)',
-      text: '! feedback',
-    });
+    const opener = el(
+      'button',
+      {
+        className: 'fab-btn feedback-capture-fab',
+        type: 'button',
+        ariaLabel: 'capture feedback',
+        title: 'capture feedback (f)',
+      },
+      el('span', { className: 'fab-glyph', text: '!' }),
+      el('span', { className: 'fab-label', text: 'feedback' }),
+      el('span', { className: 'fab-shortcut', ariaHidden: 'true', text: 'f' }),
+    );
     opener.setAttribute('data-feedback-capture-open', '');
-    nodes.push(opener);
+    opener.setAttribute('aria-keyshortcuts', 'F Control+Alt+F');
+    nodes.push(el('div', { className: 'fab-cluster' }, opener));
   }
   return nodes;
 }

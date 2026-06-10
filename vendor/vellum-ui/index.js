@@ -10,6 +10,15 @@ export { toast } from './toast.js';
 export { combobox } from './combobox.js';
 export { renderStatusState, statusStateHtml } from './statusState.js';
 export {
+  DEFAULT_THEME_STORAGE_KEY,
+  applyTheme,
+  currentTheme,
+  initTheme,
+  readStoredTheme,
+  setTheme,
+  themeToggle,
+} from './themeToggle.js';
+export {
   FEEDBACK_CAPTURE_KIND,
   FEEDBACK_CAPTURE_VERSION,
   FEEDBACK_CAPTURE_SHORTCUT,
