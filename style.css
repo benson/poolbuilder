@@ -38,14 +38,12 @@
   --btn-text: var(--text-inverse);
   --btn-bg-hover: var(--text-muted);
   --btn-bg-disabled: var(--vui-color-neutral-200, #ccc);
-  --footer-bg: rgba(248, 247, 244, 0.85);
 }
 
 /* Dark palette flows from vellum's [data-theme="dark"] token layer through the
    --vui-* aliases above. Only values with no vellum counterpart live here. */
 [data-theme="dark"] {
   --bg-mine: #232319;
-  --footer-bg: rgba(28, 23, 34, 0.85);
 }
 
 body {
@@ -53,35 +51,35 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  padding: 40px 30px 80px;
+  padding: 40px 30px;
   text-transform: lowercase;
 }
 
-/* theme toggle — a vellum .switch pinned to the page corner */
+/* theme toggle — a vellum .switch docked in the header row */
 .theme-toggle {
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  z-index: 100;
   font-size: 0.75rem;
   color: var(--text-faint);
   text-transform: lowercase;
+  white-space: nowrap;
 }
 
 .theme-toggle:hover {
   color: var(--text-muted);
 }
 
-/* override shared footer for dark mode */
+/* shared footer, made static so it never floats over pool cards (BEN-576) */
 body:not(.no-shared-footer) footer.site-footer {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  z-index: 900;
-  max-width: min(440px, calc(100vw - 60px));
+  position: static;
+  margin-top: 36px;
+  padding: 0;
+  max-width: none;
+  border-radius: 0;
   line-height: 1.3;
-  text-align: right;
-  background: var(--footer-bg);
+  text-align: left;
+  background: transparent;
   color: var(--text-faint);
 }
 
@@ -134,6 +132,13 @@ header {
   display: none;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
 .header-controls {
   display: flex;
   align-items: center;
@@ -177,6 +182,29 @@ h1 {
   position: relative;
 }
 
+/* pin the open list to the input's width and let long names ellipsize (BEN-582) */
+.autocomplete-wrapper .combobox-list {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.autocomplete-wrapper .combobox-option {
+  min-width: 0;
+}
+
+.autocomplete-wrapper .combobox-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-wrapper .combobox-option-hint {
+  flex-shrink: 0;
+}
+
 .autocomplete-wrapper input {
   width: 280px;
   font-size: 0.9rem;
@@ -207,19 +235,13 @@ h1 {
   font-size: 0.9rem;
 }
 
-.daily-seed {
-  color: var(--text-faint);
-  font-size: 0.85rem;
-}
-
 #daily-set-name {
   font-size: 1rem;
 }
 
-#daily-seed {
-  font-size: 0.85rem;
-  font-family: monospace;
+.daily-sub {
   color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 /* Loading */
@@ -402,16 +424,17 @@ h1 {
 .deck-area {
   height: var(--builder-deck-height, min(34vh, 340px));
   --card-column-width: 150px;
-  --card-stack-overlap: -177px;
 }
 
+/* Default pool column width flexes down so 8 columns fit common laptop
+   widths (BEN-574); the size slider pins an explicit px width instead. */
 .pool-area {
   min-height: 0;
   overflow: visible;
-  --card-column-width: 155px;
-  --card-stack-overlap: -183px;
+  --card-column-width: clamp(120px, calc((100% - 7 * 12px) / 8), 155px);
 }
 
+/* bottom fade so the deck crop reads intentional rather than broken (BEN-577) */
 .deck-area::after {
   content: '';
   position: absolute;
@@ -419,7 +442,7 @@ h1 {
   bottom: 0;
   left: 0;
   z-index: 4;
-  height: 10px;
+  height: 28px;
   pointer-events: none;
   background: linear-gradient(to bottom, transparent, var(--bg));
 }
@@ -436,9 +459,13 @@ h1 {
   gap: 6px;
 }
 
+/* aspect-ratio placeholder reserves card height while images stream (BEN-579) */
 .card {
   position: relative;
   cursor: pointer;
+  aspect-ratio: 488 / 680;
+  background: var(--bg-alt);
+  border-radius: 4px;
   transition: transform 0.1s ease, opacity 0.15s ease;
 }
 
@@ -448,6 +475,8 @@ h1 {
 
 .card img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 4px;
   display: block;
 }
@@ -505,10 +534,24 @@ h1 {
   text-overflow: ellipsis;
 }
 
+/* "hide" is a once-a-session action — reveal on header hover only (BEN-581) */
 .column-hide-btn {
   flex-shrink: 0;
   padding: 0;
   font-size: 0.68rem;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.pool-column-header:hover .column-hide-btn,
+.column-hide-btn:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .column-hide-btn {
+    opacity: 1;
+  }
 }
 
 /* Stacked Cards */
@@ -516,9 +559,11 @@ h1 {
   position: relative;
 }
 
+/* -118% of column width keeps the visible name strip proportional at any
+   column size (card height is 139.3% of width). */
 .card-stack .card {
   position: relative;
-  margin-bottom: var(--card-stack-overlap, -200px);
+  margin-bottom: -118%;
   transition: transform 0.15s ease, opacity 0.15s ease, z-index 0s;
   z-index: var(--stack-index, 0);
 }
@@ -599,28 +644,20 @@ h1 {
   border-top: 1px solid var(--border-light);
 }
 
-.divider-grip {
+/* the grip itself is vellum's .vui-resize-grip-y; widen it for this divider */
+.section-divider .divider-grip {
   width: 46px;
-  height: 14px;
-  border: 1px solid var(--border-light);
-  border-radius: 4px;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0,
-      transparent 7px,
-      var(--border-light) 7px,
-      var(--border-light) 9px,
-      transparent 9px,
-      transparent 14px
-    ),
-    var(--bg-raised);
+}
+
+.section-divider:hover .divider-line,
+.section-divider:focus-visible .divider-line {
+  border-top-color: var(--vui-color-line-focus, var(--accent));
 }
 
 .section-divider:hover .divider-grip,
 .section-divider:focus-visible .divider-grip {
-  border-color: var(--text-muted);
-  background-color: var(--accent-soft);
+  --vui-grip-ink: var(--vui-color-line-focus, var(--accent));
+  opacity: 0.9;
 }
 
 .section-divider:focus-visible {
@@ -969,8 +1006,9 @@ body.resizing-builder {
   margin-bottom: 20px;
 }
 
+/* identity colors, not judgment: accent marks "only theirs" (BEN-580) */
 .comparison-deck .card.only-theirs {
-  outline: 2px solid var(--vui-color-danger);
+  outline: 2px solid var(--accent);
   border-radius: 6px;
 }
 
@@ -980,15 +1018,34 @@ body.resizing-builder {
 
 .diff-summary {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   font-size: 0.8rem;
   padding: 8px 0;
   margin-bottom: 16px;
   border-top: 1px solid var(--border-faint);
 }
 
-.only-mine-text { color: var(--vui-color-success); }
-.only-theirs-text { color: var(--vui-color-danger); }
+.diff-chip {
+  color: var(--text-muted);
+}
+
+.diff-chip.theirs {
+  border-color: var(--accent);
+}
+
+/* Empty deck hint (BEN-584) */
+.deck-empty-hint {
+  position: absolute;
+  inset: 28px 0 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
 
 /* Utilities */
 .hidden {

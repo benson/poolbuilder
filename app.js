@@ -116,7 +116,10 @@ const deckGrid = document.getElementById('deck-grid');
 const poolCount = document.getElementById('pool-count');
 const deckCount = document.getElementById('deck-count');
 const dailySetName = document.getElementById('daily-set-name');
-const dailySeed = document.getElementById('daily-seed');
+const dailySub = document.getElementById('daily-sub');
+const poolInfoDailySection = document.getElementById('pool-info-daily');
+const poolInfoDailyText = document.getElementById('pool-info-daily-text');
+const deckEmptyHint = document.getElementById('deck-empty-hint');
 const submitBtn = document.getElementById('submit-deck');
 const viewResultsBtn = document.getElementById('view-results');
 const resultsSection = document.getElementById('results-section');
@@ -254,11 +257,17 @@ function setupEventListeners() {
   });
 }
 
+// Tracks whether the user has ever touched a size slider; untouched sections
+// keep the responsive CSS default for --card-column-width (BEN-574).
+const cardSizeTouched = { deck: false, pool: false };
+
 function setupBuilderLayoutControls() {
   if (!deckArea || !poolArea) return;
 
   const defaults = getDefaultBuilderLayout();
   const saved = readBuilderPrefs();
+  cardSizeTouched.deck = saved.deckCardSize != null;
+  cardSizeTouched.pool = saved.poolCardSize != null;
   const prefs = {
     deckCardSize: DEFAULT_DECK_CARD_SIZE,
     poolCardSize: DEFAULT_POOL_CARD_SIZE,
@@ -266,17 +275,19 @@ function setupBuilderLayoutControls() {
     ...saved,
   };
 
-  applySectionCardSize(deckArea, deckSizeInput, prefs.deckCardSize);
-  applySectionCardSize(poolArea, poolSizeInput, prefs.poolCardSize);
+  applySectionCardSize(deckArea, deckSizeInput, prefs.deckCardSize, cardSizeTouched.deck);
+  applySectionCardSize(poolArea, poolSizeInput, prefs.poolCardSize, cardSizeTouched.pool);
   applyBuilderDeckHeight(prefs.deckHeight);
 
   deckSizeInput?.addEventListener('input', () => {
-    applySectionCardSize(deckArea, deckSizeInput, Number(deckSizeInput.value));
+    cardSizeTouched.deck = true;
+    applySectionCardSize(deckArea, deckSizeInput, Number(deckSizeInput.value), true);
     saveCurrentBuilderPrefs();
   });
 
   poolSizeInput?.addEventListener('input', () => {
-    applySectionCardSize(poolArea, poolSizeInput, Number(poolSizeInput.value));
+    cardSizeTouched.pool = true;
+    applySectionCardSize(poolArea, poolSizeInput, Number(poolSizeInput.value), true);
     saveCurrentBuilderPrefs();
   });
 
@@ -347,20 +358,23 @@ function applyBuilderDeckHeight(deckHeight) {
   deckArea.style.setProperty('--builder-deck-height', Math.round(clampNumber(height, BUILDER_MIN_DECK_HEIGHT, getMaxDeckHeight())) + 'px');
 }
 
-function applySectionCardSize(area, input, rawSize) {
+function applySectionCardSize(area, input, rawSize, explicit = true) {
   const size = clampNumber(rawSize, 110, 220);
-  area.style.setProperty('--card-column-width', size + 'px');
-  area.style.setProperty('--card-stack-overlap', Math.round(size * -1.18) + 'px');
+  if (explicit) {
+    area.style.setProperty('--card-column-width', size + 'px');
+  } else {
+    area.style.removeProperty('--card-column-width');
+  }
   if (input) input.value = String(size);
 }
 
 function saveCurrentBuilderPrefs() {
   if (!deckArea || !poolArea) return;
   const prefs = {
-    deckCardSize: Number(deckSizeInput?.value) || DEFAULT_DECK_CARD_SIZE,
-    poolCardSize: Number(poolSizeInput?.value) || DEFAULT_POOL_CARD_SIZE,
     deckHeight: Math.round(deckArea.getBoundingClientRect().height),
   };
+  if (cardSizeTouched.deck) prefs.deckCardSize = Number(deckSizeInput?.value) || DEFAULT_DECK_CARD_SIZE;
+  if (cardSizeTouched.pool) prefs.poolCardSize = Number(poolSizeInput?.value) || DEFAULT_POOL_CARD_SIZE;
   localStorage.setItem(BUILDER_PREFS_KEY, JSON.stringify(prefs));
 }
 
@@ -370,10 +384,13 @@ function readBuilderPrefs() {
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return {};
-    const prefs = {
-      deckCardSize: sanitizeNumber(parsed.deckCardSize, DEFAULT_DECK_CARD_SIZE, 110, 220),
-      poolCardSize: sanitizeNumber(parsed.poolCardSize, DEFAULT_POOL_CARD_SIZE, 110, 220),
-    };
+    const prefs = {};
+    if (parsed.deckCardSize != null) {
+      prefs.deckCardSize = sanitizeNumber(parsed.deckCardSize, DEFAULT_DECK_CARD_SIZE, 110, 220);
+    }
+    if (parsed.poolCardSize != null) {
+      prefs.poolCardSize = sanitizeNumber(parsed.poolCardSize, DEFAULT_POOL_CARD_SIZE, 110, 220);
+    }
     const deckHeight = sanitizeNumber(parsed.deckHeight, null, BUILDER_MIN_DECK_HEIGHT, BUILDER_MAX_DECK_HEIGHT);
     if (deckHeight != null) prefs.deckHeight = deckHeight;
     return prefs;
@@ -428,6 +445,7 @@ function handleModeToggle(mode) {
   if (mode === 'daily') {
     handleDailyGenerate();
   } else {
+    poolInfoDailySection.classList.add('hidden');
     submitBtn.classList.add('hidden');
     viewResultsBtn.classList.add('hidden');
     submissionTeaser.classList.add('hidden');
@@ -460,7 +478,16 @@ function handleRouteChange() {
 // Daily challenge
 function updateDailyInfo() {
   dailySetName.textContent = 'daily challenge';
-  dailySeed.textContent = 'loading';
+  dailySub.textContent = '';
+}
+
+const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december'];
+
+function formatDailyDate(isoDate) {
+  const [, month, day] = (isoDate || '').split('-').map(Number);
+  if (!month || !day) return isoDate || '';
+  return MONTH_NAMES[month - 1] + ' ' + day;
 }
 
 // Generate pool
@@ -494,7 +521,11 @@ async function handleDailyGenerate() {
     resetPoolColumnVisibility();
 
     dailySetName.textContent = daily.set?.name || 'daily challenge';
-    dailySeed.textContent = daily.source?.label || daily.seed || 'expert ghost';
+    dailySub.textContent = ' — daily for ' + formatDailyDate(daily.date);
+    poolInfoDailyText.textContent = (daily.source?.label || 'expert ghost') +
+      ' · seed ' + (daily.source?.sourceId || daily.seed || 'unknown') +
+      ' · ' + daily.date;
+    poolInfoDailySection.classList.remove('hidden');
 
     loadedDailyDate = today;
     deck = [];
@@ -541,8 +572,8 @@ function showDailyUnavailable(error) {
   loadedDailyDate = null;
   deck = [];
   basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
-  dailySetName.textContent = 'daily unavailable';
-  dailySeed.textContent = 'reference not seeded';
+  dailySetName.textContent = 'daily challenge';
+  dailySub.textContent = '';
   updateSubmitButtonVisibility();
 }
 
@@ -1388,6 +1419,7 @@ function clearDeck() {
 function renderDeck() {
   const totalCards = deck.length + Object.values(basics).reduce((a, b) => a + b, 0);
   deckCount.textContent = totalCards;
+  deckEmptyHint?.classList.toggle('hidden', totalCards > 0);
 
   if (currentDeckSort === 'color') {
     renderDeckByColor();
@@ -2209,8 +2241,8 @@ function showComparison(otherSub, { scroll = true } = {}) {
     });
     html += '<div class="diff-summary">' +
       '<span>' + shared + ' shared</span>' +
-      '<span class="only-mine-text">+' + onlyYou + ' only you</span>' +
-      '<span class="only-theirs-text">+' + onlyThem + ' only them</span>' +
+      '<span class="ui-chip diff-chip">+' + onlyYou + ' yours</span>' +
+      '<span class="ui-chip diff-chip theirs">+' + onlyThem + ' theirs</span>' +
       '</div>';
   }
 
