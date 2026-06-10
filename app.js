@@ -243,6 +243,8 @@ function setupEventListeners() {
     handleModeToggle('generator');
   });
 
+  setupCardPeek();
+
   // Submission buttons
   submitBtn.addEventListener('click', submitDeck);
   viewResultsBtn.addEventListener('click', () => showResults({ updateUrl: true }));
@@ -1157,6 +1159,46 @@ function renderPoolByCmc(cards) {
   renderLandColumn(groups.land);
 }
 
+// ---- Tap-to-peek (mobile) ----
+// Under 720px a tap previews the card instead of instantly adding/removing;
+// the peek overlay carries the add/remove action.
+const tapPeekMedia = window.matchMedia('(max-width: 720px)');
+
+function isTapPeek() {
+  return tapPeekMedia.matches;
+}
+
+let cardPeekAction = null;
+const cardPeekEl = document.getElementById('card-peek');
+const cardPeekImg = cardPeekEl.querySelector('img');
+const cardPeekActionBtn = document.getElementById('card-peek-action');
+
+function setupCardPeek() {
+  // any tap that isn't the action button dismisses (backdrop, card image, ...)
+  cardPeekEl.addEventListener('click', (e) => {
+    if (!cardPeekActionBtn.contains(e.target)) closeCardPeek();
+  });
+  cardPeekActionBtn.addEventListener('click', () => {
+    cardPeekAction?.();
+    closeCardPeek();
+  });
+}
+
+function openCardPeek(imageUrl, name, actionLabel, action) {
+  if (!imageUrl) return;
+  cardPeekImg.src = imageUrl;
+  cardPeekImg.alt = name || '';
+  cardPeekActionBtn.textContent = actionLabel;
+  cardPeekAction = action;
+  cardPeekEl.classList.remove('hidden');
+}
+
+function closeCardPeek() {
+  cardPeekEl.classList.add('hidden');
+  cardPeekImg.src = '';
+  cardPeekAction = null;
+}
+
 function createCardElement(card, context) {
   const el = document.createElement('div');
   el.className = 'card';
@@ -1173,11 +1215,14 @@ function createCardElement(card, context) {
   el.addEventListener('mouseenter', showCardPreview);
   el.addEventListener('mouseleave', hideCardPreview);
 
-  if (context === 'pool') {
-    el.addEventListener('click', () => addToDeck(card));
-  } else {
-    el.addEventListener('click', () => removeFromDeck(card));
-  }
+  const act = context === 'pool' ? () => addToDeck(card) : () => removeFromDeck(card);
+  el.addEventListener('click', () => {
+    if (isTapPeek()) {
+      openCardPeek(normalUrl, card.name, context === 'pool' ? 'add to deck' : 'remove from deck', act);
+    } else {
+      act();
+    }
+  });
 
   return el;
 }
@@ -1212,7 +1257,13 @@ function createBasicLandElement(card, color) {
   el.addEventListener('mouseleave', hideCardPreview);
 
   // Click to add to deck (unlimited)
-  el.addEventListener('click', () => addBasicToDeck(color));
+  el.addEventListener('click', () => {
+    if (isTapPeek()) {
+      openCardPeek(normalUrl, card.name, 'add to deck', () => addBasicToDeck(color));
+    } else {
+      addBasicToDeck(color);
+    }
+  });
 
   return el;
 }
@@ -1586,7 +1637,13 @@ function createDeckBasicElement(card, color) {
   el.addEventListener('mouseleave', hideCardPreview);
 
   // Click to remove from deck
-  el.addEventListener('click', () => removeBasicFromDeck(color));
+  el.addEventListener('click', () => {
+    if (isTapPeek()) {
+      openCardPeek(normalUrl, card.name, 'remove from deck', () => removeBasicFromDeck(color));
+    } else {
+      removeBasicFromDeck(color);
+    }
+  });
 
   return el;
 }
@@ -1596,6 +1653,7 @@ const cardPreview = document.getElementById('card-preview');
 const previewImg = cardPreview.querySelector('img');
 
 function showCardPreview(e) {
+  if (isTapPeek()) return;
   const card = e.currentTarget;
   const rect = card.getBoundingClientRect();
   const normalUrl = card.dataset.normalUrl;

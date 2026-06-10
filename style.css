@@ -1070,6 +1070,114 @@ body.resizing-builder {
   font-size: 0.85rem;
 }
 
+/* Tap-to-peek card overlay (mobile, BEN-575) */
+.card-peek {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-peek-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.card-peek-body {
+  position: relative;
+  width: min(320px, 80vw);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-peek-body img {
+  width: 100%;
+  border-radius: 4.5%;
+  display: block;
+}
+
+/* Mobile layout (BEN-575): deck stacks above pool full-width, columns become
+   3-across grids, hover preview is replaced by tap-to-peek in app.js. */
+@media (max-width: 720px) {
+  body {
+    padding: 16px 14px 32px;
+  }
+
+  header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .autocomplete-wrapper input {
+    width: min(280px, calc(100vw - 28px));
+  }
+
+  .size-control {
+    display: none;
+  }
+
+  .section-divider {
+    display: none;
+  }
+
+  .deck-area {
+    height: auto;
+    max-height: 45vh;
+    margin-bottom: 12px;
+  }
+
+  .pool-columns,
+  .deck-columns {
+    display: block;
+    overflow-x: hidden;
+    padding-bottom: 0;
+  }
+
+  .card-column {
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .card-stack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .card-stack .card {
+    margin-bottom: 0;
+  }
+
+  /* empty deck columns are just header noise on a phone */
+  .deck-columns .card-column:not(:has(.card)) {
+    display: none;
+  }
+
+  #card-preview {
+    display: none !important;
+  }
+
+  .deck-empty-hint {
+    position: static;
+    padding: 24px 0;
+  }
+}
+
 /* Utilities */
 .hidden {
   display: none !important;
