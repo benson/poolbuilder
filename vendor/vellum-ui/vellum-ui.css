@@ -47,6 +47,9 @@
   --vui-color-text-muted: #5b3b25;
   --vui-color-text-strong: #15100d;
   --vui-color-text-inverse: #fff5d2;
+  /* For content sitting on ink-colored surfaces (fab pills, dark bands). */
+  --vui-color-on-dark-line: rgba(255, 255, 255, 0.4);
+  --vui-color-on-dark-text-soft: rgba(255, 255, 255, 0.82);
   --vui-color-line: rgba(21, 16, 13, 0.4);
   --vui-color-line-strong: #15100d;
   --vui-color-line-focus: var(--vui-color-accent);
@@ -358,6 +361,9 @@
   --vui-color-text-muted: #b8a18d;
   --vui-color-text-strong: #f3eefa;
   --vui-color-text-inverse: #1c1722;
+  /* "Ink" surfaces are light in dark mode, so on-dark content flips dark. */
+  --vui-color-on-dark-line: rgba(28, 23, 34, 0.4);
+  --vui-color-on-dark-text-soft: rgba(28, 23, 34, 0.82);
   --vui-color-line: rgba(233, 226, 242, 0.35);
   --vui-color-line-strong: #e9e2f2;
   --vui-color-line-faint: #332c3d;
@@ -658,6 +664,16 @@ body.vui-app {
 
 .segment-btn + .segment-btn {
   margin-left: calc(-1 * var(--vui-border-width));
+}
+
+/* Dense variant for chrome (toolbars, page furniture, zoom/state pickers). */
+.segmented-compact .segment-btn {
+  font-size: var(--vui-font-size-xxs);
+  min-height: 0;
+  padding: 4px 8px;
+  box-shadow:
+    var(--vui-shadow-hard-small),
+    0 3px 0 var(--vui-color-shadow);
 }
 
 .segment-btn:not(:first-child) {
@@ -1399,29 +1415,65 @@ body.feedback-capture-capturing .feedback-capture-widget {
   right: 0;
   width: 16px;
 }
-/* Floating opener used by mountFeedbackCapture on sites without their own
-   FAB chrome. */
-.feedback-capture-launcher {
-  background: var(--vui-color-surface-raised);
-  border: var(--vui-border-width) solid var(--vui-color-text-strong);
-  border-radius: var(--vui-radius-soft);
-  bottom: var(--vui-edge-margin);
-  box-shadow: var(--vui-shadow-hard-small);
-  color: var(--vui-color-text-strong);
-  cursor: pointer;
-  font-family: var(--vui-font-mono);
-  font-size: var(--vui-font-size-xs);
-  font-weight: var(--vui-font-weight-title);
-  letter-spacing: var(--vui-label-tracking);
-  padding: 6px 10px;
+/* Floating action buttons — solid ink pills, upstreamed from biblioplex.
+   Apps stack several in a fixed .fab-cluster bottom-right; the feedback
+   widget mounts its own single-button cluster. Design pass (BEN-544): the
+   family joins the hard-shadow press language — soft ledger shadow at rest,
+   pressing flat on hover — and the shortcut chip picks up the tight radius. */
+.fab-cluster {
   position: fixed;
   right: var(--vui-edge-margin);
-  text-transform: lowercase;
+  bottom: var(--vui-edge-margin);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   z-index: 120;
 }
-.feedback-capture-launcher:hover {
-  box-shadow: 2px 2px 0 var(--vui-color-text-strong);
-  transform: translate(1px, 1px);
+.fab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--vui-color-text-strong);
+  color: var(--vui-color-text-inverse);
+  border: var(--vui-border-width) solid var(--vui-color-text-strong);
+  border-radius: var(--vui-radius-sharp);
+  font-family: inherit;
+  font-size: var(--vui-font-size-sm);
+  cursor: pointer;
+  box-shadow: var(--vui-shadow-soft);
+  text-transform: lowercase;
+  text-decoration: none;
+  letter-spacing: 0;
+}
+.fab-btn:hover {
+  background: var(--vui-color-btn-primary-hover);
+  box-shadow: var(--vui-shadow-subtle);
+  transform: translate(2px, 2px);
+}
+.fab-btn:focus-visible {
+  outline: 2px solid var(--vui-color-text-strong);
+  outline-offset: 2px;
+}
+.fab-glyph {
+  font-family: var(--vui-font-body);
+  font-size: var(--vui-font-size-base);
+  line-height: 1;
+}
+.fab-label {
+  white-space: nowrap;
+}
+.fab-shortcut {
+  border: 1px solid var(--vui-color-on-dark-line);
+  border-radius: var(--vui-radius-tight);
+  color: var(--vui-color-on-dark-text-soft);
+  font-size: var(--vui-font-size-xs);
+  line-height: 1;
+  margin-left: 2px;
+  min-width: 16px;
+  padding: 1px 4px;
+  text-align: center;
 }
 
 
@@ -1613,49 +1665,9 @@ body.feedback-capture-capturing .feedback-capture-widget {
   margin-left: auto;
 }
 
-.fab-cluster {
-  position: fixed;
-  right: var(--vui-space-4);
-  bottom: var(--vui-space-4);
-  z-index: var(--vui-z-toast);
-  display: flex;
-  flex-direction: column;
-  gap: var(--vui-space-2);
-}
-
-.fab-btn {
-  appearance: none;
-  min-width: 42px;
-  min-height: 42px;
-  border: 2px solid var(--vui-color-line-strong);
-  border-radius: var(--vui-radius-round);
-  background: var(--vui-color-accent);
-  color: var(--vui-color-text-inverse);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--vui-space-1);
-  box-shadow: var(--vui-shadow-hard);
-  font: inherit;
-  font-weight: var(--vui-font-weight-title);
-  padding: 0 var(--vui-space-3);
-}
-
-.fab-btn:hover {
-  transform: translate(1px, 1px);
-  box-shadow: var(--vui-shadow-hard-sm);
-}
-
-.fab-glyph {
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.fab-label {
-  font-size: var(--vui-font-size-xs);
-  text-transform: lowercase;
-}
+/* The .fab-* family lives in overlays.css (ink pills, upstreamed from
+   biblioplex — BEN-543). An older accent-colored variant that used to live
+   here was never consumed and is gone. */
 
 .toast-stack {
   position: fixed;
@@ -1920,26 +1932,6 @@ body.vui-design-system-page {
   justify-content: flex-end;
 }
 
-.ds-page-back {
-  font-family: var(--vui-font-mono);
-  font-weight: var(--vui-font-weight-title);
-  font-size: var(--vui-font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--vui-label-tracking);
-  color: var(--vui-color-text-strong);
-  text-decoration: none;
-  border: var(--vui-border-width) solid var(--vui-color-text-strong);
-  border-radius: var(--vui-radius-soft);
-  padding: 6px 10px;
-  background: var(--vui-color-surface-raised);
-  box-shadow: var(--vui-shadow-hard-small);
-}
-
-.ds-page-back:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 var(--vui-color-text-strong);
-}
-
 .ds-page-layout {
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
@@ -1997,33 +1989,15 @@ body.vui-design-system-page {
   border-bottom: 1px solid var(--vui-color-line);
 }
 
+/* The force-state picker is a compact segmented control; this just makes the
+   four segments share the narrow toc width evenly. */
 .ds-toc-state-row {
-  display: flex;
-  gap: 4px;
+  width: 100%;
 }
 
-.ds-toc-state-btn {
-  flex: 1;
-  font-family: var(--vui-font-mono);
-  font-size: var(--vui-font-size-xxs);
-  text-transform: lowercase;
-  padding: 4px 0;
-  border: 1px solid var(--vui-color-line-strong);
-  border-radius: var(--vui-radius-sharp);
-  background: var(--vui-color-surface);
-  color: var(--vui-color-text-muted);
-  cursor: pointer;
-}
-
-.ds-toc-state-btn:hover {
-  border-color: var(--vui-color-text-strong);
-  color: var(--vui-color-text-strong);
-}
-
-.ds-toc-state-btn.active {
-  background: var(--vui-color-accent);
-  color: var(--vui-color-text-inverse);
-  border-color: var(--vui-color-accent);
+.ds-toc-state-row .segment-btn {
+  flex: 1 1 0;
+  padding: 4px 2px;
 }
 
 .ds-page-body {
@@ -2110,29 +2084,9 @@ body.vui-design-system-page {
   overflow: auto;
 }
 
+/* The zoom picker is a compact segmented control pinned to the demo's edge. */
 .ds-zoom-bar {
-  display: flex;
-  gap: 4px;
   align-self: flex-end;
-}
-
-.ds-zoom-btn {
-  appearance: none;
-  border: 1px solid var(--vui-color-line);
-  border-radius: var(--vui-radius-tight);
-  background: var(--vui-color-surface-raised);
-  color: var(--vui-color-text-muted);
-  font-family: var(--vui-font-mono);
-  font-size: var(--vui-font-size-xxs);
-  line-height: 1;
-  padding: 3px 7px;
-  cursor: pointer;
-}
-
-.ds-zoom-btn.active {
-  background: var(--vui-color-text-strong);
-  color: var(--vui-color-text-inverse);
-  border-color: var(--vui-color-text-strong);
 }
 
 .ds-zoom-stage {
