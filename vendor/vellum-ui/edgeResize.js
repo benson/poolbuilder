@@ -52,7 +52,9 @@ export function edgeResize(
   };
   handle.setAttribute?.('aria-valuemin', String(min));
   handle.setAttribute?.('aria-valuemax', String(max));
-  if (!isCollapsed()) syncAria(Math.round(getSize() || 0));
+  // A focusable separator must always carry aria-valuenow (axe
+  // aria-required-attr); report min while collapsed.
+  syncAria(isCollapsed() ? min : Math.round(getSize() || min));
 
   const pointerPos = (event) => (axis === 'y' ? event.clientY : event.clientX);
 
@@ -61,6 +63,7 @@ export function edgeResize(
       if (!drag.collapsed) {
         drag.collapsed = true;
         setCollapsed(true);
+        syncAria(min);
       }
       return;
     }
@@ -86,16 +89,23 @@ export function edgeResize(
       moved: false,
       lastSize: null,
     };
-    handle.setPointerCapture?.(event.pointerId);
+    try {
+      handle.setPointerCapture?.(event.pointerId);
+    } catch {
+      /* synthetic or already-released pointer — capture is best-effort */
+    }
     event.preventDefault?.();
     if (resizingClass) documentObj?.body?.classList?.add(resizingClass);
   };
 
   const onPointerMove = (event) => {
     if (!drag || event.pointerId !== drag.pointerId) return;
+    const raw = pointerPos(event) - drag.startPos;
+    // Real input fires zero/one-px pointermoves during a stationary click —
+    // noise must not cancel click-to-open. 3px reads as drag intent.
+    if (!drag.moved && Math.abs(raw) < 3) return;
     drag.moved = true;
-    const delta = (pointerPos(event) - drag.startPos) * grow;
-    applyResolved(resolveEdgeDrag({ startSize: drag.startSize, delta, min, max, snapClosedAt }));
+    applyResolved(resolveEdgeDrag({ startSize: drag.startSize, delta: raw * grow, min, max, snapClosedAt }));
   };
 
   const endDrag = (event, commit) => {
