@@ -970,7 +970,7 @@ body.resizing-builder {
 }
 
 .comparison-deck .card.only-theirs {
-  outline: 2px solid var(--color-danger);
+  outline: 2px solid var(--vui-color-danger);
   border-radius: 6px;
 }
 
@@ -987,8 +987,8 @@ body.resizing-builder {
   border-top: 1px solid var(--border-faint);
 }
 
-.only-mine-text { color: var(--color-success); }
-.only-theirs-text { color: var(--color-danger); }
+.only-mine-text { color: var(--vui-color-success); }
+.only-theirs-text { color: var(--vui-color-danger); }
 
 /* Utilities */
 .hidden {
