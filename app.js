@@ -2159,7 +2159,7 @@ function renderTheField() {
     html += '<div class="column-header">' + colorNames[key] + '</div>';
     group.forEach(({ card, pct }) => {
       const normalUrl = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal || '';
-      html += '<div class="field-row" data-normal-url="' + normalUrl + '">' +
+      html += '<div class="field-card-row" data-normal-url="' + normalUrl + '">' +
         '<span class="field-name">' + card.name + '</span>' +
         '<span class="field-bar-wrap"><span class="field-bar" style="width:' + pct + '%"></span></span>' +
         '<span class="field-pct">' + pct + '%</span>' +
@@ -2204,7 +2204,7 @@ function renderTheField() {
   el.innerHTML = html;
 
   // Attach hover previews
-  el.querySelectorAll('.field-row').forEach(row => {
+  el.querySelectorAll('.field-card-row').forEach(row => {
     row.dataset.normalUrl = row.getAttribute('data-normal-url');
     row.addEventListener('mouseenter', showCardPreview);
     row.addEventListener('mouseleave', hideCardPreview);
