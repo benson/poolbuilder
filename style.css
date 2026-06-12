@@ -384,11 +384,10 @@ h1 {
   font-size: inherit;
 }
 
-/* Vellum .ui-chip.ui-chip-filter base; only the app deltas live here. */
+/* Vellum .ui-chip base; only the app deltas live here. */
 .hidden-column-chip {
   appearance: none;
   cursor: pointer;
-  font-family: inherit;
 }
 
 .hidden-column-chip:hover {
