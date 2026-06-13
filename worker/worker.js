@@ -27,6 +27,14 @@ function todayUTC() {
   return new Date().toISOString().split('T')[0];
 }
 
+function yesterdayUTC() {
+  return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+}
+
+function isCurrentSubmissionDate(date) {
+  return date === todayUTC() || date === yesterdayUTC();
+}
+
 function generateId() {
   return crypto.randomUUID().slice(0, 8);
 }
@@ -91,7 +99,7 @@ async function handleSubmit(request, env) {
     return json({ error: 'missing required fields' }, 400, request);
   }
 
-  if (date !== todayUTC()) {
+  if (!isCurrentSubmissionDate(date)) {
     return json({ error: 'submissions only accepted for today' }, 400, request);
   }
 

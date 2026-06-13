@@ -495,6 +495,13 @@ function updateDailyInfo() {
 const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june',
   'july', 'august', 'september', 'october', 'november', 'december'];
 
+function getLocalISODate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function formatDailyDate(isoDate) {
   const [, month, day] = (isoDate || '').split('-').map(Number);
   if (!month || !day) return isoDate || '';
@@ -516,7 +523,7 @@ async function handleDailyGenerate() {
   const shouldOpenResults = isResultsRoute();
 
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalISODate();
     const res = await fetch('daily.json?v=' + today);
     if (!res.ok) {
       throw new Error(`daily.json returned ${res.status}`);
@@ -539,7 +546,7 @@ async function handleDailyGenerate() {
       ' · ' + daily.date;
     poolInfoDailySection.classList.remove('hidden');
 
-    loadedDailyDate = today;
+    loadedDailyDate = daily.date;
     deck = [];
     basics = { W: 0, U: 0, B: 0, R: 0, G: 0 };
     renderPool();

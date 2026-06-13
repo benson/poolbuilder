@@ -26,6 +26,10 @@ function todayUTC() {
   return new Date().toISOString().split('T')[0];
 }
 
+function yesterdayUTC() {
+  return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+}
+
 function request(path, { method = 'GET', body, auth = false } = {}) {
   return new Request(`https://poolbuilder-api.test${path}`, {
     method,
@@ -143,6 +147,25 @@ data = await jsonResponse(response);
 assert.equal(data.reference.sourceId, '17l-tst-002');
 assert.equal(data.submissions.length, 1);
 assert.equal(data.submissions[0].sourceId, '17l-tst-002');
+
+const rolloverDate = yesterdayUTC();
+response = await worker.fetch(request('/admin/daily', {
+  method: 'POST',
+  auth: true,
+  body: { date: rolloverDate, sourceId: '17l-rollover-001', reference },
+}), env);
+assert.equal(response.status, 200, 'admin can seed a rollover daily reference');
+
+response = await worker.fetch(request('/submit', {
+  method: 'POST',
+  body: {
+    ...submitBody,
+    date: rolloverDate,
+    sourceId: '17l-rollover-001',
+    fingerprint: 'fp-rollover',
+  },
+}), env);
+assert.equal(response.status, 200, 'submits still work for the visible daily after UTC midnight');
 
 response = await worker.fetch(request('/submit', {
   method: 'POST',
