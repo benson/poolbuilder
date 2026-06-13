@@ -1019,6 +1019,11 @@ body.resizing-builder {
 
 /* Comparison View */
 .comparison-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 16px;
 }
 
@@ -1026,14 +1031,27 @@ body.resizing-builder {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 0;
+}
+
+.comparison-view-toggle {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.comparison-view-btn {
+  font-size: 0.8rem;
+  min-height: 26px;
 }
 
 .comparison-deck {
   margin-bottom: 20px;
 }
 
-/* identity colors, not judgment: accent marks "only theirs" (BEN-580) */
-.comparison-deck .card.only-theirs {
+/* identity colors, not judgment: accent marks cards unique to the active view */
+.comparison-deck .card.only-theirs,
+.comparison-deck .card.only-yours {
   outline: 2px solid var(--accent);
   border-radius: 4px;
 }
@@ -1056,7 +1074,9 @@ body.resizing-builder {
   color: var(--text-muted);
 }
 
-.diff-chip.theirs {
+.diff-chip.yours,
+.diff-chip.theirs,
+.diff-chip.basics {
   border-color: var(--accent);
 }
 
@@ -1185,4 +1205,3 @@ body.resizing-builder {
 .hidden {
   display: none !important;
 }
-

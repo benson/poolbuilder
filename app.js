@@ -2247,84 +2247,54 @@ function renderSubmissionsList() {
   });
 }
 
-function showComparison(otherSub, { scroll = true } = {}) {
+function showComparison(otherSub, { scroll = true, view = 'theirs' } = {}) {
   const el = document.getElementById('results-comparison');
   el.classList.remove('hidden');
 
-  // Resolve card IDs to card objects from pool
-  const theirDeck = otherSub.cardIds.map(id => currentPool.find(c => c.id === id)).filter(Boolean);
-  const theirBasics = otherSub.basics || {};
-  const diffTracker = mySubmission ? createDiffTracker(mySubmission.cardIds, otherSub.cardIds) : null;
+  const canCompareMine = Boolean(mySubmission);
+  const activeView = canCompareMine && view === 'mine' ? 'mine' : 'theirs';
+  const activeSub = activeView === 'mine' ? mySubmission : otherSub;
+  const compareSub = activeView === 'mine' ? otherSub : mySubmission;
+  const activeDiffClass = activeView === 'mine' ? 'only-yours' : 'only-theirs';
+  const activeLabel = activeView === 'mine' ? 'your deck' : comparisonOpponentDeckLabel(otherSub);
+  const activeColors = activeSub.colors || inferLane(activeSub).colors;
 
   // Build header
-  const dots = (otherSub.colors || []).map(c => '<span class="color-dot color-' + c + '"></span>').join('');
-  let html = '<div class="comparison-header">' +
-    '<h3 class="results-section-title">' + otherSub.name + '\'s deck ' + dots + '</h3>' +
-    '</div>';
-
-  // Render their deck visually in CMC columns
-  const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6+': [], 'lands': [] };
-  theirDeck.forEach(card => { cmcGroups[getCmcKey(card)].push(card); });
-
-  html += '<div class="comparison-deck deck-columns">';
-  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
-  cmcOrder.forEach(key => {
-    const cards = cmcGroups[key];
-    html += '<div class="card-column"><div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div><div class="card-stack">';
-    cards.forEach((card, idx) => {
-      const normalUrl = getCardImageUrl(card, 'normal');
-      const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
-      html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
-        '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy"></div>';
-    });
-    html += '</div></div>';
-  });
-
-  // Lands column
-  const nonBasicLands = cmcGroups['lands'];
-  const basicsTotal = Object.values(theirBasics).reduce((a, b) => a + b, 0);
-  const landsTotal = nonBasicLands.length + basicsTotal;
-  html += '<div class="card-column"><div class="column-header">lands' + (landsTotal > 0 ? ' (' + landsTotal + ')' : '') + '</div><div class="card-stack">';
-  let idx = 0;
-  nonBasicLands.forEach(card => {
-    const normalUrl = getCardImageUrl(card, 'normal');
-    const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
-    html += '<div class="card ' + diffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
-      '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy"></div>';
-  });
-  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
-    if (theirBasics[color] > 0 && basicLandCards[color]) {
-      const card = basicLandCards[color];
-      const normalUrl = getCardImageUrl(card, 'normal');
-      html += '<div class="card basic-land" style="--stack-index:' + idx++ + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
-        '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy">' +
-        '<span class="card-count-badge">' + theirBasics[color] + '</span></div>';
-    }
-  });
-  html += '</div></div>';
+  const dots = renderColorDots(activeColors);
+  let html = '<div class="comparison-header">';
+  html += '<div class="comparison-title"><h3 class="results-section-title">' + escapeHtml(activeLabel) + ' ' + dots + '</h3></div>';
+  if (canCompareMine) {
+    html += '<div class="comparison-view-toggle segmented" role="group" aria-label="comparison deck view">' +
+      '<button type="button" class="segment-btn comparison-view-btn' + (activeView === 'theirs' ? ' active' : '') + '" data-view="theirs" aria-pressed="' + (activeView === 'theirs') + '">' + escapeHtml(comparisonOpponentToggleLabel(otherSub)) + '</button>' +
+      '<button type="button" class="segment-btn comparison-view-btn' + (activeView === 'mine' ? ' active' : '') + '" data-view="mine" aria-pressed="' + (activeView === 'mine') + '">your deck</button>' +
+      '</div>';
+  }
   html += '</div>';
+
+  html += renderComparisonDeck(activeSub, compareSub, activeDiffClass);
 
   // Diff summary (compact)
   if (mySubmission) {
-    const myCardIds = countIds(mySubmission.cardIds);
-    const theirCardIds = countIds(otherSub.cardIds);
-    const allIds = new Set([...myCardIds.keys(), ...theirCardIds.keys()]);
-    let shared = 0, onlyYou = 0, onlyThem = 0;
-    allIds.forEach(id => {
-      const m = myCardIds.get(id) || 0;
-      const t = theirCardIds.get(id) || 0;
-      shared += Math.min(m, t);
-      onlyYou += Math.max(0, m - t);
-      onlyThem += Math.max(0, t - m);
-    });
+    const diff = getSubmissionDiff(mySubmission, otherSub);
+    const basicsNote = diff.basicDelta > 0
+      ? '<span class="ui-chip diff-chip basics">basics differ by ' + diff.basicDelta + '</span>'
+      : '';
     html += '<div class="diff-summary">' +
-      '<span>' + shared + ' shared</span>' +
-      '<span class="ui-chip diff-chip">+' + onlyYou + ' yours</span>' +
-      '<span class="ui-chip diff-chip theirs">+' + onlyThem + ' theirs</span>' +
+      '<span>' + diff.shared + ' shared</span>' +
+      '<span class="ui-chip diff-chip yours">+' + diff.onlyYou + ' yours</span>' +
+      '<span class="ui-chip diff-chip theirs">+' + diff.onlyThem + ' theirs</span>' +
+      basicsNote +
       '</div>';
   }
 
   el.innerHTML = html;
+
+  el.querySelectorAll('.comparison-view-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      if (button.dataset.view === activeView) return;
+      showComparison(otherSub, { scroll: false, view: button.dataset.view });
+    });
+  });
 
   // Attach hover previews to comparison deck cards
   el.querySelectorAll('.card').forEach(cardEl => {
@@ -2336,26 +2306,117 @@ function showComparison(otherSub, { scroll = true } = {}) {
   if (scroll) el.scrollIntoView({ behavior: 'smooth' });
 }
 
+function renderComparisonDeck(activeSub, compareSub, activeDiffClass) {
+  // Resolve card IDs to card objects from pool
+  const activeDeck = (activeSub.cardIds || []).map(id => currentPool.find(c => c.id === id)).filter(Boolean);
+  const activeBasics = activeSub.basics || {};
+  const compareBasics = compareSub?.basics || {};
+  const diffTracker = compareSub
+    ? createDiffTracker(activeSub.cardIds || [], compareSub.cardIds || [], activeDiffClass)
+    : null;
+
+  // Render the active deck visually in CMC columns
+  const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6+': [], 'lands': [] };
+  activeDeck.forEach(card => { cmcGroups[getCmcKey(card)].push(card); });
+
+  let html = '<div class="comparison-deck deck-columns">';
+  const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
+  cmcOrder.forEach(key => {
+    const cards = cmcGroups[key];
+    html += '<div class="card-column"><div class="column-header">' + key + (cards.length > 0 ? ' (' + cards.length + ')' : '') + '</div><div class="card-stack">';
+    cards.forEach((card, idx) => {
+      html += renderComparisonCard(card, idx, diffTracker);
+    });
+    html += '</div></div>';
+  });
+
+  // Lands column
+  const nonBasicLands = cmcGroups['lands'];
+  const basicsTotal = Object.values(activeBasics).reduce((a, b) => a + b, 0);
+  const landsTotal = nonBasicLands.length + basicsTotal;
+  html += '<div class="card-column"><div class="column-header">lands' + (landsTotal > 0 ? ' (' + landsTotal + ')' : '') + '</div><div class="card-stack">';
+  let idx = 0;
+  nonBasicLands.forEach(card => {
+    html += renderComparisonCard(card, idx++, diffTracker);
+  });
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    if (activeBasics[color] > 0 && basicLandCards[color]) {
+      const card = basicLandCards[color];
+      const normalUrl = getCardImageUrl(card, 'normal');
+      const basicDiffClass = compareSub && activeBasics[color] !== (compareBasics[color] || 0)
+        ? activeDiffClass + ' basic-diff'
+        : '';
+      html += '<div class="card basic-land ' + basicDiffClass + '" style="--stack-index:' + idx++ + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+        '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy">' +
+        '<span class="card-count-badge">' + activeBasics[color] + '</span></div>';
+    }
+  });
+  html += '</div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderComparisonCard(card, idx, diffTracker) {
+  const normalUrl = getCardImageUrl(card, 'normal');
+  const diffClass = diffTracker ? consumeDiffClass(diffTracker, card.id) : '';
+  return '<div class="card ' + diffClass + '" style="--stack-index:' + idx + '" data-normal-url="' + escapeAttribute(normalUrl) + '">' +
+    '<img src="' + escapeAttribute(normalUrl) + '" alt="' + escapeAttribute(card.name) + '" loading="lazy"></div>';
+}
+
+function comparisonOpponentDeckLabel(otherSub) {
+  if (otherSub?.kind === 'reference') return 'expert ghost deck';
+  if (mySubmission && otherSub?.id === mySubmission.id) return 'your deck';
+  const name = String(otherSub?.name || '').trim();
+  return name ? name + '\'s deck' : 'their deck';
+}
+
+function comparisonOpponentToggleLabel(otherSub) {
+  if (otherSub?.kind === 'reference') return 'ghost deck';
+  if (mySubmission && otherSub?.id === mySubmission.id) return 'your deck';
+  return 'their deck';
+}
+
+function getSubmissionDiff(mineSub, otherSub) {
+  const myCardIds = countIds(mineSub.cardIds || []);
+  const theirCardIds = countIds(otherSub.cardIds || []);
+  const allIds = new Set([...myCardIds.keys(), ...theirCardIds.keys()]);
+  let shared = 0, onlyYou = 0, onlyThem = 0;
+  allIds.forEach(id => {
+    const m = myCardIds.get(id) || 0;
+    const t = theirCardIds.get(id) || 0;
+    shared += Math.min(m, t);
+    onlyYou += Math.max(0, m - t);
+    onlyThem += Math.max(0, t - m);
+  });
+
+  let basicDelta = 0;
+  ['W', 'U', 'B', 'R', 'G'].forEach(color => {
+    basicDelta += Math.abs((mineSub.basics?.[color] || 0) - (otherSub.basics?.[color] || 0));
+  });
+
+  return { shared, onlyYou, onlyThem, basicDelta };
+}
+
 function countIds(ids) {
   const map = new Map();
   ids.forEach(id => map.set(id, (map.get(id) || 0) + 1));
   return map;
 }
 
-function createDiffTracker(myIds = [], theirIds = []) {
-  const mine = countIds(myIds);
-  const theirs = countIds(theirIds);
+function createDiffTracker(activeIds = [], compareIds = [], uniqueClass = 'only-theirs') {
+  const active = countIds(activeIds);
+  const comparison = countIds(compareIds);
   const shared = new Map();
-  theirs.forEach((theirCount, id) => {
-    shared.set(id, Math.min(mine.get(id) || 0, theirCount));
+  active.forEach((activeCount, id) => {
+    shared.set(id, Math.min(comparison.get(id) || 0, activeCount));
   });
-  return { shared, seen: new Map() };
+  return { shared, seen: new Map(), uniqueClass };
 }
 
 function consumeDiffClass(tracker, id) {
   const seen = (tracker.seen.get(id) || 0) + 1;
   tracker.seen.set(id, seen);
-  return seen <= (tracker.shared.get(id) || 0) ? 'shared' : 'only-theirs';
+  return seen <= (tracker.shared.get(id) || 0) ? 'shared' : tracker.uniqueClass;
 }
 
 // Start
