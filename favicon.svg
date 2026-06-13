@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- vellum page holding a fanned two-card pool -->
+  <rect x="6" y="4" width="52" height="56" rx="7" fill="#faf8fd" stroke="#15100d" stroke-width="5"/>
+  <rect x="14" y="17" width="19" height="28" rx="2" fill="#e7d8f5" stroke="#15100d" stroke-width="4" transform="rotate(-9 23.5 31)"/>
+  <rect x="30" y="19" width="19" height="28" rx="2" fill="#f2c452" stroke="#15100d" stroke-width="4" transform="rotate(9 39.5 33)"/>
+</svg>
