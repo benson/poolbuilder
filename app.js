@@ -2326,6 +2326,12 @@ function renderComparisonDeck(activeSub, compareSub, activeDiffClass) {
   const cmcGroups = { '0-1': [], '2': [], '3': [], '4': [], '5': [], '6+': [], 'lands': [] };
   activeDeck.forEach(card => { cmcGroups[getCmcKey(card)].push(card); });
 
+  // Sort each column the same way in both decks so identical cards line up for
+  // visual comparison regardless of the order they were added (BEN-639).
+  const byCardName = (a, b) =>
+    (a.name || '').localeCompare(b.name || '') || (a.id || '').localeCompare(b.id || '');
+  Object.values(cmcGroups).forEach(group => group.sort(byCardName));
+
   let html = '<div class="comparison-deck deck-columns">';
   const cmcOrder = ['0-1', '2', '3', '4', '5', '6+'];
   cmcOrder.forEach(key => {

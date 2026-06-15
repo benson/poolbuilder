@@ -1052,7 +1052,8 @@ body.resizing-builder {
 /* identity colors, not judgment: accent marks cards unique to the active view */
 .comparison-deck .card.only-theirs,
 .comparison-deck .card.only-yours {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
   border-radius: 4px;
 }
 
