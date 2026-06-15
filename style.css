@@ -102,7 +102,9 @@ body:not(.no-shared-footer) footer.site-footer a:hover {
   max-width: 100%;
 }
 
-header {
+/* scoped to the app's own header so these styles don't bleed onto nested
+   component headers, e.g. the feedback widget's <header> (BEN-646) */
+.container > header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1021,8 +1023,8 @@ body.resizing-builder {
 .comparison-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
@@ -1049,16 +1051,24 @@ body.resizing-builder {
   margin-bottom: 20px;
 }
 
-/* identity colors, not judgment: accent marks cards unique to the active view */
-.comparison-deck .card.only-theirs,
-.comparison-deck .card.only-yours {
-  outline: 3px solid var(--accent);
+/* comparison borders: green = in both decks, blue = only yours, amber = only
+   theirs — every card reads its overlap state at a glance (BEN-647) */
+.comparison-deck .card.shared {
+  outline: 3px solid #2fb344;
   outline-offset: -1px;
   border-radius: 4px;
 }
 
-.comparison-deck .card.shared {
-  opacity: 1;
+.comparison-deck .card.only-yours {
+  outline: 3px solid #3b82c4;
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+
+.comparison-deck .card.only-theirs {
+  outline: 3px solid #e0852e;
+  outline-offset: -1px;
+  border-radius: 4px;
 }
 
 .diff-summary {
