@@ -15,10 +15,9 @@ import { initTheme, themeToggle } from './vendor/vellum-ui/themeToggle.js';
 initTheme({ storageKey: 'theme' });
 themeToggle(document.getElementById('theme-toggle-input'), { storageKey: 'theme' });
 
-// Owner feedback: files to the poolbuilder Linear project via the biblioplex
-// worker. Only mounts on machines holding the owner key (?feedback-key=<key>).
+// Feedback: files to the poolbuilder Linear project via the biblioplex worker.
+// Shows for everyone; the worker gates submissions on the site origin.
 mountFeedbackCapture({
-  requireOwnerKey: true,
   project: 'poolbuilder',
   apiUrl: 'https://biblioplex-api.bensonperry.com',
 });
