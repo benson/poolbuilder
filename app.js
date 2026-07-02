@@ -1114,7 +1114,7 @@ function renderPoolByRarity(cards) {
   rarityOrder.forEach(key => {
     const groupCards = groups[key];
     if (groupCards.length === 0) return;
-    appendPoolCardColumn(groupNames[key], key, groupCards);
+    appendPoolCardColumn(groupNames[key], key, sortCards(groupCards, 'color'));
   });
 
   // Add land column with basics
@@ -1564,9 +1564,9 @@ function renderDeckByRarity() {
   });
 
   renderDeckColumns([
-    { key: 'mythic+rare', label: 'rare/mythic', cards: groups['mythic+rare'] },
-    { key: 'uncommon', label: 'uncommon', cards: groups.uncommon },
-    { key: 'common', label: 'common', cards: groups.common },
+    { key: 'mythic+rare', label: 'rare/mythic', cards: sortCards(groups['mythic+rare'], 'color') },
+    { key: 'uncommon', label: 'uncommon', cards: sortCards(groups.uncommon, 'color') },
+    { key: 'common', label: 'common', cards: sortCards(groups.common, 'color') },
   ], []);
 }
 
