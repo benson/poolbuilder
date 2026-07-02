@@ -294,6 +294,13 @@ h1 {
   font-weight: 400;
 }
 
+.deck-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 #pool-count {
   color: var(--text-faint);
   font-size: 0.9rem;

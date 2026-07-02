@@ -58,7 +58,14 @@
         <!-- Deck Area -->
         <div class="deck-area collapsed" id="deck-area">
           <div class="deck-header">
-            <h3>your deck <span id="deck-count">0</span>/40</h3>
+            <div class="deck-header-left">
+              <h3>your deck <span id="deck-count">0</span>/40</h3>
+              <div class="deck-actions">
+                <button type="button" id="submit-deck" class="btn-link text-btn hidden">submit deck</button>
+                <button type="button" id="view-results" class="btn-link text-btn hidden">view results</button>
+                <button type="button" id="clear-deck" class="btn-link text-btn">clear</button>
+              </div>
+            </div>
             <div class="section-controls">
               <label class="size-control" for="deck-card-size">
                 <span>size</span>
@@ -68,11 +75,6 @@
                 <button type="button" id="deck-sort-color" class="segment-btn sort-btn deck-sort-btn">by color</button>
                 <button type="button" id="deck-sort-rarity" class="segment-btn sort-btn deck-sort-btn">by rarity</button>
                 <button type="button" id="deck-sort-cmc" class="segment-btn sort-btn deck-sort-btn active">by cost</button>
-              </div>
-              <div class="deck-actions">
-                <button type="button" id="submit-deck" class="btn-link text-btn hidden">submit deck</button>
-                <button type="button" id="view-results" class="btn-link text-btn hidden">view results</button>
-                <button type="button" id="clear-deck" class="btn-link text-btn">clear</button>
               </div>
             </div>
           </div>
