@@ -6,7 +6,6 @@ import {
 } from 'https://bensonperry.com/shared/mtg.js';
 import { modal } from './vendor/vellum-ui/modal.js';
 import { combobox } from './vendor/vellum-ui/combobox.js';
-import { mountFeedbackCapture } from './vendor/vellum-ui/feedbackCapture.js';
 import { initTheme, themeToggle } from './vendor/vellum-ui/themeToggle.js';
 
 // ============ Theme Toggle ============
@@ -14,13 +13,6 @@ import { initTheme, themeToggle } from './vendor/vellum-ui/themeToggle.js';
 // legacy 'theme' storage key so existing machines keep their setting.
 initTheme({ storageKey: 'theme' });
 themeToggle(document.getElementById('theme-toggle-input'), { storageKey: 'theme' });
-
-// Feedback: files to the poolbuilder Linear project via the biblioplex worker.
-// Shows for everyone; the worker gates submissions on the site origin.
-mountFeedbackCapture({
-  project: 'poolbuilder',
-  apiUrl: 'https://biblioplex-api.bensonperry.com',
-});
 
 // State
 let sets = [];
